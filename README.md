@@ -10,16 +10,23 @@ Each jam packet has two separate channels of audio so the jammers can have a cha
 
 So in this way a room consists of up to 4 jammers each with two channels or 8 separate audio channels
 
+## Get The code
+```
+git clone --recurse-submodules git@github.com:mfvargo/rtjam.git
+cd rtjam
+make
+```
+
 ## Components
 
-### VST Plugin
+### VST Plugin (bin/rtjam.vst.so)
 The RTJam plugin is a VST built using the DISTRO/DPF open source framework https://github.com/DISTRHO/DPF 
 
 The Plugin will take frames from it's input and push them using UDP to a jamrtime broadcast server.  It will then receive packets from the server that originate from other jamrtime users.  The VST then mixes those channels into a stereo output.  That's the room.
 
 The VST has 10 outputs.  The first two are the mixed channels based on the sliders in the VST.  Outputs 3-10 are the individual channels from the participants in the room.  Using the VST in a DAW package allows all 8 channels to be recorded separately for later mixing.
 
-### Jack Standalone
+### Jack Standalone (bin/rtjam)
 The RTJam software also builds on the Raspberry Pi 4 and can be run as a "standalone JACK" application.  This has been the most successful implementation for playing music realtime on the internet.  The Pi has a very stable multimedia jack port that can run 64 sample frames with only 2 period of buffer without the dreaded XRUN issues you see on most other platforms.
 
 ### App U/X
