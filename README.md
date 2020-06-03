@@ -20,7 +20,7 @@ The Plugin will take frames from it's input and push them using UDP to a jamrtim
 The VST has 10 outputs.  The first two are the mixed channels based on the sliders in the VST.  Outputs 3-10 are the individual channels from the participants in the room.  Using the VST in a DAW package allows all 8 channels to be recorded separately for later mixing.
 
 ### Jack Standalone
-The JamRealTime software also builds on the Raspberry Pi 4 and can be run as a "standalone JACK" application.  This has been the most successful implementation for playing music realtime on the internet.  The Pi has a very stable multimedia jack port that can run 64 sample frames with only 2 period of buffer without the dreaded XRUN issues you see on most other platforms.
+The RTJam software also builds on the Raspberry Pi 4 and can be run as a "standalone JACK" application.  This has been the most successful implementation for playing music realtime on the internet.  The Pi has a very stable multimedia jack port that can run 64 sample frames with only 2 period of buffer without the dreaded XRUN issues you see on most other platforms.
 
 ### App U/X
 
@@ -49,7 +49,7 @@ TODO: The server needs to timestamp and save the packet streams into an archive 
 
 ### Using With Sample DAW (Ardour)
 
-You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the JamRealTime plugin inserted.  I then route outputs 3-10 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
+You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the RTJam plugin inserted.  I then route outputs 3-10 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
 
 ![Ardour Editor](ArdourEditor.png)
 

@@ -54,4 +54,20 @@ install-user: all
 
 # --------------------------------------------------------------
 
+deploy-pi:
+	cp bin/rtjam ~/www/html/pi
+	cp utils/rtjam.sh ~/www/html/pi
+	cp utils/rtjamupdate.sh ~/www/html/pi
+
+deploy-mac:
+	zip -r bin/rtjam.vst.zip bin/rtjam.vst
+	scp bin/rtjam.vst.zip  pi@music.basscleftech.com:/home/pi/www/html/mac
+
+deploy-linux:
+	scp bin/rtjam  pi@music.basscleftech.com:/home/pi/www/html/linux
+	scp bin/rtjam-vst.so  pi@music.basscleftech.com:/home/pi/www/html/linux
+	scp readme.html  pi@music.basscleftech.com:/home/pi/www/html/index.html
+	cp bin/rtjam ~/bin
+	cp bin/rtjam-vst.so  ~/vsts/Bassclef
+
 .PHONY: all clean install install-user submodule libs plugins gen
