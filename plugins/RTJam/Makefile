@@ -61,7 +61,8 @@ FILES_DSP = \
 	PluginRTJam.cpp
 
 FILES_UI = \
-	UIRTJam.cpp
+	UIRTJam.cpp \
+	RTJamArt.cpp
 
 # --------------------------------------------------------------
 # Do some magic
