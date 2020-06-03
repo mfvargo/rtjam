@@ -24,20 +24,140 @@
  * IN THE SOFTWARE.
  */
 
+#include "PluginRTJam.hpp"
 #include "UIRTJam.hpp"
-#include "Window.hpp"
+// #include "Window.hpp"
 
 START_NAMESPACE_DISTRHO
+
+namespace Art = RTJamArt;
 
 // -----------------------------------------------------------------------
 // Init / Deinit
 
 UIRTJam::UIRTJam()
-: UI(600, 400)  {
+   : UI(Art::background_2Width, Art::background_2Height),
+      fImgBackground(Art::background_2Data, Art::background_2Width, Art::background_2Height, GL_BGR),
+      fSlideLine(Art::slidelineData, Art::slidelineWidth, Art::slidelineHeight, GL_BGR),
+      fAboutWindow(this)
+{
+    // about
+    Image aboutImage(Art::aboutData, Art::aboutWidth, Art::aboutHeight, GL_BGR);
+    fAboutWindow.setImage(aboutImage);
 
+    // about button
+    // Image aboutImageNormal(Art::aboutButtonNormalData, Art::aboutButtonNormalWidth, Art::aboutButtonNormalHeight);
+    // Image aboutImageHover(Art::aboutButtonHoverData, Art::aboutButtonHoverWidth, Art::aboutButtonHoverHeight);
+    // fButtonAbout = new ImageButton(this, aboutImageNormal, aboutImageHover, aboutImageHover);
+    // fButtonAbout->setAbsolutePos(350, 30);
+    // fButtonAbout->setCallback(this);
+
+    // level sliders
+    Image sliderImage(Art::smallSliderData, Art::smallSliderWidth, Art::smallSliderHeight);
+    Point<int> sliderPosStart(57, 180);
+    Point<int> sliderPosEnd(57, 350);
+
+    float mixerLow = -30.0f;
+    float mixerHigh = 6.0f;
+    // Input 0
+    fVol[0] = new ImageSlider(this, sliderImage);
+    fVol[0]->setId(PluginRTJam::paramChanOneGain);
+    fVol[0]->setInverted(true);
+    fVol[0]->setStartPos(sliderPosStart);
+    fVol[0]->setEndPos(sliderPosEnd);
+    fVol[0]->setRange(mixerLow, mixerHigh);
+    fVol[0]->setCallback(this);
+
+    sliderPosStart.setX(sliderPosStart.getX() + 150);
+    sliderPosEnd.setX(sliderPosEnd.getX() + 150);
+    // Input 1
+    fVol[1] = new ImageSlider(this, sliderImage);
+    fVol[1]->setId(PluginRTJam::paramChanTwoGain);
+    fVol[1]->setInverted(true);
+    fVol[1]->setStartPos(sliderPosStart);
+    fVol[1]->setEndPos(sliderPosEnd);
+    fVol[1]->setRange(mixerLow, mixerHigh);
+    fVol[1]->setCallback(this);
+
+    // Now for the rows of channels
+    int startx = 416;
+    int starty = 5;
+    int spacing = 140;
+    sliderPosStart.setPos(startx,starty); 
+    sliderPosEnd.setPos(startx,starty + 80);
+    float maxSmooth = 0.1;
+    for (int i=1; i<MAX_JAMMERS; i++) {
+        // Smoother
+        fSmooth[i] = new ImageSlider(this, sliderImage);
+        fSmooth[i]->setStartPos(sliderPosStart);
+        fSmooth[i]->setEndPos(sliderPosEnd);
+        fSmooth[i]->setId(PluginRTJam::paramSmooth1 + i);
+        fSmooth[i]->setRange(0.0f, maxSmooth);
+        fSmooth[i]->setInverted(true);
+        fSmooth[i]->setCallback(this);
+
+        // Input 0
+        sliderPosStart.setX(sliderPosStart.getX() + spacing);
+        sliderPosEnd.setX(sliderPosEnd.getX() + spacing);
+        fVol[i*2] = new ImageSlider(this, sliderImage);
+        fVol[i*2]->setId(PluginRTJam::paramChanOneGain + i*2);
+        fVol[i*2]->setInverted(true);
+        fVol[i*2]->setStartPos(sliderPosStart);
+        fVol[i*2]->setEndPos(sliderPosEnd);
+        fVol[i*2]->setRange(mixerLow, mixerHigh);
+        fVol[i*2]->setCallback(this);
+        // Input 1
+        sliderPosStart.setX(sliderPosStart.getX() + spacing);
+        sliderPosEnd.setX(sliderPosEnd.getX() + spacing);
+        fVol[i*2+1] = new ImageSlider(this, sliderImage);
+        fVol[i*2+1]->setId(PluginRTJam::paramChanOneGain + i*2+1);
+        fVol[i*2+1]->setInverted(true);
+        fVol[i*2+1]->setStartPos(sliderPosStart);
+        fVol[i*2+1]->setEndPos(sliderPosEnd);
+        fVol[i*2+1]->setRange(mixerLow, mixerHigh);
+        fVol[i*2+1]->setCallback(this);
+        // Next row
+        sliderPosStart.setPos(startx, starty +  (i * 135));
+        sliderPosEnd.setPos(startx, starty + 80 + (i * 135));
+
+    }
+    // slider Master
+    sliderPosStart.setPos(146, 5);
+    sliderPosEnd.setPos(146, 95);
+    fSliderMaster = new ImageSlider(this, sliderImage);
+    fSliderMaster->setId(PluginRTJam::paramMasterVol);
+    fSliderMaster->setInverted(true);
+    fSliderMaster->setStartPos(sliderPosStart);
+    fSliderMaster->setEndPos(sliderPosEnd);
+    fSliderMaster->setRange(mixerLow, 12.0);
+    fSliderMaster->setCallback(this);
+
+    // switches
+    fMonitorInputButton = new ImageSwitch(this,
+                        Image(Art::solo_offData, Art::solo_offWidth, Art::solo_offHeight, GL_BGR),
+                        Image(Art::solo_onData, Art::solo_onWidth, Art::solo_onHeight, GL_BGR));
+    fMonitorInputButton->setId(PluginRTJam::paramInputMonitor);
+    fMonitorInputButton->setAbsolutePos(147, 360);
+    fMonitorInputButton->setCallback(this);
+
+    // set default values
+    programLoaded(0);
 }
 
 UIRTJam::~UIRTJam() {
+    // This is some threadsafe way to null a pointer in the DSP module
+    if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
+    {
+        const MutexLocker csm(dspPtr->fMutex);
+        dspPtr->fState = nullptr;
+    }
+    // Delete the sliders
+    for (int i=0; i<MIX_CHANNELS; i++) {
+        delete fVol[i];
+    }
+    for (int i=0; i<MAX_JAMMERS; i++) {
+        delete fSmooth[i];
+    }
 
 }
 
@@ -49,13 +169,25 @@ UIRTJam::~UIRTJam() {
   This is called by the host to inform the UI about parameter changes.
 */
 void UIRTJam::parameterChanged(uint32_t index, float value) {
-    switch (index) {
-        case PluginRTJam::paramGain:
-            // do something when Gain param is set, such as update a widget
-            break;
+    switch (index)
+    {
+      case PluginRTJam::paramChanOneGain:
+      case PluginRTJam::paramChanTwoGain:
+      case PluginRTJam::paramChanThreeGain:
+      case PluginRTJam::paramChanFourGain:
+          fVol[index - PluginRTJam::paramChanOneGain]->setValue(value);
+          break;
+      case PluginRTJam::paramMasterVol:
+          fSliderMaster->setValue(value);
+          break;
+      case PluginRTJam::paramSmooth1:
+          break;
+      case PluginRTJam::paramSmooth2:
+      case PluginRTJam::paramSmooth3:
+      case PluginRTJam::paramSmooth4:
+          fSmooth[index - PluginRTJam::paramSmooth1]->setValue(value);
+          break;
     }
-
-    (void)value;
 }
 
 /**
@@ -63,12 +195,17 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
   This is called by the host to inform the UI about program changes.
 */
 void UIRTJam::programLoaded(uint32_t index) {
-    if (index < presetCount) {
-        for (int i=0; i < PluginRTJam::paramCount; i++) {
-            // set values for each parameter and update their widgets
-            parameterChanged(i, factoryPresets[index].params[i]);
-        }
+    if (index != 0)
+        return;
+
+    // Default values
+    for (int i=0; i<MIX_CHANNELS; i++) {
+        fVol[i]->setValue(0.0f);
     }
+    for (int i=1; i<MAX_JAMMERS; i++) {
+        fSmooth[i]->setValue(0.0f);
+    }
+    fSliderMaster->setValue(0.0f);
 }
 
 /**
@@ -86,7 +223,16 @@ void UIRTJam::sampleRateChanged(double newSampleRate) {
   This function is called at regular intervals.
 */
 void UIRTJam::uiIdle() {
+    repaint();
+    if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
+    {
+        // So if the dsp plugin instance does not have my state, let them have it.  Then they can update it.
+        if (dspPtr->fState != nullptr)
+            return;
 
+        const MutexLocker csm(dspPtr->fMutex);
+        dspPtr->fState = &fState;
+    }
 }
 
 /**
@@ -105,6 +251,77 @@ void UIRTJam::uiReshape(uint width, uint height) {
   A function called to draw the view contents with NanoVG.
 */
 void UIRTJam::onNanoDisplay() {
+}
+
+void UIRTJam::onDisplay() {
+    fImgBackground.draw();
+
+    Point<int> drawPos(40, 20);
+    float yScale = 0.5f;
+
+    // Master meter (post fade)
+    drawPos.setPos(130, 15);
+    fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.masterLevel + 60)/60));
+    drawPos.setX(drawPos.getX() + 40);
+    fSlideLine.xScale = 1.0f;
+    fSlideLine.yScale = yScale;
+    fSlideLine.drawAt(drawPos);
+
+    // Input section
+    drawPos.setPos(40, 180);
+    // Input level 0
+    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputLeft + 60)/60);
+    drawPos.setX(drawPos.getX() + 40);
+    // Slider line
+    fSlideLine.xScale = 1.0f;
+    fSlideLine.yScale = 1.0f;
+    fSlideLine.drawAt(drawPos);
+    // Output level 0
+    drawPos.setX(drawPos.getX() + 32);
+    fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[0] + 60)/60));
+
+    // Input level 1
+    drawPos.setX(190);
+    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputRight + 60)/60);
+    // Slider line
+    drawPos.setX(drawPos.getX() + 40);
+    fSlideLine.xScale = 1.0f;
+    fSlideLine.yScale = 1.0f;
+    fSlideLine.drawAt(drawPos);
+    // Output level 0
+    drawPos.setX(drawPos.getX() + 32);
+    fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[1] + 60)/60));
+
+    // Channel meters post fader
+    drawPos.setPos(400, 10);
+    for(int i=1; i<MAX_JAMMERS; i++) {
+        // Each i is a row
+        // Smoother
+        fMeterBar.drawAt(drawPos, 100, 1.0 - fState.bufferDepths[i*2]);
+        drawPos.setX(drawPos.getX() + 40);
+        fSlideLine.xScale = 1.0f;
+        fSlideLine.yScale = yScale;
+        fSlideLine.drawAt(drawPos);
+
+        // Input 0
+        drawPos.setX(drawPos.getX() + 100);
+        fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
+        drawPos.setX(drawPos.getX() + 40);
+        fSlideLine.xScale = 1.0f;
+        fSlideLine.yScale = yScale;
+        fSlideLine.drawAt(drawPos);
+
+        // Input 1
+        drawPos.setX(drawPos.getX() + 100);
+        fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.channelLevels[i*2+1] + 60)/60));
+        drawPos.setX(drawPos.getX() + 40);
+        fSlideLine.xScale = 1.0f;
+        fSlideLine.yScale = yScale;
+        fSlideLine.drawAt(drawPos);
+
+        drawPos.setY(drawPos.getY() + 135);
+        drawPos.setX(400);
+    }
 
 }
 
@@ -150,6 +367,38 @@ bool UIRTJam::onMotion(const MotionEvent& ev) {
 bool UIRTJam::onScroll(const ScrollEvent& ev) {
     return false;
     (void)ev;
+}
+
+// -----------------------------------------------------------------------
+// Widget Callbacks
+
+void UIRTJam::imageButtonClicked(ImageButton*, int)
+{
+    // printf("button push\n");
+    // if (button != fButtonAbout)
+    //     return;
+
+    // fAboutWindow.exec();
+}
+
+void UIRTJam::imageSwitchClicked(ImageSwitch* button, bool down) {
+    // fHostName->setVisible(down);
+    setParameterValue(button->getId(), down);
+}
+
+void UIRTJam::imageSliderDragStarted(ImageSlider* slider)
+{
+    editParameter(slider->getId(), true);
+}
+
+void UIRTJam::imageSliderDragFinished(ImageSlider* slider)
+{
+    editParameter(slider->getId(), false);
+}
+
+void UIRTJam::imageSliderValueChanged(ImageSlider* slider, float value)
+{
+    setParameterValue(slider->getId(), value);
 }
 
 // -----------------------------------------------------------------------

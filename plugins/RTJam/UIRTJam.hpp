@@ -29,10 +29,20 @@
 
 #include "DistrhoUI.hpp"
 #include "PluginRTJam.hpp"
+#include "ImageWidgets.hpp"
+#include "../common/PartialImage.hpp"
+#include "RTJamArt.hpp"
+#include "levelMeters.hpp"
+#include "../common/MeterBar.hpp"
+
 
 START_NAMESPACE_DISTRHO
 
-class UIRTJam : public UI {
+class UIRTJam : public UI,
+                public ImageButton::Callback,
+                public ImageSlider::Callback,
+                public ImageSwitch::Callback
+{
 public:
     UIRTJam();
     ~UIRTJam();
@@ -45,7 +55,17 @@ protected:
     void uiIdle() override;
     void uiReshape(uint width, uint height) override;
 
+    // -------------------------------------------------------------------
+    // Widget Callbacks
+
+    void imageButtonClicked(ImageButton* button, int) override;
+    void imageSwitchClicked(ImageSwitch* button, bool down) override;
+    void imageSliderDragStarted(ImageSlider* slider) override;
+    void imageSliderDragFinished(ImageSlider* slider) override;
+    void imageSliderValueChanged(ImageSlider* slider, float value) override;
+
     void onNanoDisplay() override;
+    void onDisplay() override;
 
     bool onKeyboard(const KeyboardEvent& ev) override;
     bool onSpecial(const SpecialEvent& ev) override;
@@ -54,6 +74,17 @@ protected:
     bool onScroll(const ScrollEvent& ev) override;
 
 private:
+    Image fImgBackground;
+    PartialImage fSlideLine;
+    ImageAboutWindow fAboutWindow;
+    Image fSmoothButtonNormal, fsmoothButtonPressed;
+    ImageSlider* fVol[MIX_CHANNELS];
+    ImageSlider* fSmooth[MAX_JAMMERS];  // one smooth for both sub-channels
+    JamNetStuff::JamMeterBar fMeterBar;
+    ScopedPointer<ImageSlider>  fSliderMaster;
+    ScopedPointer<ImageSwitch> fMonitorInputButton;
+    RTJamState fState;
+
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };
 

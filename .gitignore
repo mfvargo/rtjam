@@ -1,6 +1,7 @@
 *.a
 *.d
 *.o
+settings.json
 
 *.exe
 *.dll

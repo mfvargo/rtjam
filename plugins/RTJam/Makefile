@@ -58,16 +58,30 @@ BUILD_LADSPA ?= false
 # Files to build
 
 FILES_DSP = \
-	PluginRTJam.cpp
+	PluginRTJam.cpp \
+	../common/Settings.cpp \
+	../common/JamNetStuff.cpp \
+	../common/JamMixer.cpp \
+	../common/JitterBuffer.cpp \
+	../common/ChannelMap.cpp \
+	../common/TimersAndStats.cpp
 
 FILES_UI = \
-	UIRTJam.cpp
+	UIRTJam.cpp \
+	RTJamArt.cpp \
+	../common/PartialImage.cpp \
+	../common/MeterBar.cpp
 
 # --------------------------------------------------------------
 # Do some magic
 
 UI_TYPE = opengl
 include ../../dpf/Makefile.plugins.mk
+
+# --------------------------------------------------------------
+# Extra flags
+
+LINK_FLAGS += -lpthread
 
 # --------------------------------------------------------------
 # Enable all selected plugin types
