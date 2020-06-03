@@ -28,7 +28,12 @@
 #define PLUGIN_RTJAM_H
 
 #include "DistrhoPlugin.hpp"
-#include "CParamSmooth.hpp"
+#include "extra/Mutex.hpp"
+#include "../common/JamNetStuff.hpp"
+#include "../common/Settings.hpp"
+
+class UIRTJam;
+struct RTJamState;
 
 START_NAMESPACE_DISTRHO
 
@@ -52,8 +57,22 @@ START_NAMESPACE_DISTRHO
 
 class PluginRTJam : public Plugin {
 public:
-    enum Parameters {
-        paramGain = 0,
+    enum Parameters
+    {
+        paramChanOneGain = 0,
+        paramChanTwoGain,
+        paramChanThreeGain,
+        paramChanFourGain,
+        paramChanFiveGain,
+        paramChanSixGain,
+        paramChanSevenGain,
+        paramChanEightGain,
+        paramMasterVol,
+        paramSmooth1,
+        paramSmooth2,
+        paramSmooth3,
+        paramSmooth4,
+        paramInputMonitor,
         paramCount
     };
 
@@ -95,7 +114,7 @@ protected:
     //
     // Get a proper plugin UID and fill it in here!
     int64_t getUniqueId() const noexcept override {
-        return d_cconst('a', 'b', 'c', 'd');
+        return d_cconst('b', 'c', 'j', 'r');
     }
 
     // -------------------------------------------------------------------
@@ -121,7 +140,7 @@ protected:
     // Process
 
     void activate() override;
-
+    void deactivate() override;
     void run(const float**, float** outputs, uint32_t frames) override;
 
 
@@ -130,8 +149,21 @@ protected:
 private:
     float           fParams[paramCount];
     double          fSampleRate;
-    float           gain;
-    CParamSmooth    *smooth_gain;
+    
+    Settings settings;
+    JamNetStuff::JamMixer jamMixer;
+    JamNetStuff::JamSocket jamSocket;
+    JamNetStuff::StreamTimeStats leftInput;
+    JamNetStuff::StreamTimeStats rightInput;
+
+    bool monitorInput;
+
+    float dbToFloat(float value);    
+    int frameCount;
+
+    Mutex fMutex;
+    RTJamState* fState;
+    friend class UIRTJam;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginRTJam)
 };

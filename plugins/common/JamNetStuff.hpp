@@ -21,7 +21,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include "../include/jamrtime.h"
+#include "../common/jamrtime.h"
 
 namespace JamNetStuff
 {
