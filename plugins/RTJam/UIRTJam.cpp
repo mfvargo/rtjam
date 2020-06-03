@@ -235,14 +235,6 @@ void UIRTJam::uiIdle() {
     }
 }
 
-/**
-  Window reshape function, called when the parent window is resized.
-*/
-void UIRTJam::uiReshape(uint width, uint height) {
-    (void)width;
-    (void)height;
-}
-
 // -----------------------------------------------------------------------
 // Widget callbacks
 

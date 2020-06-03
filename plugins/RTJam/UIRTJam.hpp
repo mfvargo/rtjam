@@ -28,7 +28,6 @@
 #define UI_RTJAM_H
 
 #include "DistrhoUI.hpp"
-#include "PluginRTJam.hpp"
 #include "ImageWidgets.hpp"
 #include "../common/PartialImage.hpp"
 #include "RTJamArt.hpp"
@@ -45,7 +44,7 @@ class UIRTJam : public UI,
 {
 public:
     UIRTJam();
-    ~UIRTJam();
+    ~UIRTJam() override;
 
 protected:
     void parameterChanged(uint32_t, float value) override;
@@ -53,7 +52,6 @@ protected:
     void sampleRateChanged(double newSampleRate) override;
 
     void uiIdle() override;
-    void uiReshape(uint width, uint height) override;
 
     // -------------------------------------------------------------------
     // Widget Callbacks
