@@ -150,23 +150,6 @@ namespace JamNetStuff
 
     JamSocket::JamSocket() {
         isActivated = false;
-    }
-
-    void JamSocket::initClient(int port) {
-        // Set that bad boy up.
-        char ip[100];
-        struct hostent *he;
-        struct in_addr **addr_list;
-        if ( (he = gethostbyname( SERVER_NAME ) ) == NULL) 
-        {
-            // get the host info
-            herror("gethostbyname");
-            return;
-        }
-        addr_list = (struct in_addr **) he->h_addr_list;
-        strcpy(ip , inet_ntoa(*addr_list[0]) );
-        printf("server IP is %s\n", ip);
-
         jamSocket = socket(PF_INET, SOCK_DGRAM, 0);
         // Set socket to non-blocking
         fcntl(jamSocket, F_SETFL, fcntl(jamSocket, F_GETFL) | O_NONBLOCK);
@@ -176,6 +159,22 @@ namespace JamNetStuff
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
             printf("set TOS failed. %d\n", h_errno);
         }
+    }
+
+    void JamSocket::initClient(const char* servername, int port) {
+        // Set that bad boy up.
+        char ip[100];
+        struct hostent *he;
+        struct in_addr **addr_list;
+        if ( (he = gethostbyname( servername ) ) == NULL) 
+        {
+            // get the host info
+            herror("gethostbyname");
+            return;
+        }
+        addr_list = (struct in_addr **) he->h_addr_list;
+        strcpy(ip , inet_ntoa(*addr_list[0]) );
+        printf("server IP is %s\n", ip);
 
         /*Configure settings in address struct*/
         serverAddr.sin_family = AF_INET;

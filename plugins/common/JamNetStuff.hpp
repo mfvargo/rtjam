@@ -183,7 +183,7 @@ namespace JamNetStuff
       bool isActivated;
 
       void initServer();
-      void initClient(int port);
+      void initClient(const char* servername, int port);
     
     private:
       ChannelMap channelMap;

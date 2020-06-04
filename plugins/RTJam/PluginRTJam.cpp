@@ -46,9 +46,9 @@ PluginRTJam::PluginRTJam()
 
     // Initialize the jamSocket
     settings.loadFromFile();
-    // settings.setValue("port", 7891);
-    int port = settings.getOrSetValue("port", 7891);
-    jamSocket.initClient(port);
+    std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
+    int port = settings.getOrSetValue("port", SERVER_PORT);
+    jamSocket.initClient(serverName.c_str(), port);
     
     // set default values
     loadProgram(0);

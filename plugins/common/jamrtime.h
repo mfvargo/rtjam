@@ -2,6 +2,7 @@
 #define _JAMRTIME_H
 #include <sys/time.h>
 #define SERVER_NAME "music.basscleftech.com"
+#define SERVER_PORT 7891
 
 #define MAX_JAMMERS 4
 #define JAM_BUF_SIZE 14400
