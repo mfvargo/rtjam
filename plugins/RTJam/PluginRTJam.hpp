@@ -30,7 +30,7 @@
 #include "DistrhoPlugin.hpp"
 #include "extra/Mutex.hpp"
 #include "../common/JamNetStuff.hpp"
-#include "../common/Settings.hpp"
+// #include "../common/Settings.hpp"
 
 class UIRTJam;
 struct RTJamState;
@@ -73,6 +73,9 @@ public:
         paramSmooth3,
         paramSmooth4,
         paramInputMonitor,
+        paramRoom0,
+        paramRoom1,
+        paramRoom2,
         paramCount
     };
 
@@ -81,6 +84,10 @@ public:
     ~PluginRTJam();
 
 protected:
+
+    // Room switch
+    void switchRoom(int roomParam);
+
     // -------------------------------------------------------------------
     // Information
 
@@ -150,7 +157,7 @@ private:
     float           fParams[paramCount];
     double          fSampleRate;
     
-    Settings settings;
+    // Settings settings;
     JamNetStuff::JamMixer jamMixer;
     JamNetStuff::JamSocket jamSocket;
     JamNetStuff::StreamTimeStats leftInput;

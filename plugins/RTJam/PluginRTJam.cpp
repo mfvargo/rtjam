@@ -45,22 +45,38 @@ PluginRTJam::PluginRTJam()
     monitorInput = false;
 
     // Initialize the jamSocket
-    settings.loadFromFile();
-    std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
-    int port = settings.getOrSetValue("port", SERVER_PORT);
-    jamSocket.initClient(serverName.c_str(), port);
+    switchRoom(paramRoom0);
     
     // set default values
     loadProgram(0);
-
-    // reset
-    deactivate();
 }
 
 PluginRTJam::~PluginRTJam() {
+    printf("destructor top\n");
     DISTRHO_SAFE_ASSERT(fState == nullptr);
+    printf("destructor bottom\n");
 }
 
+void PluginRTJam::switchRoom(int roomParam) {
+    // Initialize the jamSocket
+    // settings.loadFromFile();
+    // std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
+    // int port = settings.getOrSetValue("port", SERVER_PORT);
+    int port = SERVER_PORT;
+    switch(roomParam) {
+        case paramRoom0:
+            port = 7891;
+        break;
+        case paramRoom1:
+            port = 7892;
+        break;
+        case paramRoom2:
+            port = 7893;
+        break;
+    }
+    jamSocket.initClient(SERVER_NAME, port);
+
+}
 // -----------------------------------------------------------------------
 // Init
 
@@ -222,6 +238,14 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
         case paramInputMonitor:
             monitorInput = (value > 0.5f);
             break;
+        case paramRoom0:
+        case paramRoom1:
+        case paramRoom2:
+            if (value > 0.5f) {
+                // Switch to this room
+                switchRoom(index);
+            }
+        break;
     }
 }
 
@@ -252,13 +276,15 @@ void PluginRTJam::loadProgram(uint32_t index) {
 // Process
 
 void PluginRTJam::activate() {
-    // plugin is activated
+    printf("Activated!\n");
     jamSocket.isActivated = true;
 }
 
 void PluginRTJam::deactivate() {
-    settings.saveToFile();
+    printf("DeActivate Start!\n");
+    // settings.saveToFile();
     jamSocket.isActivated = false;
+    printf("DeActivate End!\n");
 }
 
 

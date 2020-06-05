@@ -13,10 +13,5 @@ settings.json
 .kdev4/
 .DS_Store
 
-bin/rtjam
-bin/rtjam.exe
-bin/rtjam-ladspa.*
-bin/rtjam-dssi.*
-bin/rtjam-vst.*
-bin/rtjam.lv2/
+bin/
 build/

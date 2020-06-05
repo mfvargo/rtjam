@@ -140,17 +140,21 @@ UIRTJam::UIRTJam()
     fMonitorInputButton->setAbsolutePos(147, 360);
     fMonitorInputButton->setCallback(this);
 
+    // Room selectors
+    for (int i=0; i<MAX_ROOMS; i++) {
+        fRooms[i] = new ImageSwitch(this,
+                        Image(Art::room_offData, Art::room_offWidth, Art::room_offHeight, GL_BGR),
+                        Image(Art::room_onData, Art::room_onWidth, Art::room_onHeight, GL_BGR));
+        fRooms[i]->setId(PluginRTJam::paramRoom0 + i);
+        fRooms[i]->setAbsolutePos(200, 15 + i * 25);
+        fRooms[i]->setCallback(this);
+    }
+    fRooms[0]->setDown(true);
     // set default values
     programLoaded(0);
 }
 
 UIRTJam::~UIRTJam() {
-    // This is some threadsafe way to null a pointer in the DSP module
-    if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
-    {
-        const MutexLocker csm(dspPtr->fMutex);
-        dspPtr->fState = nullptr;
-    }
     // Delete the sliders
     for (int i=0; i<MIX_CHANNELS; i++) {
         delete fVol[i];
@@ -158,7 +162,15 @@ UIRTJam::~UIRTJam() {
     for (int i=0; i<MAX_JAMMERS; i++) {
         delete fSmooth[i];
     }
-
+    for (int i=0; i<MAX_ROOMS; i++) {
+        delete fRooms[i];
+    }
+    // This is some threadsafe way to null a pointer in the DSP module
+    if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
+    {
+        const MutexLocker csm(dspPtr->fMutex);
+        dspPtr->fState = nullptr;
+    }
 }
 
 // -----------------------------------------------------------------------
@@ -374,8 +386,27 @@ void UIRTJam::imageButtonClicked(ImageButton*, int)
 }
 
 void UIRTJam::imageSwitchClicked(ImageSwitch* button, bool down) {
-    // fHostName->setVisible(down);
-    setParameterValue(button->getId(), down);
+    // Radio button logic for rooms
+    switch(button->getId()) {
+        case PluginRTJam::paramRoom0:
+        case PluginRTJam::paramRoom1:
+        case PluginRTJam::paramRoom2:
+            if (down) {
+                for (int i=0; i<MAX_ROOMS; i++) {
+                    fRooms[i]->setDown(false);
+                }
+                button->setDown(true);
+                setParameterValue(button->getId(), down);
+            } else {
+                // Existing button going up, ignore it
+                button->setDown(true);
+            }
+
+        break;
+        case PluginRTJam::paramInputMonitor:
+            setParameterValue(button->getId(), down);
+        break;
+    }
 }
 
 void UIRTJam::imageSliderDragStarted(ImageSlider* slider)

@@ -233,8 +233,7 @@ namespace JamNetStuff
 
         do {
             nBytes = readData();
-            if (nBytes > 0) {
-                // recv_packet.dumpPacket("Recv: ");
+            if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
                 jamMixer->addData(&packet, nBytes);
             }
         } while( nBytes > 0);
