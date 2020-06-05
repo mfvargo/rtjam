@@ -236,7 +236,7 @@ namespace JamNetStuff
             if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
                 jamMixer->addData(&packet, nBytes);
             }
-        } while( nBytes > 0);
+        } while( isActivated && nBytes > 0);
         return rval;
     }
 

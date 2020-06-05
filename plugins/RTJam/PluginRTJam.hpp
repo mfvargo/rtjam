@@ -154,7 +154,6 @@ protected:
     // -------------------------------------------------------------------
 
 private:
-    float           fParams[paramCount];
     double          fSampleRate;
     
     // Settings settings;
@@ -174,24 +173,6 @@ private:
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginRTJam)
 };
-
-struct Preset {
-    const char* name;
-    float params[PluginRTJam::paramCount];
-};
-
-const Preset factoryPresets[] = {
-    {
-        "Unity Gain",
-        {0.0f}
-    }
-    //,{
-    //    "Another preset",  // preset name
-    //    {-14.0f, ...}      // array of presetCount float param values
-    //}
-};
-
-const uint presetCount = sizeof(factoryPresets) / sizeof(Preset);
 
 // -----------------------------------------------------------------------
 

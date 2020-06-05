@@ -34,7 +34,7 @@ START_NAMESPACE_DISTRHO
 // -----------------------------------------------------------------------
 
 PluginRTJam::PluginRTJam()
-    : Plugin(paramCount, presetCount, 0),  // paramCount param(s), presetCount program(s), 0 states
+    : Plugin(paramCount, 0, 0),  // paramCount param(s), presetCount program(s), 0 states
       fState(nullptr)
 {
     // set window size on input power bars
@@ -205,6 +205,8 @@ float PluginRTJam::getParameterValue(uint32_t index) const {
             return jamMixer.gains[index - paramChanOneGain];
         case paramMasterVol:
             return jamMixer.masterVol;
+        case paramRoom0:
+            return 1.0f;
         default:
             // All the float values are good for 0.0
             return 0.0f;
