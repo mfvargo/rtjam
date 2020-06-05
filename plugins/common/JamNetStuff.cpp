@@ -162,6 +162,8 @@ namespace JamNetStuff
     }
 
     void JamSocket::initClient(const char* servername, int port) {
+        // Clear out the channelMap on the socket
+        packet.clearChannelMap();
         // Set that bad boy up.
         char ip[100];
         struct hostent *he;

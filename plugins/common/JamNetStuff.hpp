@@ -65,6 +65,7 @@ namespace JamNetStuff
       int getChannel(uint32_t clientId);
       void setMyId(uint32_t Id);
       void dumpOut();
+      void clear();
       uint32_t getClientId(int idx) { return channels[idx].clientId; };
     private:
       struct Channel {
@@ -127,6 +128,10 @@ namespace JamNetStuff
       uint32_t getSequenceNo();
       void dumpPacket(const char*);
       int getChannel();
+
+      void clearChannelMap() {
+        channelMap.clear();
+      };
 
     private:
       void encodeJamBuffer(unsigned char*, const float*, int);
