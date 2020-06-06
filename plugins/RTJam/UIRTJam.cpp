@@ -122,8 +122,8 @@ UIRTJam::UIRTJam()
 
     }
     // slider Master
-    sliderPosStart.setPos(146, 5);
-    sliderPosEnd.setPos(146, 95);
+    sliderPosStart.setPos(76, 5);
+    sliderPosEnd.setPos(76, 95);
     fSliderMaster = new ImageSlider(this, sliderImage);
     fSliderMaster->setId(PluginRTJam::paramMasterVol);
     fSliderMaster->setInverted(true);
@@ -146,7 +146,7 @@ UIRTJam::UIRTJam()
                         Image(Art::room_offData, Art::room_offWidth, Art::room_offHeight, GL_BGR),
                         Image(Art::room_onData, Art::room_onWidth, Art::room_onHeight, GL_BGR));
         fRooms[i]->setId(PluginRTJam::paramRoom0 + i);
-        fRooms[i]->setAbsolutePos(200, 15 + i * 25);
+        fRooms[i]->setAbsolutePos(200, 20 + i * 30);
         fRooms[i]->setCallback(this);
     }
     fRooms[0]->setDown(true);
@@ -264,7 +264,7 @@ void UIRTJam::onDisplay() {
     float yScale = 0.5f;
 
     // Master meter (post fade)
-    drawPos.setPos(130, 15);
+    drawPos.setPos(60, 15);
     fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.masterLevel + 60)/60));
     drawPos.setX(drawPos.getX() + 40);
     fSlideLine.xScale = 1.0f;
