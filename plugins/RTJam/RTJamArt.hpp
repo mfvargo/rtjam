@@ -45,6 +45,16 @@ namespace RTJamArt
     const unsigned int mute_onWidth    = 21;
     const unsigned int mute_onHeight   = 20;
 
+    extern const char* room_offData;
+    const unsigned int room_offDataSize = 1260;
+    const unsigned int room_offWidth    = 21;
+    const unsigned int room_offHeight   = 20;
+
+    extern const char* room_onData;
+    const unsigned int room_onDataSize = 1260;
+    const unsigned int room_onWidth    = 21;
+    const unsigned int room_onHeight   = 20;
+
     extern const char* slidelineData;
     const unsigned int slidelineDataSize = 1818;
     const unsigned int slidelineWidth    = 3;

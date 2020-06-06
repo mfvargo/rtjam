@@ -30,7 +30,7 @@
 #include "DistrhoPlugin.hpp"
 #include "extra/Mutex.hpp"
 #include "../common/JamNetStuff.hpp"
-#include "../common/Settings.hpp"
+// #include "../common/Settings.hpp"
 
 class UIRTJam;
 struct RTJamState;
@@ -73,6 +73,9 @@ public:
         paramSmooth3,
         paramSmooth4,
         paramInputMonitor,
+        paramRoom0,
+        paramRoom1,
+        paramRoom2,
         paramCount
     };
 
@@ -81,6 +84,10 @@ public:
     ~PluginRTJam();
 
 protected:
+
+    // Room switch
+    void switchRoom(int roomParam);
+
     // -------------------------------------------------------------------
     // Information
 
@@ -147,10 +154,9 @@ protected:
     // -------------------------------------------------------------------
 
 private:
-    float           fParams[paramCount];
     double          fSampleRate;
     
-    Settings settings;
+    // Settings settings;
     JamNetStuff::JamMixer jamMixer;
     JamNetStuff::JamSocket jamSocket;
     JamNetStuff::StreamTimeStats leftInput;
@@ -167,24 +173,6 @@ private:
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginRTJam)
 };
-
-struct Preset {
-    const char* name;
-    float params[PluginRTJam::paramCount];
-};
-
-const Preset factoryPresets[] = {
-    {
-        "Unity Gain",
-        {0.0f}
-    }
-    //,{
-    //    "Another preset",  // preset name
-    //    {-14.0f, ...}      // array of presetCount float param values
-    //}
-};
-
-const uint presetCount = sizeof(factoryPresets) / sizeof(Preset);
 
 // -----------------------------------------------------------------------
 

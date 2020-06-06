@@ -162,6 +162,8 @@ namespace JamNetStuff
     }
 
     void JamSocket::initClient(const char* servername, int port) {
+        // Clear out the channelMap on the socket
+        packet.clearChannelMap();
         // Set that bad boy up.
         char ip[100];
         struct hostent *he;
@@ -233,11 +235,10 @@ namespace JamNetStuff
 
         do {
             nBytes = readData();
-            if (nBytes > 0) {
-                // recv_packet.dumpPacket("Recv: ");
+            if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
                 jamMixer->addData(&packet, nBytes);
             }
-        } while( nBytes > 0);
+        } while( isActivated && nBytes > 0);
         return rval;
     }
 

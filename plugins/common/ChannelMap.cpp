@@ -29,6 +29,12 @@ namespace JamNetStuff {
     channels[0].clientId = id;
   }
 
+  void ChannelMap::clear() {
+    for (int i=1; i<MAX_JAMMERS; i++) {
+      channels[i].clientId = EMPTY_SLOT;
+    }
+  }
+
   int ChannelMap::getChannel(uint32_t clientId) {
     // dumpOut();
     time_t now = time(NULL);

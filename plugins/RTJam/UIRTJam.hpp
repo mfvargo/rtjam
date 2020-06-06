@@ -34,6 +34,7 @@
 #include "levelMeters.hpp"
 #include "../common/MeterBar.hpp"
 
+#define MAX_ROOMS 3
 
 START_NAMESPACE_DISTRHO
 
@@ -70,7 +71,7 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
     bool onScroll(const ScrollEvent& ev) override;
-
+    
 private:
     Image fImgBackground;
     PartialImage fSlideLine;
@@ -78,6 +79,7 @@ private:
     Image fSmoothButtonNormal, fsmoothButtonPressed;
     ImageSlider* fVol[MIX_CHANNELS];
     ImageSlider* fSmooth[MAX_JAMMERS];  // one smooth for both sub-channels
+    ImageSwitch* fRooms[MAX_ROOMS];
     JamNetStuff::JamMeterBar fMeterBar;
     ScopedPointer<ImageSlider>  fSliderMaster;
     ScopedPointer<ImageSwitch> fMonitorInputButton;
