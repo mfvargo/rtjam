@@ -52,9 +52,7 @@ PluginRTJam::PluginRTJam()
 }
 
 PluginRTJam::~PluginRTJam() {
-    printf("destructor top\n");
-    DISTRHO_SAFE_ASSERT(fState == nullptr);
-    printf("destructor bottom\n");
+    // DISTRHO_SAFE_ASSERT(fState == nullptr);
 }
 
 void PluginRTJam::switchRoom(int roomParam) {
@@ -283,10 +281,8 @@ void PluginRTJam::activate() {
 }
 
 void PluginRTJam::deactivate() {
-    printf("DeActivate Start!\n");
     // settings.saveToFile();
     jamSocket.isActivated = false;
-    printf("DeActivate End!\n");
 }
 
 

@@ -156,6 +156,7 @@ UIRTJam::UIRTJam()
 
 UIRTJam::~UIRTJam() {
     // Delete the sliders
+    /*
     for (int i=0; i<MIX_CHANNELS; i++) {
         delete fVol[i];
     }
@@ -171,6 +172,7 @@ UIRTJam::~UIRTJam() {
         const MutexLocker csm(dspPtr->fMutex);
         dspPtr->fState = nullptr;
     }
+    */
 }
 
 // -----------------------------------------------------------------------
