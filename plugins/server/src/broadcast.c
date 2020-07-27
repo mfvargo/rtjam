@@ -100,7 +100,7 @@ int main(int argc,  char **argv){
   while(1){
     dumpCount++;
     if (dumpCount%1000 == 0) {
-      dumpChannels(channels);
+      // dumpChannels(channels);
     }
     /* Try to receive any incoming UDP datagram. Address and port of 
       requesting client will be stored on serverStorage variable */
@@ -109,7 +109,7 @@ int main(int argc,  char **argv){
     pruneStaleSlots(channels);
     if (nBytes <= 0) {
       // no data, a timeout
-      dumpChannels(channels);
+      // dumpChannels(channels);
     } else {
       decodeJamMessage(packet);
       int channel = updateChannels(channels, packet, &serverStorage);
@@ -178,6 +178,7 @@ int updateChannels(struct ClientEntry* channels, struct JamMessage* packet, stru
     }
   }
   if (slot == -1) {
+    dumpChannels(channels);
     // new user
     if (emptySlot == -1) {
       // This is a new dude, but there is no room
