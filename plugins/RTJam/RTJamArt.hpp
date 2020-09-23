@@ -21,8 +21,8 @@ namespace RTJamArt
     const unsigned int aboutButtonNormalHeight   = 16;
 
     extern const char* background_2Data;
-    const unsigned int background_2DataSize = 992358;
-    const unsigned int background_2Width    = 799;
+    const unsigned int background_2DataSize = 919080;
+    const unsigned int background_2Width    = 740;
     const unsigned int background_2Height   = 414;
 
     extern const char* meter_offData;

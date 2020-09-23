@@ -172,6 +172,7 @@ void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
   This function will be called once, shortly after the plugin is created.
 */
 void PluginRTJam::initProgramName(uint32_t index, String& programName) {
+    printf("init Program");
     if (index != 0)
         return;
     programName = "Default";
@@ -276,7 +277,8 @@ void PluginRTJam::loadProgram(uint32_t index) {
 // Process
 
 void PluginRTJam::activate() {
-    printf("Activated!\n");
+    jamMixer.gains[0] = dbToFloat(3.0);
+    jamMixer.gains[1] = dbToFloat(3.0);
     jamSocket.isActivated = true;
 }
 

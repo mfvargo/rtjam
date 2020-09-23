@@ -80,7 +80,7 @@ UIRTJam::UIRTJam()
     fVol[1]->setCallback(this);
 
     // Now for the rows of channels
-    int startx = 416;
+    int startx = 386;
     int starty = 5;
     int spacing = 140;
     sliderPosStart.setPos(startx,starty); 
@@ -213,7 +213,9 @@ void UIRTJam::programLoaded(uint32_t index) {
         return;
 
     // Default values
-    for (int i=0; i<MIX_CHANNELS; i++) {
+    fVol[0]-> setValue(3.0f);
+    fVol[1]-> setValue(3.0f);
+    for (int i=2; i<MIX_CHANNELS; i++) {
         fVol[i]->setValue(0.0f);
     }
     for (int i=1; i<MAX_JAMMERS; i++) {
@@ -299,7 +301,7 @@ void UIRTJam::onDisplay() {
     fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[1] + 60)/60));
 
     // Channel meters post fader
-    drawPos.setPos(400, 10);
+    drawPos.setPos(370, 10);
     for(int i=1; i<MAX_JAMMERS; i++) {
         // Each i is a row
         // Smoother
@@ -326,7 +328,7 @@ void UIRTJam::onDisplay() {
         fSlideLine.drawAt(drawPos);
 
         drawPos.setY(drawPos.getY() + 135);
-        drawPos.setX(400);
+        drawPos.setX(370);
     }
 
 }
