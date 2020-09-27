@@ -62,19 +62,22 @@ namespace JamNetStuff
   class ChannelMap {
     public:
       ChannelMap();
-      int getChannel(uint32_t clientId);
+      int getChannel(uint32_t clientId, sockaddr_in *addr = NULL);
       void setMyId(uint32_t Id);
       void dumpOut();
       void clear();
       uint32_t getClientId(int idx) { return channels[idx].clientId; };
+      void getClientAddr(int idx, sockaddr_in *addr);
+      void pruneStaleChannels(time_t now, int startAt = 1);
+
     private:
       struct Channel {
         uint32_t clientId;
         time_t KeepAlive;
+        sockaddr_in Address;
       };
       uint32_t myId;
       Channel channels[MAX_JAMMERS];
-      void pruneStaleChannels(time_t now);
   };
 
 
@@ -119,6 +122,7 @@ namespace JamNetStuff
       JamPacket();
 
       void encode(const float** inputs, int frames);
+      void encodeHeader();
       int decode(float** outputs, int nBytes);
       int decodeHeader(int nBytes);
 
@@ -183,11 +187,11 @@ namespace JamNetStuff
       JamSocket();
       int sendPacket(const float** buffer, int frames);
       int readPackets(JamMixer*);
-      int readPackets();
+      int readAndBroadcast();
       int readData();
       bool isActivated;
 
-      void initServer();
+      void initServer(short port);
       void initClient(const char* servername, int port);
     
     private:

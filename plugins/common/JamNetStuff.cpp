@@ -15,6 +15,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <netinet/ip.h>
+#include <time.h>
+
 
 namespace JamNetStuff
 {
@@ -43,17 +45,21 @@ namespace JamNetStuff
     }
 
     void JamPacket::encode(const float** inputs, int frames) {
+        encodeHeader();
         // copy two channels into the jamMessage packet
-        jamMessage.SampleRate = sampleRate;
-        jamMessage.NumSubChannels = 2;
-        jamMessage.TimeStamp = htobe64(getMicroTime());
-        jamMessage.SequenceNumber = htonl(sequenceNo++);
-        jamMessage.ClientId = htonl(clientId);
         unsigned char* bufPtr = jamMessage.buffer;
         encodeJamBuffer(bufPtr, inputs[0], frames);
         bufPtr += frames * sizeof(uint16_t);
         encodeJamBuffer(bufPtr, inputs[1], frames);
         bufferSize = frames * jamMessage.NumSubChannels * sizeof(uint16_t);
+    }
+
+    void JamPacket::encodeHeader() {
+        jamMessage.SampleRate = sampleRate;
+        jamMessage.NumSubChannels = 2;
+        jamMessage.TimeStamp = htobe64(getMicroTime());
+        jamMessage.SequenceNumber = htonl(sequenceNo++);
+        jamMessage.ClientId = htonl(clientId);
     }
 
     void JamPacket::encodeJamBuffer(unsigned char* jamBuffer, const float* buffer, int frames) {
@@ -151,17 +157,17 @@ namespace JamNetStuff
     JamSocket::JamSocket() {
         isActivated = false;
         jamSocket = socket(PF_INET, SOCK_DGRAM, 0);
-        // Set socket to non-blocking
-        fcntl(jamSocket, F_SETFL, fcntl(jamSocket, F_GETFL) | O_NONBLOCK);
         printf("socket is %d\n", jamSocket);
+    }
+
+    void JamSocket::initClient(const char* servername, int port) {
         // Try to set the Type of Service to Voice (for whatever that is worth)
         int tos_local = IPTOS_LOWDELAY;
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
             printf("set TOS failed. %d\n", h_errno);
         }
-    }
-
-    void JamSocket::initClient(const char* servername, int port) {
+        // Set socket to non-blocking
+        fcntl(jamSocket, F_SETFL, fcntl(jamSocket, F_GETFL) | O_NONBLOCK);
         // Clear out the channelMap on the socket
         packet.clearChannelMap();
         // Set that bad boy up.
@@ -186,12 +192,11 @@ namespace JamNetStuff
         addr_size = sizeof(serverAddr);  
     }
 
-    void JamSocket::initServer() {
-        jamSocket = socket(PF_INET, SOCK_DGRAM, 0);
+    void JamSocket::initServer(short port) {
        /*Configure settings in address struct*/
+        memset(&serverAddr, 0, sizeof(struct sockaddr_in));
         serverAddr.sin_family = AF_INET;
-        serverAddr.sin_port = htons(7891);
-        memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
+        serverAddr.sin_port = htons(port);
         /*Bind socket with address struct*/
         bind(jamSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
         // Try to set the Type of Service to Voice (for whatever that is worth)
@@ -244,28 +249,40 @@ namespace JamNetStuff
 
     #define EMPTY_SLOT 40000
 
-    int JamSocket::readPackets() {
+    int JamSocket::readAndBroadcast() {
         // This is the read and broadcast for the server
         int nBytes = readData();
-        printf("nBytes: %d from %d\n", nBytes, packet.getChannel());
         if (nBytes <= 0) {
             // This was a timeout reading
             // clear out dead sessions?
+            time_t now = time(NULL);
+            printf("now: %ld\n", now);
+            channelMap.pruneStaleChannels(now, 0);
+            channelMap.dumpOut();
         } else {
             // int samples = packet.decodeHeader(nBytes);
             // if (samples <= 0) {
             //     return 0;
             // }
             unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
-            int chan = channelMap.getChannel(from_addr);
-            channelMap.dumpOut();
+            channelMap.getChannel(from_addr, &senderAddr);
+            // printf("nBytes: %d from %d\n", nBytes, chan);
+            // channelMap.dumpOut();
+            packet.encodeHeader();
             for (int i=0; i<MAX_JAMMERS; i++) {
                 // Don't send back an echo to the sender
-                if (i != chan) {
-                    unsigned long to_addr = channelMap.getClientId(i);
-                    if (to_addr != EMPTY_SLOT) {
-                        // send the packet to the address
-                    }
+                sockaddr_in addr;
+                unsigned long to_addr = channelMap.getClientId(i);
+                if (to_addr != EMPTY_SLOT && to_addr != from_addr) {
+                    channelMap.getClientAddr(i, &addr);
+                    printf("sending to %ld\n", to_addr);
+                    // send the packet to the address
+                    sendto(
+                        jamSocket,
+                        packet.getPacket(),
+                        nBytes,
+                        0,
+                        (struct sockaddr *)&addr, sizeof addr);
                 }
             }
         }

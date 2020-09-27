@@ -12,6 +12,8 @@
 
 #include "../common/JamNetStuff.hpp"
 #include <time.h>
+#include <string.h>
+
 
 #define EMPTY_SLOT 40000
 
@@ -20,7 +22,8 @@ namespace JamNetStuff {
   ChannelMap::ChannelMap() {
     for (int i=0; i<MAX_JAMMERS; i++) {
       channels[i].clientId = EMPTY_SLOT;   // Illegal value, max is 32k
-      channels[i].KeepAlive = 0;
+      channels[i].KeepAlive = time(NULL);
+      memset(&channels[i].Address, '\0', sizeof channels[i].Address);
     }
   }
 
@@ -35,7 +38,11 @@ namespace JamNetStuff {
     }
   }
 
-  int ChannelMap::getChannel(uint32_t clientId) {
+  void ChannelMap::getClientAddr(int idx, sockaddr_in *addr) { 
+    memcpy(addr, &channels[idx].Address, sizeof channels[idx].Address); 
+  };
+
+  int ChannelMap::getChannel(uint32_t clientId, sockaddr_in *addr) {
     // dumpOut();
     time_t now = time(NULL);
     // Clear out the dead wood
@@ -52,24 +59,28 @@ namespace JamNetStuff {
       if (channels[i].clientId == EMPTY_SLOT) {
         channels[i].clientId = clientId;
         channels[i].KeepAlive = now;
+        if (addr != NULL) {
+          memcpy(&channels[i].Address, addr, sizeof channels[i].Address);
+        }
         return i;
       }
     }
     return -1;
   }
 
-  void ChannelMap::pruneStaleChannels(time_t now) {
+  void ChannelMap::pruneStaleChannels(time_t now, int startAt) {
     // Never clear out slot 0 cause that's the local dude
-    for (int i=1; i<MAX_JAMMERS; i++) {
+    for (int i=startAt; i<MAX_JAMMERS; i++) {
       if ((now - channels[i].KeepAlive) > EXPIRATION_IN_SECONDS) {
         channels[i].clientId = EMPTY_SLOT;
+        memset(&channels[i].Address, '\0', sizeof channels[i].Address);
       }
     }
   }
 
   void ChannelMap::dumpOut() {
     for (int i=0; i<MAX_JAMMERS; i++) {
-      printf("chan: %d, clientId: %d, ", i, channels[i].clientId);
+      printf("chan: %d, clientId: %u, k/a: %ld ", i, channels[i].clientId, channels[i].KeepAlive);
     }
     printf("\n");
   }
