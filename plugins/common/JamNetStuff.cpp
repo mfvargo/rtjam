@@ -251,12 +251,9 @@ namespace JamNetStuff
     int JamSocket::readAndBroadcast(JamMixer* jamMixer) {
         // This is the read and broadcast for the server
         int nBytes = readData();
-        if (nBytes <= 0) {
-            // This was a timeout reading
-            // clear out dead sessions?
-            time_t now = time(NULL);
-            channelMap.pruneStaleChannels(now, 0);
-        } else {
+        time_t now = time(NULL);
+        channelMap.pruneStaleChannels(now, 0);
+        if (nBytes > 0) {
             // Put the packet into the mixer
             // jamMixer->addData(&packet, nBytes);
             unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
