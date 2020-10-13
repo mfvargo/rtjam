@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
     jamSocket.readAndBroadcast(&jamMixer);
     now = time(NULL);
     if (now - lastDump > 3) {
+      printf("port %d: ", port);
       jamSocket.channelDump();
       lastDump = now;
     }

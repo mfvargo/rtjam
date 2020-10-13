@@ -80,7 +80,7 @@ namespace JamNetStuff {
     char ipString[24];
     for (int i=0; i<MAX_JAMMERS; i++) {
       makeIpString(channels[i].clientId, ipString);
-      printf("clientId: %s\t", ipString);
+      printf("%s  ", ipString);
     }
     printf("\n");
   }
@@ -91,7 +91,7 @@ namespace JamNetStuff {
     {
         octet[i] = ( s_addr >> (i*8) ) & 0xFF;
     }
-    sprintf(ipString, "%d.%d.%d.%d", octet[0],octet[1],octet[2],octet[3]);
+    sprintf(ipString, "%03d.%03d.%03d.%03d", octet[0],octet[1],octet[2],octet[3]);
   }
 
 }
