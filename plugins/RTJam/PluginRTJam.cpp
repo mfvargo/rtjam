@@ -155,6 +155,24 @@ void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
             parameter.ranges.min = -60.0f;
             parameter.ranges.max = 12.0f;
             break;
+        case paramChanNineGain:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Ch 9";
+            parameter.symbol     = "nine";
+            parameter.unit       = "dB";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.min = -60.0f;
+            parameter.ranges.max = 12.0f;
+            break;
+        case paramChanTenGain:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Ch 10";
+            parameter.symbol     = "ten";
+            parameter.unit       = "dB";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.min = -60.0f;
+            parameter.ranges.max = 12.0f;
+            break;
         case paramMasterVol:
             parameter.hints      = kParameterIsAutomable;
             parameter.name       = "Master";
@@ -163,6 +181,51 @@ void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
             parameter.ranges.def = 0.0f;
             parameter.ranges.min = -60.0f;
             parameter.ranges.max = 12.0f;
+            break;
+        case paramSmooth1:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Smooth 1";
+            parameter.symbol     = "S1";
+            parameter.unit       = "multiplier";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            break;
+        case paramSmooth2:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Smooth 2";
+            parameter.symbol     = "S2";
+            parameter.unit       = "multiplier";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            break;
+        case paramSmooth3:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Smooth 3";
+            parameter.symbol     = "S3";
+            parameter.unit       = "multiplier";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            break;
+        case paramSmooth4:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Smooth 4";
+            parameter.symbol     = "S4";
+            parameter.unit       = "multiplier";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            break;
+        case paramSmooth5:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Smooth 5";
+            parameter.symbol     = "S5";
+            parameter.unit       = "multiplier";
+            parameter.ranges.def = 0.0f;
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
             break;
     }
 }
@@ -201,6 +264,8 @@ float PluginRTJam::getParameterValue(uint32_t index) const {
         case paramChanSixGain:
         case paramChanSevenGain:
         case paramChanEightGain:
+        case paramChanNineGain:
+        case paramChanTenGain:
             return jamMixer.gains[index - paramChanOneGain];
         case paramMasterVol:
             return jamMixer.masterVol;
@@ -216,6 +281,7 @@ float PluginRTJam::getParameterValue(uint32_t index) const {
   Change a parameter value.
 */
 void PluginRTJam::setParameterValue(uint32_t index, float value) {
+    printf("param changed %u %f\n", index, value);
     switch (index) {
         case paramChanOneGain:
         case paramChanTwoGain:
@@ -225,6 +291,8 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
         case paramChanSixGain:
         case paramChanSevenGain:
         case paramChanEightGain:
+        case paramChanNineGain:
+        case paramChanTenGain:
             jamMixer.gains[index - paramChanOneGain] = dbToFloat(value);
             break;
         case paramMasterVol:
@@ -234,6 +302,7 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
         case paramSmooth2:
         case paramSmooth3:
         case paramSmooth4:
+        case paramSmooth5:
             jamMixer.setBufferSmoothness(index - paramSmooth1, value);
             break;
         case paramInputMonitor:
@@ -263,6 +332,7 @@ float PluginRTJam::dbToFloat(float value) {
   including realtime processing.
 */
 void PluginRTJam::loadProgram(uint32_t index) {
+    printf("loading program %u\n", index);
     if (index != 0)
         return;
 

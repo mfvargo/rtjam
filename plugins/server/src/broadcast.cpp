@@ -5,6 +5,7 @@
 int main(int argc, char **argv) {
 
   JamNetStuff::JamSocket jamSocket;
+  JamNetStuff::JamMixer jamMixer;
   short port = 7891;
 
   if (argc > 2 && strcmp(argv[1],"--port") == 0) {
@@ -21,9 +22,15 @@ int main(int argc, char **argv) {
   jamSocket.isActivated = true;
 
   // Loop and broadcast data
+  time_t now = time(NULL);
+  time_t lastDump = time(NULL);
   while (1) {
-    jamSocket.readAndBroadcast();
+    jamSocket.readAndBroadcast(&jamMixer);
+    now = time(NULL);
+    if (now - lastDump > 3) {
+      jamSocket.channelDump();
+      lastDump = now;
+    }
   }
-
   return 0;
 }

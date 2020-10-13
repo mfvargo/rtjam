@@ -194,9 +194,10 @@ namespace JamNetStuff
 
     void JamSocket::initServer(short port) {
        /*Configure settings in address struct*/
-        memset(&serverAddr, 0, sizeof(struct sockaddr_in));
+        // memset(&serverAddr, 0, sizeof(struct sockaddr_in));
         serverAddr.sin_family = AF_INET;
         serverAddr.sin_port = htons(port);
+        memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
         /*Bind socket with address struct*/
         bind(jamSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
         // Try to set the Type of Service to Voice (for whatever that is worth)
@@ -204,9 +205,9 @@ namespace JamNetStuff
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
             printf("set TOS failed. %d\n", h_errno);
         }
-        // Set the socket to timeout every 5 seconds if nobody is around
+        // Set the socket to timeout every 1 seconds if nobody is around
         struct timeval tv;
-        tv.tv_sec = 5;
+        tv.tv_sec = 1;
         tv.tv_usec = 0;
         if (setsockopt(jamSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv)) {
             printf("set SO_RCVTIMEO failed\n");
@@ -247,26 +248,20 @@ namespace JamNetStuff
         return rval;
     }
 
-    #define EMPTY_SLOT 40000
-
-    int JamSocket::readAndBroadcast() {
+    int JamSocket::readAndBroadcast(JamMixer* jamMixer) {
         // This is the read and broadcast for the server
         int nBytes = readData();
         if (nBytes <= 0) {
             // This was a timeout reading
             // clear out dead sessions?
             time_t now = time(NULL);
-            printf("now: %ld\n", now);
             channelMap.pruneStaleChannels(now, 0);
-            channelMap.dumpOut();
         } else {
-            // int samples = packet.decodeHeader(nBytes);
-            // if (samples <= 0) {
-            //     return 0;
-            // }
+            // Put the packet into the mixer
+            // jamMixer->addData(&packet, nBytes);
             unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
             channelMap.getChannel(from_addr, &senderAddr);
-            // printf("nBytes: %d from %d\n", nBytes, chan);
+            // printf("nBytes: %d from %lu\n", nBytes, from_addr);
             // channelMap.dumpOut();
             packet.encodeHeader();
             for (int i=0; i<MAX_JAMMERS; i++) {
@@ -275,7 +270,6 @@ namespace JamNetStuff
                 unsigned long to_addr = channelMap.getClientId(i);
                 if (to_addr != EMPTY_SLOT && to_addr != from_addr) {
                     channelMap.getClientAddr(i, &addr);
-                    printf("sending to %ld\n", to_addr);
                     // send the packet to the address
                     sendto(
                         jamSocket,

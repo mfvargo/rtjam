@@ -54,8 +54,8 @@ UIRTJam::UIRTJam()
 
     // level sliders
     Image sliderImage(Art::smallSliderData, Art::smallSliderWidth, Art::smallSliderHeight);
-    Point<int> sliderPosStart(57, 180);
-    Point<int> sliderPosEnd(57, 350);
+    Point<int> sliderPosStart(20, 180);
+    Point<int> sliderPosEnd(20, 350);
 
     float mixerLow = -30.0f;
     float mixerHigh = 6.0f;
@@ -68,8 +68,8 @@ UIRTJam::UIRTJam()
     fVol[0]->setRange(mixerLow, mixerHigh);
     fVol[0]->setCallback(this);
 
-    sliderPosStart.setX(sliderPosStart.getX() + 150);
-    sliderPosEnd.setX(sliderPosEnd.getX() + 150);
+    sliderPosStart.setX(sliderPosStart.getX() + 100);
+    sliderPosEnd.setX(sliderPosEnd.getX() + 100);
     // Input 1
     fVol[1] = new ImageSlider(this, sliderImage);
     fVol[1]->setId(PluginRTJam::paramChanTwoGain);
@@ -79,14 +79,17 @@ UIRTJam::UIRTJam()
     fVol[1]->setRange(mixerLow, mixerHigh);
     fVol[1]->setCallback(this);
 
-    // Now for the rows of channels
-    int startx = 386;
-    int starty = 5;
-    int spacing = 140;
-    sliderPosStart.setPos(startx,starty); 
-    sliderPosEnd.setPos(startx,starty + 80);
+    // Now for the channels
+    Point<int> corners[MAX_JAMMERS-1];
+    corners[0].setPos(251, 25);
+    corners[1].setPos(523, 25);
+    corners[2].setPos(251, 225);
+    corners[3].setPos(523, 225);
+    int spacing = 80;
     float maxSmooth = 0.1;
     for (int i=1; i<MAX_JAMMERS; i++) {
+        sliderPosStart.setPos(corners[i-1]);
+        sliderPosEnd.setPos(sliderPosStart.getX(), sliderPosStart.getY() + 120);
         // Smoother
         fSmooth[i] = new ImageSlider(this, sliderImage);
         fSmooth[i]->setStartPos(sliderPosStart);
@@ -116,29 +119,25 @@ UIRTJam::UIRTJam()
         fVol[i*2+1]->setEndPos(sliderPosEnd);
         fVol[i*2+1]->setRange(mixerLow, mixerHigh);
         fVol[i*2+1]->setCallback(this);
-        // Next row
-        sliderPosStart.setPos(startx, starty +  (i * 135));
-        sliderPosEnd.setPos(startx, starty + 80 + (i * 135));
-
     }
     // slider Master
-    sliderPosStart.setPos(76, 5);
-    sliderPosEnd.setPos(76, 95);
-    fSliderMaster = new ImageSlider(this, sliderImage);
-    fSliderMaster->setId(PluginRTJam::paramMasterVol);
-    fSliderMaster->setInverted(true);
-    fSliderMaster->setStartPos(sliderPosStart);
-    fSliderMaster->setEndPos(sliderPosEnd);
-    fSliderMaster->setRange(mixerLow, 12.0);
-    fSliderMaster->setCallback(this);
+    // sliderPosStart.setPos(76, 5);
+    // sliderPosEnd.setPos(76, 95);
+    // fSliderMaster = new ImageSlider(this, sliderImage);
+    // fSliderMaster->setId(PluginRTJam::paramMasterVol);
+    // fSliderMaster->setInverted(true);
+    // fSliderMaster->setStartPos(sliderPosStart);
+    // fSliderMaster->setEndPos(sliderPosEnd);
+    // fSliderMaster->setRange(mixerLow, 12.0);
+    // fSliderMaster->setCallback(this);
 
-    // switches
-    fMonitorInputButton = new ImageSwitch(this,
-                        Image(Art::solo_offData, Art::solo_offWidth, Art::solo_offHeight, GL_BGR),
-                        Image(Art::solo_onData, Art::solo_onWidth, Art::solo_onHeight, GL_BGR));
-    fMonitorInputButton->setId(PluginRTJam::paramInputMonitor);
-    fMonitorInputButton->setAbsolutePos(147, 360);
-    fMonitorInputButton->setCallback(this);
+    // // switches
+    // fMonitorInputButton = new ImageSwitch(this,
+    //                     Image(Art::solo_offData, Art::solo_offWidth, Art::solo_offHeight, GL_BGR),
+    //                     Image(Art::solo_onData, Art::solo_onWidth, Art::solo_onHeight, GL_BGR));
+    // fMonitorInputButton->setId(PluginRTJam::paramInputMonitor);
+    // fMonitorInputButton->setAbsolutePos(147, 360);
+    // fMonitorInputButton->setCallback(this);
 
     // Room selectors
     for (int i=0; i<MAX_ROOMS; i++) {
@@ -146,7 +145,7 @@ UIRTJam::UIRTJam()
                         Image(Art::room_offData, Art::room_offWidth, Art::room_offHeight, GL_BGR),
                         Image(Art::room_onData, Art::room_onWidth, Art::room_onHeight, GL_BGR));
         fRooms[i]->setId(PluginRTJam::paramRoom0 + i);
-        fRooms[i]->setAbsolutePos(200, 20 + i * 30);
+        fRooms[i]->setAbsolutePos(20, 20 + i * 30);
         fRooms[i]->setCallback(this);
     }
     fRooms[0]->setDown(true);
@@ -183,12 +182,19 @@ UIRTJam::~UIRTJam() {
   This is called by the host to inform the UI about parameter changes.
 */
 void UIRTJam::parameterChanged(uint32_t index, float value) {
+    return;
     switch (index)
     {
       case PluginRTJam::paramChanOneGain:
       case PluginRTJam::paramChanTwoGain:
       case PluginRTJam::paramChanThreeGain:
       case PluginRTJam::paramChanFourGain:
+      case PluginRTJam::paramChanFiveGain:
+      case PluginRTJam::paramChanSixGain:
+      case PluginRTJam::paramChanSevenGain:
+      case PluginRTJam::paramChanEightGain:
+      case PluginRTJam::paramChanNineGain:
+      case PluginRTJam::paramChanTenGain:
           fVol[index - PluginRTJam::paramChanOneGain]->setValue(value);
           break;
       case PluginRTJam::paramMasterVol:
@@ -199,6 +205,7 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
       case PluginRTJam::paramSmooth2:
       case PluginRTJam::paramSmooth3:
       case PluginRTJam::paramSmooth4:
+      case PluginRTJam::paramSmooth5:
           fSmooth[index - PluginRTJam::paramSmooth1]->setValue(value);
           break;
     }
@@ -209,6 +216,7 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
   This is called by the host to inform the UI about program changes.
 */
 void UIRTJam::programLoaded(uint32_t index) {
+    printf("program Load \n");
     if (index != 0)
         return;
 
@@ -221,7 +229,6 @@ void UIRTJam::programLoaded(uint32_t index) {
     for (int i=1; i<MAX_JAMMERS; i++) {
         fSmooth[i]->setValue(0.0f);
     }
-    fSliderMaster->setValue(0.0f);
 }
 
 /**
@@ -265,70 +272,99 @@ void UIRTJam::onDisplay() {
     fImgBackground.draw();
 
     Point<int> drawPos(40, 20);
-    float yScale = 0.5f;
+    float yScale = 0.7f;
 
-    // Master meter (post fade)
-    drawPos.setPos(60, 15);
-    fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.masterLevel + 60)/60));
-    drawPos.setX(drawPos.getX() + 40);
-    fSlideLine.xScale = 1.0f;
-    fSlideLine.yScale = yScale;
-    fSlideLine.drawAt(drawPos);
+    // // Master meter (post fade)
+    // drawPos.setPos(60, 15);
+    // fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.masterLevel + 60)/60));
+    // drawPos.setX(drawPos.getX() + 40);
+    // fSlideLine.xScale = 1.0f;
+    // fSlideLine.yScale = yScale;
+    // fSlideLine.drawAt(drawPos);
 
     // Input section
-    drawPos.setPos(40, 180);
+    drawPos.setPos(10, 180);
     // Input level 0
     fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputLeft + 60)/60);
-    drawPos.setX(drawPos.getX() + 40);
+    drawPos.setX(drawPos.getX() + 32);
     // Slider line
     fSlideLine.xScale = 1.0f;
     fSlideLine.yScale = 1.0f;
     fSlideLine.drawAt(drawPos);
     // Output level 0
-    drawPos.setX(drawPos.getX() + 32);
+    drawPos.setX(drawPos.getX() + 24);
     fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[0] + 60)/60));
 
     // Input level 1
-    drawPos.setX(190);
+    drawPos.setX(111);
     fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputRight + 60)/60);
     // Slider line
-    drawPos.setX(drawPos.getX() + 40);
+    drawPos.setX(drawPos.getX() + 32);
     fSlideLine.xScale = 1.0f;
     fSlideLine.yScale = 1.0f;
     fSlideLine.drawAt(drawPos);
     // Output level 0
-    drawPos.setX(drawPos.getX() + 32);
+    drawPos.setX(drawPos.getX() + 24);
     fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[1] + 60)/60));
 
     // Channel meters post fader
-    drawPos.setPos(370, 10);
+    const int leftEdge = 235;
+    const int height = 140;
+    const int spacing = 40;
+    drawPos.setPos(leftEdge, 30);
     for(int i=1; i<MAX_JAMMERS; i++) {
-        // Each i is a row
         // Smoother
-        fMeterBar.drawAt(drawPos, 100, 1.0 - fState.bufferDepths[i*2]);
-        drawPos.setX(drawPos.getX() + 40);
+        fMeterBar.drawAt(drawPos, height, 1.0 - fState.bufferDepths[i*2]);
+        drawPos.setX(drawPos.getX() + spacing);
         fSlideLine.xScale = 1.0f;
         fSlideLine.yScale = yScale;
         fSlideLine.drawAt(drawPos);
 
         // Input 0
-        drawPos.setX(drawPos.getX() + 100);
-        fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
-        drawPos.setX(drawPos.getX() + 40);
+        drawPos.setX(drawPos.getX() + spacing);
+        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
+        drawPos.setX(drawPos.getX() + spacing);
         fSlideLine.xScale = 1.0f;
         fSlideLine.yScale = yScale;
         fSlideLine.drawAt(drawPos);
 
         // Input 1
-        drawPos.setX(drawPos.getX() + 100);
-        fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.channelLevels[i*2+1] + 60)/60));
-        drawPos.setX(drawPos.getX() + 40);
+        drawPos.setX(drawPos.getX() + spacing);
+        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2+1] + 60)/60));
+        drawPos.setX(drawPos.getX() + spacing);
         fSlideLine.xScale = 1.0f;
         fSlideLine.yScale = yScale;
         fSlideLine.drawAt(drawPos);
 
-        drawPos.setY(drawPos.getY() + 135);
-        drawPos.setX(370);
+        i++;
+        drawPos.setX(leftEdge + 270);
+
+        // Smoother
+        fMeterBar.drawAt(drawPos, height, 1.0 - fState.bufferDepths[i*2]);
+        drawPos.setX(drawPos.getX() + spacing);
+        fSlideLine.xScale = 1.0f;
+        fSlideLine.yScale = yScale;
+        fSlideLine.drawAt(drawPos);
+
+        // Input 0
+        drawPos.setX(drawPos.getX() + spacing);
+        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
+        drawPos.setX(drawPos.getX() + spacing);
+        fSlideLine.xScale = 1.0f;
+        fSlideLine.yScale = yScale;
+        fSlideLine.drawAt(drawPos);
+
+        // Input 1
+        drawPos.setX(drawPos.getX() + spacing);
+        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2+1] + 60)/60));
+        drawPos.setX(drawPos.getX() + spacing);
+        fSlideLine.xScale = 1.0f;
+        fSlideLine.yScale = yScale;
+        fSlideLine.drawAt(drawPos);
+
+        drawPos.setY(drawPos.getY() + 200);
+        drawPos.setX(leftEdge);
+
     }
 
 }

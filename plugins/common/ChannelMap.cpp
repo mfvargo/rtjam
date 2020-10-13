@@ -15,8 +15,6 @@
 #include <string.h>
 
 
-#define EMPTY_SLOT 40000
-
 namespace JamNetStuff {
 
   ChannelMap::ChannelMap() {
@@ -79,9 +77,21 @@ namespace JamNetStuff {
   }
 
   void ChannelMap::dumpOut() {
+    char ipString[24];
     for (int i=0; i<MAX_JAMMERS; i++) {
-      printf("chan: %d, clientId: %u, k/a: %ld ", i, channels[i].clientId, channels[i].KeepAlive);
+      makeIpString(channels[i].clientId, ipString);
+      printf("clientId: %s\t", ipString);
     }
     printf("\n");
   }
+
+  void ChannelMap::makeIpString(unsigned long s_addr, char* ipString) {
+    unsigned char octet[4]  = {0,0,0,0};
+    for (int i=0; i<4; i++)
+    {
+        octet[i] = ( s_addr >> (i*8) ) & 0xFF;
+    }
+    sprintf(ipString, "%d.%d.%d.%d", octet[0],octet[1],octet[2],octet[3]);
+  }
+
 }

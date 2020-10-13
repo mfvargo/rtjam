@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include "../common/jamrtime.h"
 
+#define EMPTY_SLOT 0
+
 namespace JamNetStuff
 {
   void encodeJamMessage(struct JamMessage* packet);
@@ -78,6 +80,7 @@ namespace JamNetStuff
       };
       uint32_t myId;
       Channel channels[MAX_JAMMERS];
+      void makeIpString(unsigned long s_addr, char* ipString);
   };
 
 
@@ -187,12 +190,13 @@ namespace JamNetStuff
       JamSocket();
       int sendPacket(const float** buffer, int frames);
       int readPackets(JamMixer*);
-      int readAndBroadcast();
+      int readAndBroadcast(JamMixer*);
       int readData();
       bool isActivated;
 
       void initServer(short port);
       void initClient(const char* servername, int port);
+      void channelDump() { channelMap.dumpOut(); };
     
     private:
       ChannelMap channelMap;
