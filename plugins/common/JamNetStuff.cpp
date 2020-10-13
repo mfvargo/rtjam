@@ -194,10 +194,10 @@ namespace JamNetStuff
 
     void JamSocket::initServer(short port) {
        /*Configure settings in address struct*/
-        // memset(&serverAddr, 0, sizeof(struct sockaddr_in));
+        memset(&serverAddr, 0, sizeof(struct sockaddr_in));
         serverAddr.sin_family = AF_INET;
         serverAddr.sin_port = htons(port);
-        memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
+        // memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
         /*Bind socket with address struct*/
         bind(jamSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
         // Try to set the Type of Service to Voice (for whatever that is worth)
