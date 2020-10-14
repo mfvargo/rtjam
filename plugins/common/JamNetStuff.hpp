@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include "../common/jamrtime.h"
 
-#define EMPTY_SLOT 0
+#define EMPTY_SLOT 40000
 
 namespace JamNetStuff
 {
@@ -139,6 +139,7 @@ namespace JamNetStuff
       void clearChannelMap() {
         channelMap.clear();
       };
+      void setServerChannel(int channel);
 
     private:
       void encodeJamBuffer(unsigned char*, const float*, int);

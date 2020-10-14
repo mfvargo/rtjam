@@ -58,6 +58,7 @@ namespace JamNetStuff
         jamMessage.SampleRate = sampleRate;
         jamMessage.NumSubChannels = 2;
         jamMessage.TimeStamp = htobe64(getMicroTime());
+        jamMessage.ServerTime = htobe64(jamMessage.ServerTime);
         jamMessage.SequenceNumber = htonl(sequenceNo++);
         jamMessage.ClientId = htonl(clientId);
     }
@@ -107,6 +108,11 @@ namespace JamNetStuff
         }
         bufferSize = samples * jamMessage.NumSubChannels * sizeof(uint16_t);
         return samples;
+    }
+
+    void JamPacket::setServerChannel(int channel) {
+        jamMessage.Channel = channel;
+        jamMessage.ServerTime = getMicroTime();
     }
 
     bool JamPacket::validPacket(int nBytes) {
@@ -257,7 +263,7 @@ namespace JamNetStuff
             // Put the packet into the mixer
             // jamMixer->addData(&packet, nBytes);
             unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
-            channelMap.getChannel(from_addr, &senderAddr);
+            packet.setServerChannel(channelMap.getChannel(from_addr, &senderAddr));
             // printf("nBytes: %d from %lu\n", nBytes, from_addr);
             // channelMap.dumpOut();
             packet.encodeHeader();
