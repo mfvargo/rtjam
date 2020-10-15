@@ -60,6 +60,7 @@ namespace JamNetStuff
         jamMessage.NumSubChannels = 2;
         jamMessage.TimeStamp = htobe64(getMicroTime());
         jamMessage.ServerTime = htobe64(jamMessage.ServerTime);
+        // Note that these next two fields are just pass through if you are not a client
         jamMessage.SequenceNumber = htonl(isClient ? sequenceNo++ : jamMessage.SequenceNumber);
         jamMessage.ClientId = htonl(isClient ? clientId : jamMessage.ClientId);
     }
