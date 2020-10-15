@@ -28,7 +28,7 @@ namespace JamNetStuff
         bufferSize = 0;
         sequenceNo = 0;
         sampleRate = FORTY_EIGHT_K;  // Default.  Need to get value from plugin...
-
+        numSamples = 0;
     }
 
     void JamPacket::dumpPacket(const char* intro) {
@@ -44,8 +44,8 @@ namespace JamNetStuff
         );
     }
 
-    void JamPacket::encode(const float** inputs, int frames) {
-        encodeHeader();
+    void JamPacket::encodeAudio(const float** inputs, int frames) {
+        numSamples = frames;
         // copy two channels into the jamMessage packet
         unsigned char* bufPtr = jamMessage.buffer;
         encodeJamBuffer(bufPtr, inputs[0], frames);
@@ -81,38 +81,36 @@ namespace JamNetStuff
 
     int JamPacket::decodeHeader(int nBytes) {
         // decode header
-        jamMessage.ServerTime = be64toh(jamMessage.ServerTime);
         jamMessage.TimeStamp = be64toh(jamMessage.TimeStamp);
-        jamMessage.ClientId = ntohl(jamMessage.ClientId);
+        jamMessage.ServerTime = be64toh(jamMessage.ServerTime);
         jamMessage.SequenceNumber = ntohl(jamMessage.SequenceNumber);
+        jamMessage.ClientId = ntohl(jamMessage.ClientId);
         if (!validPacket(nBytes)) {
             // Don't try to decode invalid packets.
             printf("bad packet\n");
             return 0;
         }
-        return (nBytes - (sizeof(struct JamMessage) - JAM_BUF_SIZE)) /
-                            (sizeof(uint16_t) * jamMessage.NumSubChannels);
+        bufferSize = nBytes - (sizeof(struct JamMessage) - JAM_BUF_SIZE);
+        numSamples = bufferSize / (sizeof(uint16_t) * jamMessage.NumSubChannels);
+        return numSamples;
     }
-    int JamPacket::decode(float** outputs, int nBytes) {
-        int samples = decodeHeader(nBytes);
-        if (samples == 0) {
-            return 0;
-        }
+
+    int JamPacket::decodeJamBuffer(float** outputs) {
         // Now decode the samples back into floats
         uint16_t* src = (uint16_t*)jamMessage.buffer;
-        for (int i=0; i<samples; i++) {
+        for (int i=0; i<numSamples; i++) {
             outputs[0][i] = (1.0/32768.0 * ntohs(*src++))- 1.0;
         }
-        for (int i=0; i<samples; i++) {
+        for (int i=0; i<numSamples; i++) {
             outputs[1][i] = (1.0/32768.0 * ntohs(*src++))- 1.0;
         }
-        bufferSize = samples * jamMessage.NumSubChannels * sizeof(uint16_t);
-        return samples;
+        return numSamples;
     }
 
     void JamPacket::setServerChannel(int channel) {
         jamMessage.Channel = channel;
         jamMessage.ServerTime = getMicroTime();
+        clientId = jamMessage.ClientId;
     }
 
     bool JamPacket::validPacket(int nBytes) {
@@ -225,16 +223,8 @@ namespace JamNetStuff
             return 0;
         }
         // Send a packet to the server!
-        packet.encode(buffer, frames);
-        // xmit_packet.dumpPacket("Xmit: ");
-        int rval = sendto(
-                jamSocket,
-                packet.getPacket(),
-                packet.getSize(),
-                0,
-                (struct sockaddr *)&serverAddr,addr_size
-            );
-        return rval;
+        packet.encodeAudio(buffer, frames);
+        return sendData(&serverAddr);
     }
 
     int JamSocket::readPackets(JamMixer* jamMixer) {
@@ -248,7 +238,8 @@ namespace JamNetStuff
         do {
             nBytes = readData();
             if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
-                jamMixer->addData(&packet, nBytes);
+                packet.dumpPacket("mikey: ");
+                jamMixer->addData(&packet);
             }
         } while( isActivated && nBytes > 0);
         return rval;
@@ -266,20 +257,13 @@ namespace JamNetStuff
             packet.setServerChannel(channelMap.getChannel(from_addr, &senderAddr));
             // printf("nBytes: %d from %lu\n", nBytes, from_addr);
             // channelMap.dumpOut();
-            packet.encodeHeader();
             for (int i=0; i<MAX_JAMMERS; i++) {
                 // Don't send back an echo to the sender
                 sockaddr_in addr;
                 unsigned long to_addr = channelMap.getClientId(i);
                 if (to_addr != EMPTY_SLOT && to_addr != from_addr) {
                     channelMap.getClientAddr(i, &addr);
-                    // send the packet to the address
-                    sendto(
-                        jamSocket,
-                        packet.getPacket(),
-                        nBytes,
-                        0,
-                        (struct sockaddr *)&addr, sizeof addr);
+                    sendData(&addr);
                 }
             }
         }
@@ -287,12 +271,28 @@ namespace JamNetStuff
         return nBytes;
     }
     int JamSocket::readData() {
-        return recvfrom(
+        int nBytes = recvfrom(
             jamSocket,packet.getPacket(),
             sizeof(struct JamMessage),
             0,
             (struct sockaddr *) &senderAddr, 
             &addr_size
         );
+        if (nBytes > 0) {
+            packet.decodeHeader(nBytes);
+        }
+        return nBytes;
+    }
+    int JamSocket::sendData(struct sockaddr_in* to_addr) {
+        packet.encodeHeader();
+        int rval = sendto(
+                jamSocket,
+                packet.getPacket(),
+                packet.getSize(),
+                0,
+                (struct sockaddr *)to_addr,
+                sizeof(struct sockaddr)
+            );
+        return rval;
     }
 }
