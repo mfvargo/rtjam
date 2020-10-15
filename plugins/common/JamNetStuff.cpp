@@ -28,7 +28,7 @@ namespace JamNetStuff
         bufferSize = 0;
         sequenceNo = 0;
         sampleRate = FORTY_EIGHT_K;  // Default.  Need to get value from plugin...
-
+        isClient = true;
     }
 
     void JamPacket::dumpPacket(const char* intro) {
@@ -60,7 +60,7 @@ namespace JamNetStuff
         jamMessage.TimeStamp = htobe64(getMicroTime());
         jamMessage.ServerTime = htobe64(jamMessage.ServerTime);
         jamMessage.SequenceNumber = htonl(sequenceNo++);
-        jamMessage.ClientId = htonl(clientId);
+        jamMessage.ClientId = htonl(isClient ? clientId : jamMessage.ClientId);
     }
 
     void JamPacket::encodeJamBuffer(unsigned char* jamBuffer, const float* buffer, int frames) {
@@ -195,7 +195,10 @@ namespace JamNetStuff
         serverAddr.sin_port = htons(port);
         serverAddr.sin_addr.s_addr = inet_addr(ip);
         memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
-        addr_size = sizeof(serverAddr);  
+        addr_size = sizeof(serverAddr);
+
+        // Set the packet to client mode
+        packet.setIsClient(true);
     }
 
     void JamSocket::initServer(short port) {
@@ -218,6 +221,8 @@ namespace JamNetStuff
         if (setsockopt(jamSocket, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv)) {
             printf("set SO_RCVTIMEO failed\n");
         }
+        // Set the packet to server mode
+        packet.setIsClient(false);
     }
 
     int JamSocket::sendPacket(const float** buffer, int frames) {

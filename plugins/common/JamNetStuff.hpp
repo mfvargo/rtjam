@@ -135,6 +135,7 @@ namespace JamNetStuff
       uint32_t getSequenceNo();
       void dumpPacket(const char*);
       int getChannel();
+      void setIsClient(bool val) { isClient = val; };
 
       void clearChannelMap() {
         channelMap.clear();
@@ -142,6 +143,7 @@ namespace JamNetStuff
       void setServerChannel(int channel);
 
     private:
+      bool isClient;
       void encodeJamBuffer(unsigned char*, const float*, int);
       bool validPacket(int nBytes);
       JamMessage jamMessage;
