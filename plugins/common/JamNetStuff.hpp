@@ -23,6 +23,8 @@
 #include <stdio.h>
 #include "../common/jamrtime.h"
 
+#define EMPTY_SLOT 40000
+
 namespace JamNetStuff
 {
   void encodeJamMessage(struct JamMessage* packet);
@@ -62,19 +64,23 @@ namespace JamNetStuff
   class ChannelMap {
     public:
       ChannelMap();
-      int getChannel(uint32_t clientId);
+      int getChannel(uint32_t clientId, sockaddr_in *addr = NULL);
       void setMyId(uint32_t Id);
       void dumpOut();
       void clear();
       uint32_t getClientId(int idx) { return channels[idx].clientId; };
+      void getClientAddr(int idx, sockaddr_in *addr);
+      void pruneStaleChannels(time_t now, int startAt = 1);
+
     private:
       struct Channel {
         uint32_t clientId;
         time_t KeepAlive;
+        sockaddr_in Address;
       };
       uint32_t myId;
       Channel channels[MAX_JAMMERS];
-      void pruneStaleChannels(time_t now);
+      void makeIpString(unsigned long s_addr, char* ipString);
   };
 
 
@@ -118,9 +124,14 @@ namespace JamNetStuff
     public:
       JamPacket();
 
-      void encode(const float** inputs, int frames);
-      int decode(float** outputs, int nBytes);
+      // Take a frame of floats and encode two channels into 16 bit PCM data
+      void encodeAudio(const float** inputs, int frames);
+      // Encode just the header of the jamMessage
+      void encodeHeader();
+      // Decode just the header of the jamMessage
       int decodeHeader(int nBytes);
+      // Decode the jamMessage into two arrays of floats (one for each subchannel)
+      int decodeJamBuffer(float** outputs);
 
       void* getPacket();
       int getSize();
@@ -128,12 +139,16 @@ namespace JamNetStuff
       uint32_t getSequenceNo();
       void dumpPacket(const char*);
       int getChannel();
+      void setIsClient(bool val) { isClient = val; };
 
       void clearChannelMap() {
         channelMap.clear();
       };
+      void setServerChannel(int channel);
 
     private:
+      bool isClient;
+      // Convert one channel of floats to 16 bit PCM
       void encodeJamBuffer(unsigned char*, const float*, int);
       bool validPacket(int nBytes);
       JamMessage jamMessage;
@@ -142,6 +157,7 @@ namespace JamNetStuff
       uint32_t sequenceNo;
       JAM_SAMPLE_RATES sampleRate;
       ChannelMap channelMap;
+      int numSamples;
   };
 
 
@@ -155,7 +171,7 @@ namespace JamNetStuff
       /* get some data for the output */
       void getMix(float** outputs, uint32_t frames);
       /* write a jamPacket */
-      void addData(JamPacket* packet, int nBytes);
+      void addData(JamPacket* packet);
       /* write local monitoring data */
       void addLocalMonitor(const float** inputs, uint32_t frames);
 
@@ -183,12 +199,12 @@ namespace JamNetStuff
       JamSocket();
       int sendPacket(const float** buffer, int frames);
       int readPackets(JamMixer*);
-      int readPackets();
-      int readData();
+      int readAndBroadcast(JamMixer*);
       bool isActivated;
 
-      void initServer();
+      void initServer(short port);
       void initClient(const char* servername, int port);
+      void channelDump() { channelMap.dumpOut(); };
     
     private:
       ChannelMap channelMap;
@@ -197,6 +213,8 @@ namespace JamNetStuff
       struct sockaddr_in serverAddr;
       struct sockaddr_in senderAddr;
       socklen_t addr_size;
+      int readData();
+      int sendData(struct sockaddr_in* to_addr);
   };
 };
 

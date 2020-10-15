@@ -1,7 +1,17 @@
 TARGET ?= ../../bin/broadcast
-SRC_DIRS ?= ./src
+SRC_DIRS ?= ./src ../common
 
-SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+CC = gcc
+
+#SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+SRCS = \
+	./src/broadcast.cpp \
+	../common/JamNetStuff.cpp \
+	../common/JamMixer.cpp \
+	../common/JitterBuffer.cpp \
+	../common/ChannelMap.cpp \
+	../common/TimersAndStats.cpp
+
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)
 
