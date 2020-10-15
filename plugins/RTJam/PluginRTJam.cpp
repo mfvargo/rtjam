@@ -393,7 +393,7 @@ void PluginRTJam::run(const float** inputs, float** outputs,
     // Feed the output from the mixer
     jamMixer.getMix(outputs, frames);
     if (++frameCount%2000 == 0) {
-        jamSocket.channelDump();
+        jamMixer.dumpOut();
     }
 
     // Update data to be shared with the U/X
