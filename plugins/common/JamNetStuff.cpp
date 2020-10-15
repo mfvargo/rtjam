@@ -244,7 +244,7 @@ namespace JamNetStuff
         do {
             nBytes = readData();
             if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
-                packet.dumpPacket("mikey: ");
+                // packet.dumpPacket("mikey: ");
                 jamMixer->addData(&packet);
             }
         } while( isActivated && nBytes > 0);
