@@ -9,12 +9,16 @@ struct RTJamState {
   float masterLevel;
   float inputLeft;
   float inputRight;
+  bool clickOn;
 
   RTJamState() {
     for (int i=0; i<MIX_CHANNELS; i++) {
       channelLevels[i] = -60.0f;
     }
     masterLevel = -60.0f;
+    inputLeft = 0.0;
+    inputRight = 0.0;
+    clickOn = false;
   }
 
   void levelUpdate(float* channels, float* depths) {

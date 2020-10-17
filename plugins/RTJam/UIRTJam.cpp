@@ -364,8 +364,13 @@ void UIRTJam::onDisplay() {
 
         drawPos.setY(drawPos.getY() + 200);
         drawPos.setX(leftEdge);
-
     }
+
+    // Metronome
+    drawPos.setX(50);
+    drawPos.setY(115);
+    fMeterBar.drawAt(drawPos, 30, 1.0 - (fState.clickOn));
+    drawPos.setX(drawPos.getX() + spacing);
 
 }
 

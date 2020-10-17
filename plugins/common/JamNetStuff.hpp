@@ -145,6 +145,7 @@ namespace JamNetStuff
         channelMap.clear();
       };
       void setServerChannel(int channel);
+      uint64_t getServerTime() { return jamMessage.ServerTime; };
 
     private:
       bool isClient;
@@ -182,6 +183,7 @@ namespace JamNetStuff
       float masterLevel;
 
       void setBufferSmoothness(int channel, float smooth);
+      bool getClickLight() { return clickLight; };
 
     protected:
       JitterBuffer jitterBuffers[MIX_CHANNELS];
@@ -189,6 +191,8 @@ namespace JamNetStuff
       StreamTimeStats levelStats[MIX_CHANNELS];
       StreamTimeStats masterStats;
     private:
+      uint64_t lastClickTime;
+      bool clickLight;
       float cBuf0[MAX_FRAME_SIZE];
       float cBuf1[MAX_FRAME_SIZE];
       float* conversionBuf[2];

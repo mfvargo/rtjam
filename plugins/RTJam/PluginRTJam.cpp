@@ -403,6 +403,7 @@ void PluginRTJam::run(const float** inputs, float** outputs,
         fState->masterLevel = jamMixer.masterLevel;
         fState->inputLeft = leftInput.mean;
         fState->inputRight = rightInput.mean;
+        fState->clickOn = jamMixer.getClickLight();
     }
 
     if (monitorInput) {
