@@ -145,6 +145,8 @@ namespace JamNetStuff
         channelMap.clear();
       };
       void setServerChannel(int channel);
+      void setBeatCount(char beat) { jamMessage.Beat = beat; };
+      char getBeatCount() { return jamMessage.Beat; };
       uint64_t getServerTime() { return jamMessage.ServerTime; };
 
     private:
@@ -183,7 +185,7 @@ namespace JamNetStuff
       float masterLevel;
 
       void setBufferSmoothness(int channel, float smooth);
-      bool getClickLight() { return clickLight; };
+      char getBeat() { return beat; };
 
     protected:
       JitterBuffer jitterBuffers[MIX_CHANNELS];
@@ -191,8 +193,7 @@ namespace JamNetStuff
       StreamTimeStats levelStats[MIX_CHANNELS];
       StreamTimeStats masterStats;
     private:
-      uint64_t lastClickTime;
-      bool clickLight;
+      char beat;
       float cBuf0[MAX_FRAME_SIZE];
       float cBuf1[MAX_FRAME_SIZE];
       float* conversionBuf[2];
@@ -219,6 +220,8 @@ namespace JamNetStuff
       socklen_t addr_size;
       int readData();
       int sendData(struct sockaddr_in* to_addr);
+      uint64_t beatCount;
+      uint64_t lastClickTime;
   };
 };
 

@@ -396,6 +396,7 @@ void PluginRTJam::run(const float** inputs, float** outputs,
         jamMixer.dumpOut();
     }
 
+    
     // Update data to be shared with the U/X
     const MutexLocker csm(fMutex);
     if (fState != nullptr) {
@@ -403,7 +404,7 @@ void PluginRTJam::run(const float** inputs, float** outputs,
         fState->masterLevel = jamMixer.masterLevel;
         fState->inputLeft = leftInput.mean;
         fState->inputRight = rightInput.mean;
-        fState->clickOn = jamMixer.getClickLight();
+        fState->beat = jamMixer.getBeat();;
     }
 
     if (monitorInput) {

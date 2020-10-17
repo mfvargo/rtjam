@@ -29,8 +29,6 @@ namespace JamNetStuff
         masterStats.windowSize = 30.0;
         conversionBuf[0] = cBuf0;
         conversionBuf[1] = cBuf1;
-        lastClickTime = 0;
-        clickLight = false;
     }
     /* print out some stats */
     void JamMixer::dumpOut() {
@@ -91,12 +89,7 @@ namespace JamNetStuff
     void JamMixer::addData(JamPacket* packet) {
         int samples = packet->decodeJamBuffer(conversionBuf);
         int locChan = packet->getChannel() * 2;
-        uint64_t deltaT = packet->getServerTime() - lastClickTime;
-        if (deltaT > (60 * 1e6 / 120 )) {
-            // We have passed a click boundary
-            lastClickTime = packet->getServerTime();
-            clickLight = !clickLight;
-        }
+        beat = packet->getBeatCount();
         if (locChan <= 0) {
             // local monitoring or no slot available
             return;

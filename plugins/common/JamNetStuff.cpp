@@ -33,7 +33,7 @@ namespace JamNetStuff
     }
 
     void JamPacket::dumpPacket(const char* intro) {
-        printf("%s cid: %d pcid: %d c: %d, r: %d, Sub: %d, Seq: %d, Size: %d\n",
+        printf("%s cid: %d pcid: %d c: %d, r: %d, Sub: %d, Seq: %d, Beat: %d, Size: %d\n",
             intro,
             clientId,
             jamMessage.ClientId,
@@ -41,6 +41,7 @@ namespace JamNetStuff
             jamMessage.SampleRate,
             jamMessage.NumSubChannels,
             jamMessage.SequenceNumber,
+            jamMessage.Beat,
             bufferSize
         );
     }
@@ -162,6 +163,8 @@ namespace JamNetStuff
 
     JamSocket::JamSocket() {
         isActivated = false;
+        beatCount = 0;
+        lastClickTime = 0;
         jamSocket = socket(PF_INET, SOCK_DGRAM, 0);
         printf("socket is %d\n", jamSocket);
     }
@@ -262,6 +265,13 @@ namespace JamNetStuff
             // jamMixer->addData(&packet, nBytes);
             unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
             packet.setServerChannel(channelMap.getChannel(from_addr, &senderAddr));
+            uint64_t deltaT = packet.getServerTime() - lastClickTime;
+            if (deltaT > (60 * 1e6 / 120 )) {  // 120BPM
+                // We have passed a click boundary
+                lastClickTime = packet.getServerTime();
+                beatCount++;
+            }
+            packet.setBeatCount(beatCount%4);
             // printf("nBytes: %d from %lu\n", nBytes, from_addr);
             // channelMap.dumpOut();
             for (int i=0; i<MAX_JAMMERS; i++) {
@@ -269,6 +279,7 @@ namespace JamNetStuff
                 sockaddr_in addr;
                 unsigned long to_addr = channelMap.getClientId(i);
                 if (to_addr != EMPTY_SLOT && to_addr != from_addr) {
+                // if (to_addr != EMPTY_SLOT) {
                     channelMap.getClientAddr(i, &addr);
                     sendData(&addr);
                 }
