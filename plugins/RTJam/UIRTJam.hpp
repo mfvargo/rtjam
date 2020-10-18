@@ -84,6 +84,7 @@ private:
     ScopedPointer<ImageSlider>  fSliderMaster;
     ScopedPointer<ImageSwitch> fMonitorInputButton;
     RTJamState fState;
+    bool clickOn;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };

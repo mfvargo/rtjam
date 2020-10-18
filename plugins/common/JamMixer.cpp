@@ -89,6 +89,7 @@ namespace JamNetStuff
     void JamMixer::addData(JamPacket* packet) {
         int samples = packet->decodeJamBuffer(conversionBuf);
         int locChan = packet->getChannel() * 2;
+        beat = packet->getBeatCount();
         if (locChan <= 0) {
             // local monitoring or no slot available
             return;

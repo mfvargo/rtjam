@@ -24,7 +24,7 @@ struct JamMessage {
   uint8_t Channel;  // Assigned by server
   uint8_t SampleRate;  // Assigned by client
   uint8_t NumSubChannels; // Assigned by client
-  uint8_t Spare1;  // Not used yet
+  uint8_t Beat;  // Assigned by server for shared synchonized metronome
   uint64_t ServerTime;  // Assigned by server
   uint64_t TimeStamp;   // Assigned by the client
   uint32_t ClientId;    // Assigned by the client to know which channel is their channel
