@@ -41,6 +41,9 @@ UIRTJam::UIRTJam()
       fSlideLine(Art::slidelineData, Art::slidelineWidth, Art::slidelineHeight, GL_BGR),
       fAboutWindow(this)
 {
+    // Read envrionment
+    clickOn = getenv("CLICK_ON") != NULL;
+
     // about
     Image aboutImage(Art::aboutData, Art::aboutWidth, Art::aboutHeight, GL_BGR);
     fAboutWindow.setImage(aboutImage);
@@ -366,11 +369,13 @@ void UIRTJam::onDisplay() {
         drawPos.setX(leftEdge);
     }
 
-    // Metronome
-    drawPos.setPos(50, 115);
-    for(int i=0; i<4; i++) {
-        fMeterBar.drawAt(drawPos, 30, 1.0 - (fState.beat == i));
-        drawPos.setX(drawPos.getX() + spacing);
+    if (clickOn) {
+        // Metronome
+        drawPos.setPos(50, 115);
+        for(int i=0; i<4; i++) {
+            fMeterBar.drawAt(drawPos, 30, 1.0 - (fState.beat == i));
+            drawPos.setX(drawPos.getX() + spacing);
+        }
     }
 }
 

@@ -347,8 +347,8 @@ void PluginRTJam::loadProgram(uint32_t index) {
 // Process
 
 void PluginRTJam::activate() {
-    jamMixer.gains[0] = dbToFloat(3.0);
-    jamMixer.gains[1] = dbToFloat(3.0);
+    jamMixer.gains[0] = dbToFloat(5.0);
+    jamMixer.gains[1] = dbToFloat(5.0);
     jamSocket.isActivated = true;
 }
 
