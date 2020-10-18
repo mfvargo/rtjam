@@ -8,7 +8,7 @@ The server keeps a table of up to 5 jammers in the "room" and will forward each 
 
 Each jam packet has two separate channels of audio so the jammers can have a channel for voice and guitar, stereo keyboards, or whatever they choose.  The two channels are isochronous for that person.
 
-So in this way a room consists of up to 5 jammers each with two channels or 8 separate audio channels
+So in this way a room consists of up to 5 jammers each with two channels or 10 separate audio channels
 
 ## Get The code
 ```
@@ -33,17 +33,15 @@ The RTJam software also builds on the Raspberry Pi 4 and can be run as a "standa
 
 ![Pi App](Standalone.png)
 
-- Master Vol - controls the total mix level from the room
 - Input 1/2 - Shows pre and post fader levels for the users inputs
-- Solo button "S" - mutes all outputs and only routes the user inputs to the outputs with no faders
-- Three channel rows - Each rwo corresponds to another person in the room. The controls are Smooth which increases the jitter buffer depth for that user and two level sliders for that users two channels.
+- 4 player controls - Each control corresponds to another person in the room. The controls are Smooth which increases the jitter buffer depth for that user and two level sliders for that users two channels.
 
 About "Smooth" - the smooth slider should really only be used if the VST is being run inside a DAW.  If you are trying to play music in real time adding smooth might make packet starves sound a little better but you pay for it hard with latency. Smooth at the bottom of the slider give 500 samples of jitter buffer which is about 10msec of latency at 48kHz.  At full scale the jitter buffer is about 20msec long.  This is pretty hard to make a pocket with.
 
 Note: 4/4 time @ 120BPM (pretty standard pop song (think Billie Jean)) will have a 1/4 note of 500msec.  so a 1/16 note is 125msec in duration.  Think about trying to make a pocket like "What Is Hip" by Tower of Power with the 1/16th notes moving around by 20-30%.
 
 ### Broadcast Server
-The server just listens for packets from VST clients.  The server dynamically creates channels based on the source address of the client packets and forwards packets to all active listeners.  There is currently no session control.  When you start talking the server will allocate a channel to you if one is open.  If you don't send any packets for 10 seconds, your channel is made available.
+The server just listens for packets from VST clients.  The server dynamically creates channels based on the source address of the client packets and forwards packets to all active listeners.  There is currently no session control.  When you start talking the server will allocate a channel to you if one is open.  If you don't send any packets for 2 seconds, your channel is made available.
 
 TODO: The server needs to timestamp and save the packet streams into an archive that can later be imported into some DAW software for mixing.  It might also be possible to have the VST keep the channels demuxed and provide them to the DAW there for recording.
 
@@ -56,7 +54,7 @@ TODO: The server needs to timestamp and save the packet streams into an archive 
 
 ### Using With Sample DAW (Ardour)
 
-You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the RTJam plugin inserted.  I then route outputs 3-10 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
+You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the RTJam plugin inserted.  I then route outputs 3-12 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
 
 ![Ardour Editor](ArdourEditor.png)
 
