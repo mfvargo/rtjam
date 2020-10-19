@@ -141,10 +141,7 @@ namespace JamNetStuff
       int getChannel();
       void setIsClient(bool val) { isClient = val; };
 
-      void clearChannelMap() {
-        sequenceNo = 0;
-        channelMap.clear();
-      };
+      void clearChannelMap();
       void setServerChannel(int channel);
       uint8_t getServerChannel() { return jamMessage.Channel; };
       void setBeatCount(char beat) { jamMessage.Beat = beat; };

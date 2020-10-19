@@ -386,7 +386,7 @@ void PluginRTJam::run(const float** inputs, float** outputs,
     rightInput.addSample(rightPow);
 
     // Local monitoring
-    // jamMixer.addLocalMonitor(inputs, frames);
+    jamMixer.addLocalMonitor(inputs, frames);
 
     // Do the network thingy..
     jamSocket.sendPacket(inputs, frames);
