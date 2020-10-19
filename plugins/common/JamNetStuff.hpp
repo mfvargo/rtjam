@@ -141,8 +141,12 @@ namespace JamNetStuff
       int getChannel();
       void setIsClient(bool val) { isClient = val; };
 
-      void clearChannelMap();
+      void clearChannelMap() {
+        sequenceNo = 0;
+        channelMap.clear();
+      };
       void setServerChannel(int channel);
+      uint8_t getServerChannel() { return jamMessage.Channel; };
       void setBeatCount(char beat) { jamMessage.Beat = beat; };
       char getBeatCount() { return jamMessage.Beat; };
       uint64_t getServerTime() { return jamMessage.ServerTime; };
@@ -210,6 +214,7 @@ namespace JamNetStuff
       void initServer(short port);
       void initClient(const char* servername, int port);
       void channelDump() { channelMap.dumpOut(); };
+      void setTempo(int newTempo) { tempo = newTempo; };
     
     private:
       ChannelMap channelMap;
@@ -222,6 +227,7 @@ namespace JamNetStuff
       int sendData(struct sockaddr_in* to_addr);
       uint64_t beatCount;
       uint64_t lastClickTime;
+      int tempo;
   };
 };
 
