@@ -18,18 +18,25 @@ namespace JamNetStuff
 {
     JamMixer::JamMixer() {
         // Initialize stuff here
+        conversionBuf[0] = cBuf0;
+        conversionBuf[1] = cBuf1;
+        reset();
+    }
+
+    // reset to default values
+    void JamMixer::reset() {
         for (int i=0; i<MIX_CHANNELS; i++) {
             gains[i] = 1.0;
             channelLevels[i] = 0;
             bufferDepths[i] = 0.0;
             levelStats[i].windowSize = 30.0;
+            jitterBuffers[i].flush();
         }
         masterVol = 1.0;
         masterLevel = 0.0f;
         masterStats.windowSize = 30.0;
-        conversionBuf[0] = cBuf0;
-        conversionBuf[1] = cBuf1;
     }
+
     /* print out some stats */
     void JamMixer::dumpOut() {
         for (int i=0; i<MIX_CHANNELS; i++) {

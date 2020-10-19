@@ -10,6 +10,19 @@ Each jam packet has two separate channels of audio so the jammers can have a cha
 
 So in this way a room consists of up to 5 jammers each with two channels or 10 separate audio channels
 
+## Latency Breakdown
+
+
+* Audio system running 64 sample frames with 2 buffers - Jack delay = 2.67msec
+* Jitter Buffer default 512 samples = 8 frames of data at at 1.33msec / frame = 10.6msec
+* Network latency (speed of light and buffers in the network) = variable depending on locations and networks.  Figure speed of light is 200km/msec (through glass).
+
+
+Measuring on my local network I can get best case of 13msec.  Thats with an avg jitter buffer depth of 365 samples (7.6msec), 2.67msec jack delay, x amount of stack delay.  I'm measuring this at the analog interface of my USB 2.0 audio device.  The device has a local mix so I can go 50/50 and see the delay from a mic tap.  Hard to hear, but it's there.
+
+So the bulk of the delay is network transit and jitter buffer.  
+
+
 ## Get The code
 ```
 git clone --recurse-submodules git@github.com:mfvargo/rtjam.git

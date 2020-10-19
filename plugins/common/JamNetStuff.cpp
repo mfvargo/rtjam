@@ -46,6 +46,12 @@ namespace JamNetStuff
         );
     }
 
+    void JamPacket::clearChannelMap() {
+        clientId = rand() % 32768;
+        channelMap.setMyId(clientId);
+        channelMap.clear();
+    }
+
     void JamPacket::encodeAudio(const float** inputs, int frames) {
         numSamples = frames;
         // copy two channels into the jamMessage packet

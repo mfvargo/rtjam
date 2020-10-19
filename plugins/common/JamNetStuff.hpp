@@ -141,9 +141,7 @@ namespace JamNetStuff
       int getChannel();
       void setIsClient(bool val) { isClient = val; };
 
-      void clearChannelMap() {
-        channelMap.clear();
-      };
+      void clearChannelMap();
       void setServerChannel(int channel);
       void setBeatCount(char beat) { jamMessage.Beat = beat; };
       char getBeatCount() { return jamMessage.Beat; };
@@ -171,6 +169,8 @@ namespace JamNetStuff
       JamMixer();
       /* print out some stats */
       void dumpOut();
+      // reset to default values
+      void reset();
       /* get some data for the output */
       void getMix(float** outputs, uint32_t frames);
       /* write a jamPacket */

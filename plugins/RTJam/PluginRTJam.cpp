@@ -72,6 +72,7 @@ void PluginRTJam::switchRoom(int roomParam) {
             port = 7893;
         break;
     }
+    jamMixer.reset();
     jamSocket.initClient(SERVER_NAME, port);
 
 }
@@ -347,6 +348,7 @@ void PluginRTJam::loadProgram(uint32_t index) {
 // Process
 
 void PluginRTJam::activate() {
+    jamMixer.reset();
     jamMixer.gains[0] = dbToFloat(5.0);
     jamMixer.gains[1] = dbToFloat(5.0);
     jamSocket.isActivated = true;
@@ -384,7 +386,7 @@ void PluginRTJam::run(const float** inputs, float** outputs,
     rightInput.addSample(rightPow);
 
     // Local monitoring
-    jamMixer.addLocalMonitor(inputs, frames);
+    // jamMixer.addLocalMonitor(inputs, frames);
 
     // Do the network thingy..
     jamSocket.sendPacket(inputs, frames);
