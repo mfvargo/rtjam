@@ -122,11 +122,6 @@ namespace JamNetStuff
             printf("bad sample rate\n");
             return false;
         }
-        if (jamMessage.Channel >= MAX_JAMMERS) {
-            printf("bad channel\n");
-            // Illegal channel
-            return false;
-        }
         if (jamMessage.NumSubChannels != 2) {
             printf("bad sub channel\n");
             // hard code to 2 sub channels always.
@@ -226,6 +221,8 @@ namespace JamNetStuff
         }
         // Set the packet to server mode
         packet.setIsClient(false);
+        // Set the default tempo
+        tempo = 120;
     }
 
     int JamSocket::sendPacket(const float** buffer, int frames) {
@@ -261,12 +258,16 @@ namespace JamNetStuff
         time_t now = time(NULL);
         channelMap.pruneStaleChannels(now, 0);
         if (nBytes > 0) {
+            if (packet.getServerChannel() == SET_TEMPO_CHAN) {
+                // We have a tempo change
+                tempo = packet.getBeatCount();
+            }
             // Put the packet into the mixer
             // jamMixer->addData(&packet, nBytes);
             unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
             packet.setServerChannel(channelMap.getChannel(from_addr, &senderAddr));
             uint64_t deltaT = packet.getServerTime() - lastClickTime;
-            if (deltaT > (60 * 1e6 / 120 )) {  // 120BPM
+            if (deltaT > (60 * 1e6 / tempo )) {  // 120BPM
                 // We have passed a click boundary
                 lastClickTime = packet.getServerTime();
                 beatCount++;
