@@ -61,7 +61,7 @@ UIRTJam::UIRTJam()
     Point<int> sliderPosEnd(20, 350);
 
     float mixerLow = -30.0f;
-    float mixerHigh = 6.0f;
+    float mixerHigh = 12.0f;
     // Input 0
     fVol[0] = new ImageSlider(this, sliderImage);
     fVol[0]->setId(PluginRTJam::paramChanOneGain);
@@ -447,6 +447,7 @@ void UIRTJam::imageSwitchClicked(ImageSwitch* button, bool down) {
                 }
                 button->setDown(true);
                 setParameterValue(button->getId(), down);
+                programLoaded(0);
             } else {
                 // Existing button going up, ignore it
                 button->setDown(true);
