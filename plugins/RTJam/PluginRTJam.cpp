@@ -294,6 +294,9 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
         case paramChanEightGain:
         case paramChanNineGain:
         case paramChanTenGain:
+            if (value < -29.9) {
+                value = -60.0;
+            }
             jamMixer.gains[index - paramChanOneGain] = dbToFloat(value);
             break;
         case paramMasterVol:
