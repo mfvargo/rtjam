@@ -65,6 +65,10 @@ TODO: The server needs to timestamp and save the packet streams into an archive 
 * add stereo panning to the channels to help people separate sources.
 * make a listen only mode for a VST for live remixing of a room
 
+### Hooking up a Raspberry Pi
+
+https://youtu.be/iUXzOq8HfEQ
+
 ### Using With Sample DAW (Ardour)
 
 You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the RTJam plugin inserted.  I then route outputs 3-12 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
