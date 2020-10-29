@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <netinet/ip.h>
 #include <time.h>
+#include <errno.h>
 
 
 namespace JamNetStuff
@@ -206,13 +207,6 @@ namespace JamNetStuff
     }
 
     void JamSocket::initServer(short port) {
-       /*Configure settings in address struct*/
-        memset(&serverAddr, 0, sizeof(struct sockaddr_in));
-        serverAddr.sin_family = AF_INET;
-        serverAddr.sin_port = htons(port);
-        // memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
-        /*Bind socket with address struct*/
-        bind(jamSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
         // Try to set the Type of Service to Voice (for whatever that is worth)
         int tos_local = IPTOS_LOWDELAY;
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
@@ -229,6 +223,15 @@ namespace JamNetStuff
         packet.setIsClient(false);
         // Set the default tempo
         tempo = 120;
+       /*Configure settings in address struct*/
+        memset(&serverAddr, 0, sizeof(struct sockaddr_in));
+        serverAddr.sin_family = AF_INET;
+        serverAddr.sin_port = htons(port);
+        // memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
+        /*Bind socket with address struct*/
+        if (bind(jamSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr))) {
+            printf("port address bind failed. %d\n", h_errno);
+        }
     }
 
     int JamSocket::sendPacket(const float** buffer, int frames) {
@@ -258,7 +261,7 @@ namespace JamNetStuff
         return rval;
     }
 
-    int JamSocket::readAndBroadcast(JamMixer* jamMixer) {
+    int JamSocket::readAndBroadcast(JamMixer*) {
         // This is the read and broadcast for the server
         int nBytes = readData();
         time_t now = time(NULL);
@@ -297,12 +300,16 @@ namespace JamNetStuff
     }
     int JamSocket::readData() {
         int nBytes = recvfrom(
-            jamSocket,packet.getPacket(),
+            jamSocket,
+            packet.getPacket(),
             sizeof(struct JamMessage),
             0,
             (struct sockaddr *) &senderAddr, 
             &addr_size
         );
+        if (nBytes < 0 && errno != 11) {
+            fprintf(stderr, "recvfrom: %s (%d)\n", strerror(errno), errno);
+        }
         if (nBytes > 0) {
             packet.decodeHeader(nBytes);
         }

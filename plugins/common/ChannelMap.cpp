@@ -60,6 +60,8 @@ namespace JamNetStuff {
         if (addr != NULL) {
           memcpy(&channels[i].Address, addr, sizeof channels[i].Address);
         }
+        printf("adding %d: ", i);
+        dumpOut();
         return i;
       }
     }
@@ -69,7 +71,9 @@ namespace JamNetStuff {
   void ChannelMap::pruneStaleChannels(time_t now, int startAt) {
     // Never clear out slot 0 cause that's the local dude
     for (int i=startAt; i<MAX_JAMMERS; i++) {
-      if ((now - channels[i].KeepAlive) > EXPIRATION_IN_SECONDS) {
+      if (channels[i].clientId != EMPTY_SLOT && (now - channels[i].KeepAlive) > EXPIRATION_IN_SECONDS) {
+        printf("nuking %d: ", i);
+        dumpOut();
         channels[i].clientId = EMPTY_SLOT;
         memset(&channels[i].Address, '\0', sizeof channels[i].Address);
       }
