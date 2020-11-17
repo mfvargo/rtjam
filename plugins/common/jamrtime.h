@@ -4,7 +4,7 @@
 #define SERVER_NAME "music.basscleftech.com"
 #define SERVER_PORT 7891
 
-#define MAX_JAMMERS 5
+#define MAX_JAMMERS 7
 #define JAM_BUF_SIZE 14400
 #define MAX_FRAME_SIZE 1024
 #define EXPIRATION_IN_SECONDS 2
