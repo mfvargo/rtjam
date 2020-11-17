@@ -261,7 +261,7 @@ namespace JamNetStuff
         return rval;
     }
 
-    int JamSocket::readAndBroadcast(JamMixer*) {
+    int JamSocket::readAndBroadcast(JamMixer* jamMixer) {
         // This is the read and broadcast for the server
         int nBytes = readData();
         time_t now = time(NULL);
@@ -272,7 +272,9 @@ namespace JamNetStuff
                 tempo = packet.getBeatCount();
             }
             // Put the packet into the mixer
-            // jamMixer->addData(&packet, nBytes);
+            if (jamMixer != NULL) {
+                jamMixer->addData(&packet);
+            }
             unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
             packet.setServerChannel(channelMap.getChannel(from_addr, &senderAddr));
             uint64_t deltaT = packet.getServerTime() - lastClickTime;
@@ -299,6 +301,7 @@ namespace JamNetStuff
         return nBytes;
     }
     int JamSocket::readData() {
+        addr_size = sizeof(serverAddr);
         int nBytes = recvfrom(
             jamSocket,
             packet.getPacket(),
