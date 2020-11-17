@@ -85,6 +85,7 @@ private:
     ScopedPointer<ImageSwitch> fMonitorInputButton;
     RTJamState fState;
     bool clickOn;
+    Point<int> Corners[MAX_JAMMERS-1];
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };

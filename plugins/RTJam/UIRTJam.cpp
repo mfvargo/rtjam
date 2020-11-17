@@ -64,7 +64,7 @@ UIRTJam::UIRTJam()
     float mixerHigh = 12.0f;
     // Input 0
     fVol[0] = new ImageSlider(this, sliderImage);
-    fVol[0]->setId(PluginRTJam::paramChanOneGain);
+    fVol[0]->setId(PluginRTJam::paramChanGain1);
     fVol[0]->setInverted(true);
     fVol[0]->setStartPos(sliderPosStart);
     fVol[0]->setEndPos(sliderPosEnd);
@@ -75,7 +75,7 @@ UIRTJam::UIRTJam()
     sliderPosEnd.setX(sliderPosEnd.getX() + 100);
     // Input 1
     fVol[1] = new ImageSlider(this, sliderImage);
-    fVol[1]->setId(PluginRTJam::paramChanTwoGain);
+    fVol[1]->setId(PluginRTJam::paramChanGain2);
     fVol[1]->setInverted(true);
     fVol[1]->setStartPos(sliderPosStart);
     fVol[1]->setEndPos(sliderPosEnd);
@@ -83,15 +83,16 @@ UIRTJam::UIRTJam()
     fVol[1]->setCallback(this);
 
     // Now for the channels
-    Point<int> corners[MAX_JAMMERS-1];
-    corners[0].setPos(251, 25);
-    corners[1].setPos(523, 25);
-    corners[2].setPos(251, 225);
-    corners[3].setPos(523, 225);
-    int spacing = 80;
+    Corners[0].setPos(237, 25);
+    Corners[1].setPos(417, 25);
+    Corners[2].setPos(597, 25);
+    Corners[3].setPos(237, 225);
+    Corners[4].setPos(417, 225);
+    Corners[5].setPos(597, 225);
+    int spacing = 54;
     float maxSmooth = 0.1;
     for (int i=1; i<MAX_JAMMERS; i++) {
-        sliderPosStart.setPos(corners[i-1]);
+        sliderPosStart.setPos(Corners[i-1]);
         sliderPosEnd.setPos(sliderPosStart.getX(), sliderPosStart.getY() + 120);
         // Smoother
         fSmooth[i] = new ImageSlider(this, sliderImage);
@@ -106,7 +107,7 @@ UIRTJam::UIRTJam()
         sliderPosStart.setX(sliderPosStart.getX() + spacing);
         sliderPosEnd.setX(sliderPosEnd.getX() + spacing);
         fVol[i*2] = new ImageSlider(this, sliderImage);
-        fVol[i*2]->setId(PluginRTJam::paramChanOneGain + i*2);
+        fVol[i*2]->setId(PluginRTJam::paramChanGain1 + i*2);
         fVol[i*2]->setInverted(true);
         fVol[i*2]->setStartPos(sliderPosStart);
         fVol[i*2]->setEndPos(sliderPosEnd);
@@ -116,7 +117,7 @@ UIRTJam::UIRTJam()
         sliderPosStart.setX(sliderPosStart.getX() + spacing);
         sliderPosEnd.setX(sliderPosEnd.getX() + spacing);
         fVol[i*2+1] = new ImageSlider(this, sliderImage);
-        fVol[i*2+1]->setId(PluginRTJam::paramChanOneGain + i*2+1);
+        fVol[i*2+1]->setId(PluginRTJam::paramChanGain1 + i*2+1);
         fVol[i*2+1]->setInverted(true);
         fVol[i*2+1]->setStartPos(sliderPosStart);
         fVol[i*2+1]->setEndPos(sliderPosEnd);
@@ -188,17 +189,21 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
     return;
     switch (index)
     {
-      case PluginRTJam::paramChanOneGain:
-      case PluginRTJam::paramChanTwoGain:
-      case PluginRTJam::paramChanThreeGain:
-      case PluginRTJam::paramChanFourGain:
-      case PluginRTJam::paramChanFiveGain:
-      case PluginRTJam::paramChanSixGain:
-      case PluginRTJam::paramChanSevenGain:
-      case PluginRTJam::paramChanEightGain:
-      case PluginRTJam::paramChanNineGain:
-      case PluginRTJam::paramChanTenGain:
-          fVol[index - PluginRTJam::paramChanOneGain]->setValue(value);
+      case PluginRTJam::paramChanGain1:
+      case PluginRTJam::paramChanGain2:
+      case PluginRTJam::paramChanGain3:
+      case PluginRTJam::paramChanGain4:
+      case PluginRTJam::paramChanGain5:
+      case PluginRTJam::paramChanGain6:
+      case PluginRTJam::paramChanGain7:
+      case PluginRTJam::paramChanGain8:
+      case PluginRTJam::paramChanGain9:
+      case PluginRTJam::paramChanGain10:
+      case PluginRTJam::paramChanGain11:
+      case PluginRTJam::paramChanGain12:
+      case PluginRTJam::paramChanGain13:
+      case PluginRTJam::paramChanGain14:
+          fVol[index - PluginRTJam::paramChanGain1]->setValue(value);
           break;
       case PluginRTJam::paramMasterVol:
           fSliderMaster->setValue(value);
@@ -209,6 +214,8 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
       case PluginRTJam::paramSmooth3:
       case PluginRTJam::paramSmooth4:
       case PluginRTJam::paramSmooth5:
+      case PluginRTJam::paramSmooth6:
+      case PluginRTJam::paramSmooth7:
           fSmooth[index - PluginRTJam::paramSmooth1]->setValue(value);
           break;
     }
@@ -224,8 +231,8 @@ void UIRTJam::programLoaded(uint32_t index) {
         return;
 
     // Default values
-    fVol[0]-> setValue(3.0f);
-    fVol[1]-> setValue(3.0f);
+    fVol[0]-> setValue(6.0f);
+    fVol[1]-> setValue(6.0f);
     for (int i=2; i<MIX_CHANNELS; i++) {
         fVol[i]->setValue(0.0f);
     }
@@ -311,11 +318,11 @@ void UIRTJam::onDisplay() {
     fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[1] + 60)/60));
 
     // Channel meters post fader
-    const int leftEdge = 235;
     const int height = 140;
-    const int spacing = 40;
-    drawPos.setPos(leftEdge, 30);
+    const int spacing = 27;
     for(int i=1; i<MAX_JAMMERS; i++) {
+        drawPos.setPos(Corners[i-1]);
+        drawPos.setX(drawPos.getX() -  5);
         // Smoother
         fMeterBar.drawAt(drawPos, height, 1.0 - fState.bufferDepths[i*2]);
         drawPos.setX(drawPos.getX() + spacing);
@@ -338,45 +345,16 @@ void UIRTJam::onDisplay() {
         fSlideLine.xScale = 1.0f;
         fSlideLine.yScale = yScale;
         fSlideLine.drawAt(drawPos);
-
-        i++;
-        drawPos.setX(leftEdge + 270);
-
-        // Smoother
-        fMeterBar.drawAt(drawPos, height, 1.0 - fState.bufferDepths[i*2]);
-        drawPos.setX(drawPos.getX() + spacing);
-        fSlideLine.xScale = 1.0f;
-        fSlideLine.yScale = yScale;
-        fSlideLine.drawAt(drawPos);
-
-        // Input 0
-        drawPos.setX(drawPos.getX() + spacing);
-        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
-        drawPos.setX(drawPos.getX() + spacing);
-        fSlideLine.xScale = 1.0f;
-        fSlideLine.yScale = yScale;
-        fSlideLine.drawAt(drawPos);
-
-        // Input 1
-        drawPos.setX(drawPos.getX() + spacing);
-        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2+1] + 60)/60));
-        drawPos.setX(drawPos.getX() + spacing);
-        fSlideLine.xScale = 1.0f;
-        fSlideLine.yScale = yScale;
-        fSlideLine.drawAt(drawPos);
-
-        drawPos.setY(drawPos.getY() + 200);
-        drawPos.setX(leftEdge);
     }
 
-    if (clickOn) {
-        // Metronome
-        drawPos.setPos(50, 115);
-        for(int i=0; i<4; i++) {
-            fMeterBar.drawAt(drawPos, 30, 1.0 - (fState.beat == i));
-            drawPos.setX(drawPos.getX() + spacing);
-        }
-    }
+    // if (clickOn) {
+    //     // Metronome
+    //     drawPos.setPos(50, 115);
+    //     for(int i=0; i<4; i++) {
+    //         fMeterBar.drawAt(drawPos, 30, 1.0 - (fState.beat == i));
+    //         drawPos.setX(drawPos.getX() + spacing);
+    //     }
+    // }
 }
 
 
