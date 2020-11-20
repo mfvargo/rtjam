@@ -29,6 +29,10 @@ void packet_thread(short port) {
     fprintf(stderr, "fifo open: %s %s (%d)\n", fifo, strerror(errno), errno);
     return;
   }
+  // Max out the buffers on the mixer
+  for (int i=0; i<MAX_JAMMERS; i++) {
+    jamMixer.setBufferSmoothness(i, 0.1);
+  }
   // Loop and broadcast data
   uint64_t lastPump = JamNetStuff::getMicroTime();
   uint64_t delta = 0;
