@@ -4,19 +4,24 @@
 #include <vector>
 #include <thread>
 #include <mutex>
+#include <cmath>
 
 std::vector<std::thread> roomThreads;
 
+#define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
+#define FIFO_FRAME_SIZE 240
+
 void packet_thread(short port) {
+  JamNetStuff::MicroTimer timer;
   JamNetStuff::JamSocket jamSocket;
   JamNetStuff::JamMixer jamMixer;
   jamSocket.initServer(port);
   jamSocket.isActivated = true;
-  float* outputs[12];
-  for (int i=0; i<12; i++) {
+  float* outputs[NUM_OUTPUTS];
+  for (int i=0; i<NUM_OUTPUTS; i++) {
     outputs[i] = new float[1024];
   }
-  int16_t pcmBuf[1024];
+  unsigned char pcmBuf[FIFO_FRAME_SIZE*sizeof(short)];
   char fifo[128];
   int fd_fifo;
   sprintf(fifo, "/home/pi/www/ice/%d", port);
@@ -27,25 +32,34 @@ void packet_thread(short port) {
   // Loop and broadcast data
   uint64_t lastPump = JamNetStuff::getMicroTime();
   uint64_t delta = 0;
+  uint64_t outFrameTime = FIFO_FRAME_SIZE * 1000 / 48;
   while (1) {
     jamSocket.readAndBroadcast(&jamMixer);
-    delta = JamNetStuff::getMicroTime() - lastPump;
-    if ( delta > 20000) {
-      // printf("%d: %ld\n", port, delta);
+    delta += timer.getExpiredTime();
+    if (delta > outFrameTime) {
+      // fprintf(stderr, "%d\n", delta);
       // Pump out some data
-      jamMixer.getMix(outputs, 960);
-      for (int i=0; i<960; i++) {
-        pcmBuf[i] = (short) (outputs[0][i] * 32766);
+      jamMixer.getMix(outputs, FIFO_FRAME_SIZE);
+      for (int i=0; i<FIFO_FRAME_SIZE; i++) {
+        float float_in = outputs[0][i];
+        // float float_in = sin((2.0 * 3.14 * i)/FIFO_FRAME_SIZE );
+        short temp = float_in * 32768;
+        if (float_in < 0)
+        {
+          // temp = ~temp + 1;
+        }
+        memcpy(&pcmBuf[i*2], &temp, 2);
       }
-      if (write (fd_fifo, pcmBuf, 960 * sizeof(int16_t)) != 960*sizeof(int16_t)) {
+      if (write (fd_fifo, pcmBuf, FIFO_FRAME_SIZE * sizeof(short)) != FIFO_FRAME_SIZE*sizeof(short)) {
         if (errno != 11) {
           fprintf(stderr, "fifo write: %s %s (%d)\n", fifo, strerror(errno), errno);
         }
       }
-      lastPump += 20000;
-      if (delta > 40000) {
+      delta -= outFrameTime;
+      if (delta > outFrameTime) {
         // slipped, catch up
-        lastPump = JamNetStuff::getMicroTime();
+        // fprintf(stderr, "catching up %ld %ld\n", delta);
+       //  delta = 0;
       }
     }
   }
