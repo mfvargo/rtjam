@@ -34,7 +34,6 @@ void packet_thread(short port) {
     jamMixer.setBufferSmoothness(i, 0.1);
   }
   // Loop and broadcast data
-  uint64_t lastPump = JamNetStuff::getMicroTime();
   uint64_t delta = 0;
   uint64_t outFrameTime = FIFO_FRAME_SIZE * 1000 / 48;
   while (1) {
