@@ -40,7 +40,7 @@ void packet_thread(short port) {
   while (1) {
     jamSocket.readAndBroadcast(&jamMixer);
     delta += timer.getExpiredTime();
-    if (delta > outFrameTime) {
+    while (delta > outFrameTime) {
       // fprintf(stderr, "%d\n", delta);
       // Pump out some data
       jamMixer.getMix(outputs, FIFO_FRAME_SIZE);
@@ -60,11 +60,6 @@ void packet_thread(short port) {
         }
       }
       delta -= outFrameTime;
-      if (delta > outFrameTime) {
-        // slipped, catch up
-        // fprintf(stderr, "catching up %ld %ld\n", delta);
-       //  delta = 0;
-      }
     }
   }
 }
