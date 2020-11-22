@@ -47,6 +47,7 @@ namespace JamNetStuff
     }
     /* get some data for the output */
     void JamMixer::getMix(float** outputs, uint32_t frames) {
+        mMutex.lock();
         float levelSums[MIX_CHANNELS];
 
         // get a frame out of each mix buffer
@@ -90,21 +91,20 @@ namespace JamNetStuff
         }
         masterStats.addSample(masterLevel);
         masterLevel = masterStats.mean;
+        mMutex.unlock();
     }
 
     /* give the mixer a packet to chew on */
     void JamMixer::addData(JamPacket* packet) {
+        mMutex.lock();
         int samples = packet->decodeJamBuffer(conversionBuf);
         int locChan = packet->getChannel() * 2;
         beat = packet->getBeatCount();
-        if (locChan <= 0) {
-            // local monitoring or no slot available
-            return;
-        }
-        if (samples > 0) {
+        if (locChan >= 0 && samples > 0) {
             jitterBuffers[locChan].putIn(conversionBuf[0], samples, packet->getSequenceNo());
             jitterBuffers[locChan+1].putIn(conversionBuf[1], samples, packet->getSequenceNo());
         }
+        mMutex.unlock();
     }
 
     void JamMixer::addLocalMonitor(const float** input, uint32_t frames) {

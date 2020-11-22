@@ -22,6 +22,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include "../common/jamrtime.h"
+#include <mutex>
 
 #define EMPTY_SLOT 40000
 
@@ -198,6 +199,7 @@ namespace JamNetStuff
       float cBuf0[MAX_FRAME_SIZE];
       float cBuf1[MAX_FRAME_SIZE];
       float* conversionBuf[2];
+      std::mutex mMutex;
   };
 
   class JamSocket {
