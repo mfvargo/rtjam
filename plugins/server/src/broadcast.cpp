@@ -9,7 +9,7 @@
 std::vector<std::thread> roomThreads;
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
-#define FIFO_FRAME_SIZE 240
+#define FIFO_FRAME_SIZE 960
 
 void fifo_thread(short port, JamNetStuff::JamMixer* jamMixer) {
   JamNetStuff::MicroTimer timer;
@@ -28,7 +28,7 @@ void fifo_thread(short port, JamNetStuff::JamMixer* jamMixer) {
   uint64_t delta = 0;
   uint64_t outFrameTime = FIFO_FRAME_SIZE * 1000 / 48;
   while(1) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    std::this_thread::sleep_for(std::chrono::milliseconds(outFrameTime/1000));
     // std::this_thread::sleep_for(20000);
     delta += timer.getExpiredTime();
     while (delta > outFrameTime) {
@@ -58,7 +58,7 @@ void packet_thread(short port) {
   jamSocket.isActivated = true;
   // Max out the buffers on the mixer
   for (int i=0; i<MAX_JAMMERS; i++) {
-    jamMixer.setBufferSmoothness(i, 0.1);
+    jamMixer.setBufferSmoothness(i, 0.5);
   }
   // Start a thread to write the mix to the FIFO
   std::thread fifoThread = std::thread(fifo_thread, port, &jamMixer);
