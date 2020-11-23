@@ -28,10 +28,9 @@ void fifo_thread(short port, JamNetStuff::JamMixer* jamMixer) {
   uint64_t delta = 0;
   uint64_t outFrameTime = FIFO_FRAME_SIZE * 1000 / 48;
   while(1) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(outFrameTime/1000));
-    // std::this_thread::sleep_for(20000);
+    std::this_thread::sleep_for(std::chrono::microseconds(outFrameTime-delta));
     delta += timer.getExpiredTime();
-    while (delta > outFrameTime) {
+    if (delta > outFrameTime) {
       // fprintf(stderr, "%d\n", delta);
       // Pump out some data
       jamMixer->getMix(outputs, FIFO_FRAME_SIZE);
@@ -47,6 +46,10 @@ void fifo_thread(short port, JamNetStuff::JamMixer* jamMixer) {
         }
       }
       delta -= outFrameTime;
+      if (delta > outFrameTime) {
+        // slip 
+        delta = 0;
+      }
     }
   }
 }
