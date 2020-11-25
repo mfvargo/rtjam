@@ -16,13 +16,13 @@
 
 #define MIN_DEPTH 512
 #define MAX_DEPTH 4096
+#define MIN_SIGMA 10.0
 
 namespace JamNetStuff
 {
 
     JitterBuffer::JitterBuffer() {
         maxDepth = JITTER_SAMPLES - 512;
-        targetDepth = MIN_DEPTH;
         flush();
         bufferStats.windowSize = 50;
     }
@@ -36,11 +36,14 @@ namespace JamNetStuff
         numGets = 0;
         numDropped = 0;
         lastSequence = 0;
+        targetDepth = MIN_DEPTH;
+        nSigma = MIN_SIGMA;
     }
 
     void JitterBuffer::setSmoothness(float smooth) {
         flush();
-        targetDepth = MIN_DEPTH + (smooth * 9600);  //a 0.1 smooth adds 20msec
+        nSigma = MIN_SIGMA + (smooth * 100.0);
+        // targetDepth = MIN_DEPTH + (smooth * 9600);  //a 0.1 smooth adds 20msec
     }
 
     int JitterBuffer::depth() {
@@ -54,6 +57,7 @@ namespace JamNetStuff
 
     float JitterBuffer::getAvgDepth() {
         return (targetDepth * 1.0) / MAX_DEPTH;
+        // return bufferStats.mean / targetDepth;
     }
 
     void JitterBuffer::putIn(const float* buffer, int frames, uint32_t seqNo) {
@@ -85,15 +89,16 @@ namespace JamNetStuff
         numGets++;
         bufferStats.addSample(depth());
         // dynamic target depth
-        float nSigma = bufferStats.mean/bufferStats.sigma;
-        if (nSigma > 15.0 && targetDepth > MIN_DEPTH) {
-            // slow decay
-            if (numGets%4 == 0) {
+        unsigned desiredDepth = nSigma * bufferStats.sigma;
+        if (desiredDepth > targetDepth) {
+            // make the buffer longer
+            if (targetDepth < MAX_DEPTH) {
+                targetDepth += 1;
+            }
+        } else {
+            if (numGets%4 == 0 && targetDepth > MIN_DEPTH) {
                 targetDepth -= 1;
             }
-        }
-        else if (nSigma < 25.0 && targetDepth < MAX_DEPTH) {
-            targetDepth += 1;
         }
         if (depth() < frames) {
             // Not enough for a frame
@@ -145,7 +150,7 @@ namespace JamNetStuff
             bufferStats.mean,
             targetDepth,
             numUnderruns,
-            bufferStats.mean / bufferStats.sigma,
+            bufferStats.sigma,
             lastSequence
         );
     }

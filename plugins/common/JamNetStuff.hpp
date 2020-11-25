@@ -98,19 +98,18 @@ namespace JamNetStuff
       float getAvgDepth();
     
     protected:
-
-      struct JamMessage myPacket;
       float myBuffer[JITTER_SAMPLES];
       float lastFrame[MAX_FRAME_SIZE];
       int readIdx;
       int writeIdx;
       int maxDepth;
-      int targetDepth;
+      unsigned targetDepth;
       int numOverruns;
       int numUnderruns;
       int numPuts;
+      float nSigma;
       unsigned numGets;
-      int lastSequence;
+      uint32_t lastSequence;
       int numDropped;
       StreamTimeStats bufferStats;
 
