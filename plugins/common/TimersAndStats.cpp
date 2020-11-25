@@ -53,21 +53,15 @@ namespace JamNetStuff
 
     void StreamTimeStats::clear() {
         mean = 0.0;
-        dxdt = 0.0;
         sigma = 0.0;
-        sigmaPrime = 0.0;
         windowSize = 100.0;
     }
         
     void StreamTimeStats::addSample(float sample) {
         mean += sample/windowSize;
         mean *= (windowSize - 1) / windowSize;
-        dxdt += (mean - sample)/windowSize;
-        dxdt *= (windowSize - 1) / windowSize;
         sigma += std::abs(mean - sample)/windowSize;
         sigma *= (windowSize - 1) / windowSize;
-        sigmaPrime += std::abs(sigma - std::abs(mean - sample))/windowSize;
-        sigmaPrime *= (windowSize - 1) / windowSize;
     }
 
 }

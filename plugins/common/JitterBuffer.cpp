@@ -14,14 +14,17 @@
 #include <cmath>
 #include <string.h>
 
+#define MIN_DEPTH 512
+#define MAX_DEPTH 4096
+
 namespace JamNetStuff
 {
 
     JitterBuffer::JitterBuffer() {
         maxDepth = JITTER_SAMPLES - 512;
-        targetDepth = 512;
+        targetDepth = MIN_DEPTH;
         flush();
-        bufferStats.windowSize = 20;
+        bufferStats.windowSize = 50;
     }
 
     void JitterBuffer::flush() {
@@ -36,7 +39,7 @@ namespace JamNetStuff
 
     void JitterBuffer::setSmoothness(float smooth) {
         flush();
-        targetDepth = 480 + (smooth * 9600);  //a 0.1 smooth adds 20msec
+        targetDepth = MIN_DEPTH + (smooth * 9600);  //a 0.1 smooth adds 20msec
     }
 
     int JitterBuffer::depth() {
@@ -49,12 +52,10 @@ namespace JamNetStuff
     }
 
     float JitterBuffer::getAvgDepth() {
-        return bufferStats.mean / targetDepth;
+        return (targetDepth * 1.0) / MAX_DEPTH;
     }
 
     void JitterBuffer::putIn(const float* buffer, int frames, uint32_t seqNo) {
-        underrunStats.addSample(numUnderruns);
-        overrunStats.addSample(numOverruns);
         int dropped = lastSequence - seqNo;
         lastSequence = seqNo;
         numPuts++;
@@ -81,6 +82,14 @@ namespace JamNetStuff
 
     void JitterBuffer::getOut(float* buffer, int frames) {
         bufferStats.addSample(depth());
+        // dynamic target depth
+        float nSigma = bufferStats.mean/bufferStats.sigma;
+        if (nSigma > 15.0 && targetDepth > MIN_DEPTH) {
+            targetDepth -= 1;
+        }
+        else if (nSigma < 25.0 && targetDepth < MAX_DEPTH) {
+            targetDepth += 1;
+        }
         if (depth() < frames) {
             // Not enough for a frame
             if (numPuts > 0) {
@@ -127,11 +136,11 @@ namespace JamNetStuff
 
     void JitterBuffer::dumpOut() {
         printf(
-            "avgDepth: %08.1f\t target: %06d\t under: %05d\7 dropped:%03d\t seq: %d\n",
+            "avgDepth: %08.1f\t target: %06d\t under: %05d\7 delta_u:%03.2f\t seq: %d\n",
             bufferStats.mean,
             targetDepth,
             numUnderruns,
-            numDropped,
+            bufferStats.mean / bufferStats.sigma,
             lastSequence
         );
     }

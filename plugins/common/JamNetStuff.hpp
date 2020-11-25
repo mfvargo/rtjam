@@ -51,9 +51,7 @@ namespace JamNetStuff
       StreamTimeStats();
 
       float mean;
-      float dxdt;
       float sigma;
-      float sigmaPrime;
       bool started;
       float windowSize;
 
@@ -114,8 +112,6 @@ namespace JamNetStuff
       int lastSequence;
       int numDropped;
       StreamTimeStats bufferStats;
-      StreamTimeStats overrunStats;
-      StreamTimeStats underrunStats;
 
       void copySamples(float* dst, const float* src, int count);
   };
