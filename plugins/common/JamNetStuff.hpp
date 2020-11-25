@@ -109,6 +109,7 @@ namespace JamNetStuff
       int numOverruns;
       int numUnderruns;
       int numPuts;
+      unsigned numGets;
       int lastSequence;
       int numDropped;
       StreamTimeStats bufferStats;

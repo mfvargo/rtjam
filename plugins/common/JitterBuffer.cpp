@@ -33,6 +33,7 @@ namespace JamNetStuff
         numOverruns = 0;
         numUnderruns = 0;
         numPuts = 0;
+        numGets = 0;
         numDropped = 0;
         lastSequence = 0;
     }
@@ -81,11 +82,15 @@ namespace JamNetStuff
     }
 
     void JitterBuffer::getOut(float* buffer, int frames) {
+        numGets++;
         bufferStats.addSample(depth());
         // dynamic target depth
         float nSigma = bufferStats.mean/bufferStats.sigma;
         if (nSigma > 15.0 && targetDepth > MIN_DEPTH) {
-            targetDepth -= 1;
+            // slow decay
+            if (numGets%4 == 0) {
+                targetDepth -= 1;
+            }
         }
         else if (nSigma < 25.0 && targetDepth < MAX_DEPTH) {
             targetDepth += 1;
