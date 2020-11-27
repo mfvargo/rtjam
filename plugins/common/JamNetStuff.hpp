@@ -51,9 +51,7 @@ namespace JamNetStuff
       StreamTimeStats();
 
       float mean;
-      float dxdt;
       float sigma;
-      float sigmaPrime;
       bool started;
       float windowSize;
 
@@ -100,22 +98,20 @@ namespace JamNetStuff
       float getAvgDepth();
     
     protected:
-
-      struct JamMessage myPacket;
       float myBuffer[JITTER_SAMPLES];
       float lastFrame[MAX_FRAME_SIZE];
       int readIdx;
       int writeIdx;
       int maxDepth;
-      int targetDepth;
+      unsigned targetDepth;
       int numOverruns;
       int numUnderruns;
       int numPuts;
-      int lastSequence;
+      float nSigma;
+      unsigned numGets;
+      uint32_t lastSequence;
       int numDropped;
       StreamTimeStats bufferStats;
-      StreamTimeStats overrunStats;
-      StreamTimeStats underrunStats;
 
       void copySamples(float* dst, const float* src, int count);
   };
