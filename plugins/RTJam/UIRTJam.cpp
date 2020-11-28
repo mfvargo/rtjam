@@ -26,8 +26,8 @@
 
 #include "PluginRTJam.hpp"
 #include "UIRTJam.hpp"
+#include "../common/NotoSans_Regular.ttf.hpp"
 // #include "Window.hpp"
-
 START_NAMESPACE_DISTRHO
 
 namespace Art = RTJamArt;
@@ -38,23 +38,11 @@ namespace Art = RTJamArt;
 UIRTJam::UIRTJam()
    : UI(Art::background_2Width, Art::background_2Height),
       fImgBackground(Art::background_2Data, Art::background_2Width, Art::background_2Height, GL_BGR),
-      fSlideLine(Art::slidelineData, Art::slidelineWidth, Art::slidelineHeight, GL_BGR),
-      fAboutWindow(this)
+      fSlideLine(Art::slidelineData, Art::slidelineWidth, Art::slidelineHeight, GL_BGR)
 {
     // Read envrionment
     clickOn = getenv("CLICK_ON") != NULL;
-
-    // about
-    Image aboutImage(Art::aboutData, Art::aboutWidth, Art::aboutHeight, GL_BGR);
-    fAboutWindow.setImage(aboutImage);
-
-    // about button
-    // Image aboutImageNormal(Art::aboutButtonNormalData, Art::aboutButtonNormalWidth, Art::aboutButtonNormalHeight);
-    // Image aboutImageHover(Art::aboutButtonHoverData, Art::aboutButtonHoverWidth, Art::aboutButtonHoverHeight);
-    // fButtonAbout = new ImageButton(this, aboutImageNormal, aboutImageHover, aboutImageHover);
-    // fButtonAbout->setAbsolutePos(350, 30);
-    // fButtonAbout->setCallback(this);
-
+    
     // level sliders
     Image sliderImage(Art::smallSliderData, Art::smallSliderWidth, Art::smallSliderHeight);
     Point<int> sliderPosStart(20, 180);
@@ -155,6 +143,24 @@ UIRTJam::UIRTJam()
     fRooms[0]->setDown(true);
     // set default values
     programLoaded(0);
+
+    NanoVG::FontId notoSansId = createFontFromMemory("noto_sans", (const uchar *)font_notosans::notosans_ttf, font_notosans::notosans_ttf_size, 0);
+    printf("NototFont ID: %d\n", notoSansId);
+    NanoVG::FontId dejaVuSansId = findFont(NANOVG_DEJAVU_SANS_TTF);
+    printf("DejaFont ID: %d\n", dejaVuSansId);
+
+    // LabelBoxes
+    for(int i=0; i<2; i++) {
+        labels[i] = new LabelBox(this, Size<uint>(400, 400));
+        labels[i]->setText("Bobby");
+        labels[i]->setFontId(notoSansId);
+        labels[i]->setFontSize(36.0f);
+        // labels[i]->setAlign(ALIGN_LEFT | ALIGN_MIDDLE);
+        // labels[i]->setMargin(Margin(0, 0, labels[i]->getHeight() / 2.0f, 0));
+        labels[i]->setAbsolutePos(i*100, 20); 
+        labels[i]->setVisible(true);
+    }
+
 }
 
 UIRTJam::~UIRTJam() {
@@ -177,7 +183,6 @@ UIRTJam::~UIRTJam() {
     }
     */
 }
-
 // -----------------------------------------------------------------------
 // DSP/Plugin callbacks
 
@@ -226,7 +231,7 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
   This is called by the host to inform the UI about program changes.
 */
 void UIRTJam::programLoaded(uint32_t index) {
-    printf("program Load \n");
+    printf("program Load %d\n", index);
     if (index != 0)
         return;
 
@@ -346,7 +351,13 @@ void UIRTJam::onDisplay() {
         fSlideLine.yScale = yScale;
         fSlideLine.drawAt(drawPos);
     }
+    
+    // LabelBoxes
+    for(int i=0; i<1; i++) {
+        // labels[i]->drawMe();
+    }
 
+    // printf("5001: %s\n", jamDirectory.findUser(5001).c_str());
     // if (clickOn) {
     //     // Metronome
     //     drawPos.setPos(50, 115);

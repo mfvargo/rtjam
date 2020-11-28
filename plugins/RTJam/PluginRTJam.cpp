@@ -416,8 +416,8 @@ void PluginRTJam::loadProgram(uint32_t index) {
 
 void PluginRTJam::activate() {
     jamMixer.reset();
-    jamMixer.gains[0] = dbToFloat(5.0);
-    jamMixer.gains[1] = dbToFloat(5.0);
+    jamMixer.gains[0] = dbToFloat(6.0);
+    jamMixer.gains[1] = dbToFloat(6.0);
     jamSocket.isActivated = true;
 }
 
@@ -464,6 +464,8 @@ void PluginRTJam::run(const float** inputs, float** outputs,
     if (++frameCount%2000 == 0) {
         jamMixer.dumpOut();
     }
+    uint32_t ids[MAX_JAMMERS];
+    jamSocket.getClientIds(ids);
 
     
     // Update data to be shared with the U/X
@@ -473,7 +475,8 @@ void PluginRTJam::run(const float** inputs, float** outputs,
         fState->masterLevel = jamMixer.masterLevel;
         fState->inputLeft = leftInput.mean;
         fState->inputRight = rightInput.mean;
-        fState->beat = jamMixer.getBeat();;
+        fState->beat = jamMixer.getBeat();
+        fState->clientIdsUpdate(ids);
     }
 
     if (monitorInput) {

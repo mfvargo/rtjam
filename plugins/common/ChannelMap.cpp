@@ -18,11 +18,7 @@
 namespace JamNetStuff {
 
   ChannelMap::ChannelMap() {
-    for (int i=0; i<MAX_JAMMERS; i++) {
-      channels[i].clientId = EMPTY_SLOT;   // Illegal value, max is 32k
-      channels[i].KeepAlive = time(NULL);
-      memset(&channels[i].Address, '\0', sizeof channels[i].Address);
-    }
+    clear();
   }
 
   void ChannelMap::setMyId(uint32_t id) {
@@ -31,8 +27,10 @@ namespace JamNetStuff {
   }
 
   void ChannelMap::clear() {
-    for (int i=1; i<MAX_JAMMERS; i++) {
-      channels[i].clientId = EMPTY_SLOT;
+    for (int i=0; i<MAX_JAMMERS; i++) {
+      channels[i].clientId = EMPTY_SLOT;   // Illegal value, max is 32k
+      channels[i].KeepAlive = time(NULL);
+      memset(&channels[i].Address, '\0', sizeof channels[i].Address);
     }
   }
 

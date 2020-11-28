@@ -24,7 +24,13 @@ namespace JamNetStuff
     JamPacket::JamPacket() {
         // Some constructor stuff goes here...
         srand(getMicroTime());
-        clientId = rand() % 32768;
+        char* client_env = getenv("RTJAM_CLIENT");
+        if (client_env) {
+            clientId = atoi(client_env);
+        } else {
+            clientId = rand() % 32768;
+        }
+        fprintf(stderr, "Client %d\n", clientId);
         channelMap.setMyId(clientId);
         bufferSize = 0;
         sequenceNo = 0;
@@ -48,9 +54,9 @@ namespace JamNetStuff
     }
 
     void JamPacket::clearChannelMap() {
-        clientId = rand() % 32768;
-        channelMap.setMyId(clientId);
+        // clientId = rand() % 32768;
         channelMap.clear();
+        channelMap.setMyId(clientId);
     }
 
     void JamPacket::encodeAudio(const float** inputs, int frames) {

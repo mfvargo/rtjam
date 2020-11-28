@@ -70,7 +70,10 @@ FILES_UI = \
 	UIRTJam.cpp \
 	RTJamArt.cpp \
 	../common/PartialImage.cpp \
-	../common/MeterBar.cpp
+	../common/JamDirectory.cpp \
+	../common/LabelBox.cpp \
+	../common/MeterBar.cpp \
+	../common/NotoSans_Regular.ttf.cpp
 
 # --------------------------------------------------------------
 # Do some magic
@@ -81,7 +84,7 @@ include ../../dpf/Makefile.plugins.mk
 # --------------------------------------------------------------
 # Extra flags
 
-LINK_FLAGS += -lpthread
+LINK_FLAGS += -lpthread -lcurl
 
 # --------------------------------------------------------------
 # Enable all selected plugin types
