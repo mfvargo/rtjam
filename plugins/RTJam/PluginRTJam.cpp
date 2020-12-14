@@ -389,11 +389,15 @@ void PluginRTJam::run(const float** inputs, float** outputs,
 
     // Feed the output from the mixer
     jamMixer.getMix(outputs, frames);
-    if (++frameCount%2000 == 0) {
-        jamMixer.dumpOut();
-    }
     uint32_t ids[MAX_JAMMERS];
     jamSocket.getClientIds(ids);
+    if (++frameCount%2000 == 0) {
+        for (int i=0; i< MAX_JAMMERS; i++) {
+            printf("%d: %s\t", i, jamDirectory.findUser(ids[i]).c_str());
+        }
+        printf("\n");
+        // jamMixer.dumpOut();
+    }
 
     
     // Update data to be shared with the U/X

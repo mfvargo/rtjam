@@ -30,6 +30,8 @@
 #include "DistrhoPlugin.hpp"
 #include "extra/Mutex.hpp"
 #include "../common/JamNetStuff.hpp"
+#include "../common/JamDirectory.hpp"
+
 // #include "../common/Settings.hpp"
 
 class UIRTJam;
@@ -172,6 +174,8 @@ private:
     Mutex fMutex;
     RTJamState* fState;
     friend class UIRTJam;
+
+    JamNetStuff::JamDirectory jamDirectory;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginRTJam)
 };

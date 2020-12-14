@@ -33,8 +33,8 @@
 #include "RTJamArt.hpp"
 #include "levelMeters.hpp"
 #include "../common/MeterBar.hpp"
-#include "../common/JamDirectory.hpp"
-#include "../common/LabelBox.hpp"
+// #include "../common/JamDirectory.hpp"
+// #include "../common/LabelBox.hpp"
 
 #define MAX_ROOMS 3
 
@@ -87,9 +87,7 @@ private:
     bool clickOn;
     Point<int> Corners[MAX_JAMMERS-1];
 
-    JamNetStuff::JamDirectory jamDirectory;
-
-    LabelBox* labels[MAX_JAMMERS];
+    // LabelBox* labels[MAX_JAMMERS];
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };

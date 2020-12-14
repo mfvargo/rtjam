@@ -32,7 +32,7 @@ namespace JamNetStuff {
     if ( it != users.end()) {
       return it->second;
     } else {
-      return "bob";
+      return std::to_string(id);
     }
   }
 

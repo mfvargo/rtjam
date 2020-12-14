@@ -123,16 +123,16 @@ UIRTJam::UIRTJam()
     printf("DejaFont ID: %d\n", dejaVuSansId);
 
     // LabelBoxes
-    for(int i=0; i<2; i++) {
-        labels[i] = new LabelBox(this, Size<uint>(400, 400));
-        labels[i]->setText("Bobby");
-        labels[i]->setFontId(notoSansId);
-        labels[i]->setFontSize(36.0f);
-        // labels[i]->setAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-        // labels[i]->setMargin(Margin(0, 0, labels[i]->getHeight() / 2.0f, 0));
-        labels[i]->setAbsolutePos(i*100, 20); 
-        labels[i]->setVisible(true);
-    }
+    // for(int i=0; i<2; i++) {
+    //     labels[i] = new LabelBox(this, Size<uint>(400, 400));
+    //     labels[i]->setText("Bobby");
+    //     labels[i]->setFontId(notoSansId);
+    //     labels[i]->setFontSize(36.0f);
+    //     // labels[i]->setAlign(ALIGN_LEFT | ALIGN_MIDDLE);
+    //     // labels[i]->setMargin(Margin(0, 0, labels[i]->getHeight() / 2.0f, 0));
+    //     labels[i]->setAbsolutePos(i*100, 20); 
+    //     labels[i]->setVisible(true);
+    // }
 
 }
 
@@ -309,9 +309,9 @@ void UIRTJam::onDisplay() {
     }
     
     // LabelBoxes
-    for(int i=0; i<1; i++) {
-        labels[i]->drawMe();
-    }
+    // for(int i=0; i<1; i++) {
+    //     labels[i]->drawMe();
+    // }
 
     // printf("5001: %s\n", jamDirectory.findUser(5001).c_str());
     // if (clickOn) {

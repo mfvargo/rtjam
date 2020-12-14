@@ -64,13 +64,13 @@ FILES_DSP = \
 	../common/JamMixer.cpp \
 	../common/JitterBuffer.cpp \
 	../common/ChannelMap.cpp \
+	../common/JamDirectory.cpp \
 	../common/TimersAndStats.cpp
 
 FILES_UI = \
 	UIRTJam.cpp \
 	RTJamArt.cpp \
 	../common/PartialImage.cpp \
-	../common/JamDirectory.cpp \
 	../common/LabelBox.cpp \
 	../common/MeterBar.cpp \
 	../common/NotoSans_Regular.ttf.cpp
