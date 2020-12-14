@@ -40,10 +40,10 @@ namespace JamNetStuff
         nSigma = MIN_SIGMA;
     }
 
+    // Set the number of sigmas of depth variance
     void JitterBuffer::setSmoothness(float smooth) {
         flush();
         nSigma = MIN_SIGMA + (smooth * 100.0);
-        // targetDepth = MIN_DEPTH + (smooth * 9600);  //a 0.1 smooth adds 20msec
     }
 
     int JitterBuffer::depth() {

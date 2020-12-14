@@ -219,69 +219,6 @@ void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
             parameter.ranges.min = -60.0f;
             parameter.ranges.max = 12.0f;
             break;
-        case paramSmooth1:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 1";
-            parameter.symbol     = "S1";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth2:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 2";
-            parameter.symbol     = "S2";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth3:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 3";
-            parameter.symbol     = "S3";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth4:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 4";
-            parameter.symbol     = "S4";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth5:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 5";
-            parameter.symbol     = "S5";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth6:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 6";
-            parameter.symbol     = "S6";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth7:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 7";
-            parameter.symbol     = "S7";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
     }
 }
 
@@ -363,15 +300,6 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
             break;
         case paramMasterVol:
             jamMixer.masterVol = dbToFloat(value);
-            break;
-        case paramSmooth1:
-        case paramSmooth2:
-        case paramSmooth3:
-        case paramSmooth4:
-        case paramSmooth5:
-        case paramSmooth6:
-        case paramSmooth7:
-            jamMixer.setBufferSmoothness(index - paramSmooth1, value);
             break;
         case paramInputMonitor:
             monitorInput = (value > 0.5f);

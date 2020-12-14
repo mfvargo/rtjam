@@ -79,7 +79,6 @@ private:
     PartialImage fSlideLine;
     Image fSmoothButtonNormal, fsmoothButtonPressed;
     ImageSlider* fVol[MIX_CHANNELS];
-    ImageSlider* fSmooth[MAX_JAMMERS];  // one smooth for both sub-channels
     ImageSwitch* fRooms[MAX_ROOMS];
     JamNetStuff::JamMeterBar fMeterBar;
     ScopedPointer<ImageSlider>  fSliderMaster;
