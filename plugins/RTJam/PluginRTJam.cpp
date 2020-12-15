@@ -57,9 +57,17 @@ PluginRTJam::~PluginRTJam() {
 
 void PluginRTJam::switchRoom(int roomParam) {
     // Initialize the jamSocket
-    // settings.loadFromFile();
-    // std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
-    // int port = settings.getOrSetValue("port", SERVER_PORT);
+    settings.loadFromFile();
+    std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
+    char* client_env = getenv("RTJAM_CLIENT");
+    uint32_t clientId;
+    if (client_env) {
+        clientId = atoi(client_env);
+    } else {
+        clientId = rand() % 32768;
+    }
+    clientId = settings.getOrSetValue("clientId", clientId);
+    settings.saveToFile();
     int port = SERVER_PORT;
     switch(roomParam) {
         case paramRoom0:
@@ -73,7 +81,7 @@ void PluginRTJam::switchRoom(int roomParam) {
         break;
     }
     jamMixer.reset();
-    jamSocket.initClient(SERVER_NAME, port);
+    jamSocket.initClient(serverName.c_str(), port, clientId);
 
 }
 // -----------------------------------------------------------------------

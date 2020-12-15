@@ -32,7 +32,7 @@
 #include "../common/JamNetStuff.hpp"
 #include "../common/JamDirectory.hpp"
 
-// #include "../common/Settings.hpp"
+#include "../common/Settings.hpp"
 
 class UIRTJam;
 struct RTJamState;
@@ -160,7 +160,7 @@ protected:
 private:
     double          fSampleRate;
     
-    // Settings settings;
+    Settings settings;
     JamNetStuff::JamMixer jamMixer;
     JamNetStuff::JamSocket jamSocket;
     JamNetStuff::StreamTimeStats leftInput;

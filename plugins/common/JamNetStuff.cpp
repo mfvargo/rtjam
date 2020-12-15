@@ -177,7 +177,7 @@ namespace JamNetStuff
         printf("socket is %d\n", jamSocket);
     }
 
-    void JamSocket::initClient(const char* servername, int port) {
+    void JamSocket::initClient(const char* servername, int port, uint32_t clientId) {
         // Try to set the Type of Service to Voice (for whatever that is worth)
         int tos_local = IPTOS_LOWDELAY;
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
@@ -186,7 +186,7 @@ namespace JamNetStuff
         // Set socket to non-blocking
         fcntl(jamSocket, F_SETFL, fcntl(jamSocket, F_GETFL) | O_NONBLOCK);
         // Clear out the channelMap on the socket
-        packet.clearChannelMap();
+        packet.setClientId(clientId);
         // Set that bad boy up.
         char ip[100];
         struct hostent *he;
