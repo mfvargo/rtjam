@@ -17,13 +17,20 @@ namespace JamNetStuff {
       curl_easy_setopt(curl, CURLOPT_URL, "http://music.basscleftech.com/users/index.json");
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callback);
       res = curl_easy_perform(curl);
-      curl_easy_cleanup(curl);
-      if (res == CURLE_OK) {
+      long http_code = 0;
+      curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
+      if (http_code == 200 && res != CURLE_ABORTED_BY_CALLBACK)
+      {
         directory = json::parse(readBuffer);
         for (auto& el : directory["users"]) {
           users.insert(std::make_pair(el["id"], el["name"]));
         }
       }
+      else
+      {
+        printf("failed to retrieve directory\n");
+      }
+      curl_easy_cleanup(curl);
     }
   }
 
