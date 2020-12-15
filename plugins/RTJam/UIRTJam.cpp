@@ -285,7 +285,8 @@ void UIRTJam::onDisplay() {
     for(int i=1; i<MAX_JAMMERS; i++) {
         drawPos.setPos(Corners[i-1]);
         // Smoother
-        fMeterBar.drawAt(drawPos, height, 1.0 - fState.bufferDepths[i*2]);
+        const float depth = fState.clientIds[i] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[i*2];
+        fMeterBar.drawAt(drawPos, height, 1.0 - depth);
         drawPos.setX(drawPos.getX() + spacing);
         // fSlideLine.xScale = 1.0f;
         // fSlideLine.yScale = yScale;
