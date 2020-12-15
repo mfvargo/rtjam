@@ -26,8 +26,8 @@
 
 #include "PluginRTJam.hpp"
 #include "UIRTJam.hpp"
+#include "../common/NotoSans_Regular.ttf.hpp"
 // #include "Window.hpp"
-
 START_NAMESPACE_DISTRHO
 
 namespace Art = RTJamArt;
@@ -38,23 +38,11 @@ namespace Art = RTJamArt;
 UIRTJam::UIRTJam()
    : UI(Art::background_2Width, Art::background_2Height),
       fImgBackground(Art::background_2Data, Art::background_2Width, Art::background_2Height, GL_BGR),
-      fSlideLine(Art::slidelineData, Art::slidelineWidth, Art::slidelineHeight, GL_BGR),
-      fAboutWindow(this)
+      fSlideLine(Art::slidelineData, Art::slidelineWidth, Art::slidelineHeight, GL_BGR)
 {
     // Read envrionment
     clickOn = getenv("CLICK_ON") != NULL;
-
-    // about
-    Image aboutImage(Art::aboutData, Art::aboutWidth, Art::aboutHeight, GL_BGR);
-    fAboutWindow.setImage(aboutImage);
-
-    // about button
-    // Image aboutImageNormal(Art::aboutButtonNormalData, Art::aboutButtonNormalWidth, Art::aboutButtonNormalHeight);
-    // Image aboutImageHover(Art::aboutButtonHoverData, Art::aboutButtonHoverWidth, Art::aboutButtonHoverHeight);
-    // fButtonAbout = new ImageButton(this, aboutImageNormal, aboutImageHover, aboutImageHover);
-    // fButtonAbout->setAbsolutePos(350, 30);
-    // fButtonAbout->setCallback(this);
-
+    
     // level sliders
     Image sliderImage(Art::smallSliderData, Art::smallSliderWidth, Art::smallSliderHeight);
     Point<int> sliderPosStart(20, 180);
@@ -90,22 +78,13 @@ UIRTJam::UIRTJam()
     Corners[4].setPos(417, 225);
     Corners[5].setPos(597, 225);
     int spacing = 54;
-    float maxSmooth = 0.1;
     for (int i=1; i<MAX_JAMMERS; i++) {
         sliderPosStart.setPos(Corners[i-1]);
         sliderPosEnd.setPos(sliderPosStart.getX(), sliderPosStart.getY() + 120);
-        // Smoother
-        fSmooth[i] = new ImageSlider(this, sliderImage);
-        fSmooth[i]->setStartPos(sliderPosStart);
-        fSmooth[i]->setEndPos(sliderPosEnd);
-        fSmooth[i]->setId(PluginRTJam::paramSmooth1 + i);
-        fSmooth[i]->setRange(0.0f, maxSmooth);
-        fSmooth[i]->setInverted(true);
-        fSmooth[i]->setCallback(this);
 
         // Input 0
-        sliderPosStart.setX(sliderPosStart.getX() + spacing);
-        sliderPosEnd.setX(sliderPosEnd.getX() + spacing);
+        sliderPosStart.setX(sliderPosStart.getX() + spacing-7);
+        sliderPosEnd.setX(sliderPosEnd.getX() + spacing - 7);
         fVol[i*2] = new ImageSlider(this, sliderImage);
         fVol[i*2]->setId(PluginRTJam::paramChanGain1 + i*2);
         fVol[i*2]->setInverted(true);
@@ -124,25 +103,6 @@ UIRTJam::UIRTJam()
         fVol[i*2+1]->setRange(mixerLow, mixerHigh);
         fVol[i*2+1]->setCallback(this);
     }
-    // slider Master
-    // sliderPosStart.setPos(76, 5);
-    // sliderPosEnd.setPos(76, 95);
-    // fSliderMaster = new ImageSlider(this, sliderImage);
-    // fSliderMaster->setId(PluginRTJam::paramMasterVol);
-    // fSliderMaster->setInverted(true);
-    // fSliderMaster->setStartPos(sliderPosStart);
-    // fSliderMaster->setEndPos(sliderPosEnd);
-    // fSliderMaster->setRange(mixerLow, 12.0);
-    // fSliderMaster->setCallback(this);
-
-    // // switches
-    // fMonitorInputButton = new ImageSwitch(this,
-    //                     Image(Art::solo_offData, Art::solo_offWidth, Art::solo_offHeight, GL_BGR),
-    //                     Image(Art::solo_onData, Art::solo_onWidth, Art::solo_onHeight, GL_BGR));
-    // fMonitorInputButton->setId(PluginRTJam::paramInputMonitor);
-    // fMonitorInputButton->setAbsolutePos(147, 360);
-    // fMonitorInputButton->setCallback(this);
-
     // Room selectors
     for (int i=0; i<MAX_ROOMS; i++) {
         fRooms[i] = new ImageSwitch(this,
@@ -155,6 +115,25 @@ UIRTJam::UIRTJam()
     fRooms[0]->setDown(true);
     // set default values
     programLoaded(0);
+
+    loadSharedResources();
+    NanoVG::FontId notoSansId = createFontFromMemory("noto_sans", (const uchar *)font_notosans::notosans_ttf, font_notosans::notosans_ttf_size, 0);
+    printf("NototFont ID: %d\n", notoSansId);
+    NanoVG::FontId dejaVuSansId = findFont(NANOVG_DEJAVU_SANS_TTF);
+    printf("DejaFont ID: %d\n", dejaVuSansId);
+
+    // LabelBoxes
+    // for(int i=0; i<2; i++) {
+    //     labels[i] = new LabelBox(this, Size<uint>(400, 400));
+    //     labels[i]->setText("Bobby");
+    //     labels[i]->setFontId(notoSansId);
+    //     labels[i]->setFontSize(36.0f);
+    //     // labels[i]->setAlign(ALIGN_LEFT | ALIGN_MIDDLE);
+    //     // labels[i]->setMargin(Margin(0, 0, labels[i]->getHeight() / 2.0f, 0));
+    //     labels[i]->setAbsolutePos(i*100, 20); 
+    //     labels[i]->setVisible(true);
+    // }
+
 }
 
 UIRTJam::~UIRTJam() {
@@ -162,9 +141,6 @@ UIRTJam::~UIRTJam() {
     /*
     for (int i=0; i<MIX_CHANNELS; i++) {
         delete fVol[i];
-    }
-    for (int i=0; i<MAX_JAMMERS; i++) {
-        delete fSmooth[i];
     }
     for (int i=0; i<MAX_ROOMS; i++) {
         delete fRooms[i];
@@ -177,7 +153,6 @@ UIRTJam::~UIRTJam() {
     }
     */
 }
-
 // -----------------------------------------------------------------------
 // DSP/Plugin callbacks
 
@@ -208,16 +183,6 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
       case PluginRTJam::paramMasterVol:
           fSliderMaster->setValue(value);
           break;
-      case PluginRTJam::paramSmooth1:
-          break;
-      case PluginRTJam::paramSmooth2:
-      case PluginRTJam::paramSmooth3:
-      case PluginRTJam::paramSmooth4:
-      case PluginRTJam::paramSmooth5:
-      case PluginRTJam::paramSmooth6:
-      case PluginRTJam::paramSmooth7:
-          fSmooth[index - PluginRTJam::paramSmooth1]->setValue(value);
-          break;
     }
 }
 
@@ -226,7 +191,7 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
   This is called by the host to inform the UI about program changes.
 */
 void UIRTJam::programLoaded(uint32_t index) {
-    printf("program Load \n");
+    printf("program Load %d\n", index);
     if (index != 0)
         return;
 
@@ -235,9 +200,6 @@ void UIRTJam::programLoaded(uint32_t index) {
     fVol[1]-> setValue(6.0f);
     for (int i=2; i<MIX_CHANNELS; i++) {
         fVol[i]->setValue(0.0f);
-    }
-    for (int i=1; i<MAX_JAMMERS; i++) {
-        fSmooth[i]->setValue(0.0f);
     }
 }
 
@@ -322,16 +284,15 @@ void UIRTJam::onDisplay() {
     const int spacing = 27;
     for(int i=1; i<MAX_JAMMERS; i++) {
         drawPos.setPos(Corners[i-1]);
-        drawPos.setX(drawPos.getX() -  5);
         // Smoother
         fMeterBar.drawAt(drawPos, height, 1.0 - fState.bufferDepths[i*2]);
         drawPos.setX(drawPos.getX() + spacing);
-        fSlideLine.xScale = 1.0f;
-        fSlideLine.yScale = yScale;
-        fSlideLine.drawAt(drawPos);
+        // fSlideLine.xScale = 1.0f;
+        // fSlideLine.yScale = yScale;
+        // fSlideLine.drawAt(drawPos);
 
         // Input 0
-        drawPos.setX(drawPos.getX() + spacing);
+        drawPos.setX(drawPos.getX() + spacing-10);
         fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
         drawPos.setX(drawPos.getX() + spacing);
         fSlideLine.xScale = 1.0f;
@@ -346,7 +307,13 @@ void UIRTJam::onDisplay() {
         fSlideLine.yScale = yScale;
         fSlideLine.drawAt(drawPos);
     }
+    
+    // LabelBoxes
+    // for(int i=0; i<1; i++) {
+    //     labels[i]->drawMe();
+    // }
 
+    // printf("5001: %s\n", jamDirectory.findUser(5001).c_str());
     // if (clickOn) {
     //     // Metronome
     //     drawPos.setPos(50, 115);

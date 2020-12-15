@@ -24,7 +24,13 @@ namespace JamNetStuff
     JamPacket::JamPacket() {
         // Some constructor stuff goes here...
         srand(getMicroTime());
-        clientId = rand() % 32768;
+        char* client_env = getenv("RTJAM_CLIENT");
+        if (client_env) {
+            clientId = atoi(client_env);
+        } else {
+            clientId = rand() % 32768;
+        }
+        fprintf(stderr, "Client %d\n", clientId);
         channelMap.setMyId(clientId);
         bufferSize = 0;
         sequenceNo = 0;
@@ -48,9 +54,9 @@ namespace JamNetStuff
     }
 
     void JamPacket::clearChannelMap() {
-        clientId = rand() % 32768;
-        channelMap.setMyId(clientId);
+        // clientId = rand() % 32768;
         channelMap.clear();
+        channelMap.setMyId(clientId);
     }
 
     void JamPacket::encodeAudio(const float** inputs, int frames) {
@@ -171,7 +177,7 @@ namespace JamNetStuff
         printf("socket is %d\n", jamSocket);
     }
 
-    void JamSocket::initClient(const char* servername, int port) {
+    void JamSocket::initClient(const char* servername, int port, uint32_t clientId) {
         // Try to set the Type of Service to Voice (for whatever that is worth)
         int tos_local = IPTOS_LOWDELAY;
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
@@ -180,7 +186,7 @@ namespace JamNetStuff
         // Set socket to non-blocking
         fcntl(jamSocket, F_SETFL, fcntl(jamSocket, F_GETFL) | O_NONBLOCK);
         // Clear out the channelMap on the socket
-        packet.clearChannelMap();
+        packet.setClientId(clientId);
         // Set that bad boy up.
         char ip[100];
         struct hostent *he;

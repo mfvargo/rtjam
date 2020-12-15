@@ -70,6 +70,11 @@ namespace JamNetStuff
       uint32_t getClientId(int idx) { return channels[idx].clientId; };
       void getClientAddr(int idx, sockaddr_in *addr);
       void pruneStaleChannels(time_t now, int startAt = 1);
+      void getClientIds(uint32_t* ids) {
+        for(int i=0; i<MAX_JAMMERS; i++) {
+          ids[i] = channels[i].clientId;
+        }
+      };
 
     private:
       struct Channel {
@@ -144,6 +149,9 @@ namespace JamNetStuff
       void setBeatCount(char beat) { jamMessage.Beat = beat; };
       char getBeatCount() { return jamMessage.Beat; };
       uint64_t getServerTime() { return jamMessage.ServerTime; };
+      void getClientIds(uint32_t* ids) { channelMap.getClientIds(ids); };
+      void setClientId(uint32_t id) { clientId = id; clearChannelMap(); };
+      uint32_t getClientId() { return clientId; };
 
     private:
       bool isClient;
@@ -207,9 +215,10 @@ namespace JamNetStuff
       bool isActivated;
 
       void initServer(short port);
-      void initClient(const char* servername, int port);
+      void initClient(const char* servername, int port, uint32_t clientId);
       void channelDump() { channelMap.dumpOut(); };
       void setTempo(int newTempo) { tempo = newTempo; };
+      void getClientIds(uint32_t* ids) { packet.getClientIds(ids); };
     
     private:
       ChannelMap channelMap;

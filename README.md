@@ -47,11 +47,7 @@ The RTJam software also builds on the Raspberry Pi 4 and can be run as a "standa
 ![Pi App](Standalone.png)
 
 - Input 1/2 - Shows pre and post fader levels for the users inputs
-- 4 player controls - Each control corresponds to another person in the room. The controls are Smooth which increases the jitter buffer depth for that user and two level sliders for that users two channels.
-
-About "Smooth" - the smooth slider should really only be used if the VST is being run inside a DAW.  If you are trying to play music in real time adding smooth might make packet starves sound a little better but you pay for it hard with latency. Smooth at the bottom of the slider give 500 samples of jitter buffer which is about 10msec of latency at 48kHz.  At full scale the jitter buffer is about 20msec long.  This is pretty hard to make a pocket with.
-
-Note: 4/4 time @ 120BPM (pretty standard pop song (think Billie Jean)) will have a 1/4 note of 500msec.  so a 1/16 note is 125msec in duration.  Think about trying to make a pocket like "What Is Hip" by Tower of Power with the 1/16th notes moving around by 20-30%.
+- 4 player controls - Each control corresponds to another person in the room. The controls are level sliders for that user's two channels.
 
 ### Broadcast Server
 The server just listens for packets from VST clients.  The server dynamically creates channels based on the source address of the client packets and forwards packets to all active listeners.  There is currently no session control.  When you start talking the server will allocate a channel to you if one is open.  If you don't send any packets for 2 seconds, your channel is made available.

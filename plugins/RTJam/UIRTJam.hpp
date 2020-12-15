@@ -33,6 +33,8 @@
 #include "RTJamArt.hpp"
 #include "levelMeters.hpp"
 #include "../common/MeterBar.hpp"
+// #include "../common/JamDirectory.hpp"
+// #include "../common/LabelBox.hpp"
 
 #define MAX_ROOMS 3
 
@@ -71,14 +73,12 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
     bool onScroll(const ScrollEvent& ev) override;
-    
+
 private:
     Image fImgBackground;
     PartialImage fSlideLine;
-    ImageAboutWindow fAboutWindow;
     Image fSmoothButtonNormal, fsmoothButtonPressed;
     ImageSlider* fVol[MIX_CHANNELS];
-    ImageSlider* fSmooth[MAX_JAMMERS];  // one smooth for both sub-channels
     ImageSwitch* fRooms[MAX_ROOMS];
     JamNetStuff::JamMeterBar fMeterBar;
     ScopedPointer<ImageSlider>  fSliderMaster;
@@ -86,6 +86,8 @@ private:
     RTJamState fState;
     bool clickOn;
     Point<int> Corners[MAX_JAMMERS-1];
+
+    // LabelBox* labels[MAX_JAMMERS];
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };

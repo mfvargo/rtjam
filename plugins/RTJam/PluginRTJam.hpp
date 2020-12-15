@@ -30,7 +30,9 @@
 #include "DistrhoPlugin.hpp"
 #include "extra/Mutex.hpp"
 #include "../common/JamNetStuff.hpp"
-// #include "../common/Settings.hpp"
+#include "../common/JamDirectory.hpp"
+
+#include "../common/Settings.hpp"
 
 class UIRTJam;
 struct RTJamState;
@@ -74,13 +76,6 @@ public:
         paramChanGain13,
         paramChanGain14,
         paramMasterVol,
-        paramSmooth1,
-        paramSmooth2,
-        paramSmooth3,
-        paramSmooth4,
-        paramSmooth5,
-        paramSmooth6,
-        paramSmooth7,
         paramInputMonitor,
         paramRoom0,
         paramRoom1,
@@ -165,7 +160,7 @@ protected:
 private:
     double          fSampleRate;
     
-    // Settings settings;
+    Settings settings;
     JamNetStuff::JamMixer jamMixer;
     JamNetStuff::JamSocket jamSocket;
     JamNetStuff::StreamTimeStats leftInput;
@@ -179,6 +174,8 @@ private:
     Mutex fMutex;
     RTJamState* fState;
     friend class UIRTJam;
+
+    JamNetStuff::JamDirectory jamDirectory;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginRTJam)
 };

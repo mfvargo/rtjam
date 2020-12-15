@@ -57,9 +57,17 @@ PluginRTJam::~PluginRTJam() {
 
 void PluginRTJam::switchRoom(int roomParam) {
     // Initialize the jamSocket
-    // settings.loadFromFile();
-    // std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
-    // int port = settings.getOrSetValue("port", SERVER_PORT);
+    settings.loadFromFile();
+    std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
+    char* client_env = getenv("RTJAM_CLIENT");
+    uint32_t clientId;
+    if (client_env) {
+        clientId = atoi(client_env);
+    } else {
+        clientId = rand() % 32768;
+    }
+    clientId = settings.getOrSetValue("clientId", clientId);
+    settings.saveToFile();
     int port = SERVER_PORT;
     switch(roomParam) {
         case paramRoom0:
@@ -73,7 +81,7 @@ void PluginRTJam::switchRoom(int roomParam) {
         break;
     }
     jamMixer.reset();
-    jamSocket.initClient(SERVER_NAME, port);
+    jamSocket.initClient(serverName.c_str(), port, clientId);
 
 }
 // -----------------------------------------------------------------------
@@ -219,69 +227,6 @@ void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
             parameter.ranges.min = -60.0f;
             parameter.ranges.max = 12.0f;
             break;
-        case paramSmooth1:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 1";
-            parameter.symbol     = "S1";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth2:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 2";
-            parameter.symbol     = "S2";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth3:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 3";
-            parameter.symbol     = "S3";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth4:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 4";
-            parameter.symbol     = "S4";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth5:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 5";
-            parameter.symbol     = "S5";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth6:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 6";
-            parameter.symbol     = "S6";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
-        case paramSmooth7:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Smooth 7";
-            parameter.symbol     = "S7";
-            parameter.unit       = "multiplier";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
     }
 }
 
@@ -364,15 +309,6 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
         case paramMasterVol:
             jamMixer.masterVol = dbToFloat(value);
             break;
-        case paramSmooth1:
-        case paramSmooth2:
-        case paramSmooth3:
-        case paramSmooth4:
-        case paramSmooth5:
-        case paramSmooth6:
-        case paramSmooth7:
-            jamMixer.setBufferSmoothness(index - paramSmooth1, value);
-            break;
         case paramInputMonitor:
             monitorInput = (value > 0.5f);
             break;
@@ -416,8 +352,8 @@ void PluginRTJam::loadProgram(uint32_t index) {
 
 void PluginRTJam::activate() {
     jamMixer.reset();
-    jamMixer.gains[0] = dbToFloat(5.0);
-    jamMixer.gains[1] = dbToFloat(5.0);
+    jamMixer.gains[0] = dbToFloat(6.0);
+    jamMixer.gains[1] = dbToFloat(6.0);
     jamSocket.isActivated = true;
 }
 
@@ -461,8 +397,14 @@ void PluginRTJam::run(const float** inputs, float** outputs,
 
     // Feed the output from the mixer
     jamMixer.getMix(outputs, frames);
+    uint32_t ids[MAX_JAMMERS];
+    jamSocket.getClientIds(ids);
     if (++frameCount%2000 == 0) {
-        jamMixer.dumpOut();
+        for (int i=0; i< MAX_JAMMERS; i++) {
+            printf("%d: %s\t", i, jamDirectory.findUser(ids[i]).c_str());
+        }
+        printf("\n");
+        // jamMixer.dumpOut();
     }
 
     
@@ -473,7 +415,8 @@ void PluginRTJam::run(const float** inputs, float** outputs,
         fState->masterLevel = jamMixer.masterLevel;
         fState->inputLeft = leftInput.mean;
         fState->inputRight = rightInput.mean;
-        fState->beat = jamMixer.getBeat();;
+        fState->beat = jamMixer.getBeat();
+        fState->clientIdsUpdate(ids);
     }
 
     if (monitorInput) {
