@@ -65,6 +65,47 @@ TODO: The server needs to timestamp and save the packet streams into an archive 
 
 https://youtu.be/iUXzOq8HfEQ
 
+### Making the thing autostart on a Raspberry Pi
+
+Add startup app to autostart folder
+```
+cd ~/.config
+mkdir autostart
+cd autostart
+vi app.desktop
+```
+Contents of app.desktop:
+```
+[Desktop Entry]
+Encoding=UTF-8
+Typr=Application
+Name=rtjam
+Exec=/bin/bash /home/pi/Desktop/JamOn.sh
+StartupNotify=false
+Terminal=false
+Hidden=-false
+```
+Contents of /home/pi/Desktop/JamOn.sh
+```
+#!/bin/bash
+jack_control start
+jack_control ds alsa
+# Note that the device goes with the USB audio device
+jack_control dps device hw:USB
+jack_control dps rate 48000
+jack_control dps nperiods 2
+jack_control dps period 64
+sleep 3
+/home/pi/rtjam &
+/home/pi/MVerb &
+sleep 3
+jack_connect RTJam:out1 system:playback_1
+jack_connect RTJam:out2 system:playback_2
+jack_connect system:capture_1 MVerb:in1
+jack_connect MVerb:out1 RTJam:in1
+jack_connect system:capture_2 RTJam:in2
+sleep 1
+```
 ### Using With Sample DAW (Ardour)
 
 You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the RTJam plugin inserted.  I then route outputs 3-12 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
