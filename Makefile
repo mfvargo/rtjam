@@ -19,6 +19,7 @@ libs:
 plugins: libs
 	$(MAKE) all -C plugins/RTJam
 	$(MAKE) all -C plugins/server
+	$(MAKE) all -C plugins/nojack
 
 ifneq ($(CROSS_COMPILING),true)
 gen: plugins dpf/utils/lv2_ttl_generator
