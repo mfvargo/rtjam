@@ -281,8 +281,8 @@ namespace JamNetStuff
             if (jamMixer != NULL) {
                 jamMixer->addData(&packet);
             }
-            unsigned long from_addr = ((struct sockaddr_in*) &senderAddr)->sin_addr.s_addr;
-            packet.setServerChannel(channelMap.getChannel(from_addr, &senderAddr));
+            uint32_t clientId = packet.getClientIdFromPacket();
+            packet.setServerChannel(channelMap.getChannelBySenderIp(clientId, &senderAddr));
             uint64_t deltaT = packet.getServerTime() - lastClickTime;
             if (deltaT > (60 * 1e6 / tempo )) {  // 120BPM
                 // We have passed a click boundary
@@ -295,8 +295,8 @@ namespace JamNetStuff
             for (int i=0; i<MAX_JAMMERS; i++) {
                 // Don't send back an echo to the sender
                 sockaddr_in addr;
-                unsigned long to_addr = channelMap.getClientId(i);
-                if (to_addr != EMPTY_SLOT && to_addr != from_addr) {
+                uint32_t to_client = channelMap.getClientId(i);
+                if (to_client != EMPTY_SLOT && to_client != clientId) {
                 // if (to_addr != EMPTY_SLOT) {
                     channelMap.getClientAddr(i, &addr);
                     sendData(&addr);

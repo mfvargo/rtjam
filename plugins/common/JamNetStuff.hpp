@@ -32,7 +32,20 @@ namespace JamNetStuff
   void decodeJamMessage(struct JamMessage* packet);
   uint64_t getMicroTime();
 
-  // Class to measure microsecond timers
+  // Class to represent an sockaddr_in
+  // class MySockaddr {
+  //   public:
+  //     MySockaddr(sockaddr_in const & addr) {
+  //       m_sockaddr_in = addr;
+  //       // memcpy(&m_sockaddr_in, &addr, sizeof(m_sockaddr_in));
+  //     }
+  //     bool operator==( sockaddr_in const & o ) const {
+  //       return m_sockaddr_in.sin_addr.s_addr == o.sin_addr.s_addr && m_sockaddr_in.sin_port == o.sin_port;
+  //     }
+  //   private:
+  //     sockaddr_in m_sockaddr_in;
+  // };
+  // // Class to measure microsecond timers
   class MicroTimer {
     public:
       MicroTimer();
@@ -64,6 +77,7 @@ namespace JamNetStuff
     public:
       ChannelMap();
       int getChannel(uint32_t clientId, sockaddr_in *addr = NULL);
+      int getChannelBySenderIp(uint32_t clientId, sockaddr_in *addr);
       void setMyId(uint32_t Id);
       void dumpOut();
       void clear();
@@ -152,6 +166,7 @@ namespace JamNetStuff
       void getClientIds(uint32_t* ids) { channelMap.getClientIds(ids); };
       void setClientId(uint32_t id) { clientId = id; clearChannelMap(); };
       uint32_t getClientId() { return clientId; };
+      uint32_t getClientIdFromPacket() { return jamMessage.ClientId; }
 
     private:
       bool isClient;
