@@ -113,6 +113,15 @@ UIRTJam::UIRTJam()
         fRooms[i]->setCallback(this);
     }
     fRooms[0]->setDown(true);
+    // Master Volume
+    fSliderMaster = new ImageSlider(this, sliderImage);
+    fSliderMaster->setId(PluginRTJam::paramMasterVol);
+    fSliderMaster->setInverted(true);
+    fSliderMaster->setStartPos(158, 3);
+    fSliderMaster->setEndPos(158, 88);
+    fSliderMaster->setRange(mixerLow, mixerHigh);
+    fSliderMaster->setCallback(this);
+
     // set default values
     programLoaded(0);
 
@@ -275,9 +284,19 @@ void UIRTJam::onDisplay() {
     fSlideLine.xScale = 1.0f;
     fSlideLine.yScale = 1.0f;
     fSlideLine.drawAt(drawPos);
-    // Output level 0
+    // Output level 1
     drawPos.setX(drawPos.getX() + 24);
     fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[1] + 60)/60));
+
+    // Master Volume section
+    drawPos.setPos(150, 10);
+    // output level
+    fMeterBar.drawAt(drawPos, 100, 1.0 - (fState.masterLevel + 60)/60);
+    drawPos.setX(drawPos.getX() + 32);
+    // Slider line
+    fSlideLine.xScale = 1.0f;
+    fSlideLine.yScale = 0.5f;
+    fSlideLine.drawAt(drawPos);
 
     // Channel meters post fader
     const int height = 140;

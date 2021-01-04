@@ -27,7 +27,7 @@ void read_audio() {
       inputs[0][i] = ((float *) buffer)[i*2];
       inputs[1][i] = ((float *) buffer)[i*2+1];
     }
-    fprintf(stderr, "frames: %d, time is: %lu\n", frames_captured, timer.getExpiredTime());
+    // fprintf(stderr, "frames: %d, time is: %lu\n", frames_captured, timer.getExpiredTime());
     jamMixer.addLocalMonitor((const float**) inputs, frames_captured);
     jamSocket.sendPacket((const float**)inputs, frames_captured);
     jamSocket.readPackets(&jamMixer);
