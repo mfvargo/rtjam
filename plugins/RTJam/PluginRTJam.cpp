@@ -81,6 +81,9 @@ void PluginRTJam::switchRoom(int roomParam) {
         break;
     }
     jamMixer.reset();
+    jamMixer.gains[0] = dbToFloat(6.0);
+    jamMixer.gains[1] = dbToFloat(6.0);
+
     jamSocket.initClient(serverName.c_str(), port, clientId);
 
 }

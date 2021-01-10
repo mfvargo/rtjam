@@ -266,7 +266,7 @@ void UIRTJam::onDisplay() {
     // Input section
     drawPos.setPos(10, 180);
     // Input level 0
-    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputLeft + 60)/60);
+    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputLeft + 66)/60);
     drawPos.setX(drawPos.getX() + 32);
     // Slider line
     fSlideLine.xScale = 1.0f;
@@ -278,7 +278,7 @@ void UIRTJam::onDisplay() {
 
     // Input level 1
     drawPos.setX(111);
-    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputRight + 60)/60);
+    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputRight + 66)/60);
     // Slider line
     drawPos.setX(drawPos.getX() + 32);
     fSlideLine.xScale = 1.0f;
@@ -313,7 +313,7 @@ void UIRTJam::onDisplay() {
 
         // Input 0
         drawPos.setX(drawPos.getX() + spacing-10);
-        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
+        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 6)/60));
         drawPos.setX(drawPos.getX() + spacing);
         fSlideLine.xScale = 1.0f;
         fSlideLine.yScale = yScale;
