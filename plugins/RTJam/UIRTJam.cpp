@@ -313,7 +313,7 @@ void UIRTJam::onDisplay() {
 
         // Input 0
         drawPos.setX(drawPos.getX() + spacing-10);
-        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 6)/60));
+        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
         drawPos.setX(drawPos.getX() + spacing);
         fSlideLine.xScale = 1.0f;
         fSlideLine.yScale = yScale;
