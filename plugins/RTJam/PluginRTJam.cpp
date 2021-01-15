@@ -340,6 +340,10 @@ float PluginRTJam::dbToFloat(float value) {
 */
 void PluginRTJam::loadProgram(uint32_t index) {
     printf("loading program %u\n", index);
+
+    // Initialize the jam User directory
+    // jamDirectory.loadFromNetwork();
+
     if (index != 0)
         return;
 
@@ -403,10 +407,10 @@ void PluginRTJam::run(const float** inputs, float** outputs,
     uint32_t ids[MAX_JAMMERS];
     jamSocket.getClientIds(ids);
     if (++frameCount%2000 == 0) {
-        for (int i=0; i< MAX_JAMMERS; i++) {
-            printf("%d: %s\t", i, jamDirectory.findUser(ids[i]).c_str());
-        }
-        printf("\n");
+        // for (int i=0; i< MAX_JAMMERS; i++) {
+        //     printf("%d: %s\t", i, jamDirectory.findUser(ids[i]).c_str());
+        // }
+        // printf("\n");
         // jamMixer.dumpOut();
     }
 

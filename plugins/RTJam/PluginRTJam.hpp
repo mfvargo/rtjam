@@ -108,7 +108,7 @@ protected:
     }
 
     const char* getHomePage() const override {
-        return "https://basscleftech.com/plugins/rtjam";
+        return "http://music.basscleftech.com/";
     }
 
     const char* getLicense() const noexcept override {

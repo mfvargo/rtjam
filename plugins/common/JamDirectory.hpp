@@ -11,6 +11,7 @@ namespace JamNetStuff {
   class JamDirectory {
     public:
       JamDirectory();
+      void loadFromNetwork();
       std::string findUser(uint id);
 
     private:
