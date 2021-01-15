@@ -175,8 +175,6 @@ private:
     RTJamState* fState;
     friend class UIRTJam;
 
-    JamNetStuff::JamDirectory jamDirectory;
-
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginRTJam)
 };
 

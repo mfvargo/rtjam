@@ -28,6 +28,9 @@
 #include "UIRTJam.hpp"
 #include "../common/NotoSans_Regular.ttf.hpp"
 // #include "Window.hpp"
+
+
+
 START_NAMESPACE_DISTRHO
 
 namespace Art = RTJamArt;
@@ -40,6 +43,9 @@ UIRTJam::UIRTJam()
       fImgBackground(Art::background_2Data, Art::background_2Width, Art::background_2Height, GL_BGR),
       fSlideLine(Art::slidelineData, Art::slidelineWidth, Art::slidelineHeight, GL_BGR)
 {
+    fNanoText.loadSharedResources();
+    fNanoFont = fNanoText.findFont(NANOVG_DEJAVU_SANS_TTF);
+
     // Read envrionment
     clickOn = getenv("CLICK_ON") != NULL;
     
@@ -125,11 +131,11 @@ UIRTJam::UIRTJam()
     // set default values
     programLoaded(0);
 
-    loadSharedResources();
-    NanoVG::FontId notoSansId = createFontFromMemory("noto_sans", (const uchar *)font_notosans::notosans_ttf, font_notosans::notosans_ttf_size, 0);
-    printf("NototFont ID: %d\n", notoSansId);
-    NanoVG::FontId dejaVuSansId = findFont(NANOVG_DEJAVU_SANS_TTF);
-    printf("DejaFont ID: %d\n", dejaVuSansId);
+    // loadSharedResources();
+    // NanoVG::FontId notoSansId = createFontFromMemory("noto_sans", (const uchar *)font_notosans::notosans_ttf, font_notosans::notosans_ttf_size, 0);
+    // printf("NototFont ID: %d\n", notoSansId);
+    // NanoVG::FontId dejaVuSansId = findFont(NANOVG_DEJAVU_SANS_TTF);
+    // printf("DejaFont ID: %d\n", dejaVuSansId);
 
     // LabelBoxes
     // for(int i=0; i<2; i++) {
@@ -200,6 +206,8 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
   This is called by the host to inform the UI about program changes.
 */
 void UIRTJam::programLoaded(uint32_t index) {
+    jamDirectory.loadFromNetwork();
+    
     printf("program Load %d\n", index);
     if (index != 0)
         return;
@@ -243,25 +251,11 @@ void UIRTJam::uiIdle() {
 // Widget callbacks
 
 
-/**
-  A function called to draw the view contents with NanoVG.
-*/
-void UIRTJam::onNanoDisplay() {
-}
-
 void UIRTJam::onDisplay() {
     fImgBackground.draw();
 
     Point<int> drawPos(40, 20);
     float yScale = 0.7f;
-
-    // // Master meter (post fade)
-    // drawPos.setPos(60, 15);
-    // fMeterBar.drawAt(drawPos, 100, 1.0 - ((fState.masterLevel + 60)/60));
-    // drawPos.setX(drawPos.getX() + 40);
-    // fSlideLine.xScale = 1.0f;
-    // fSlideLine.yScale = yScale;
-    // fSlideLine.drawAt(drawPos);
 
     // Input section
     drawPos.setPos(10, 180);
@@ -307,9 +301,6 @@ void UIRTJam::onDisplay() {
         const float depth = fState.clientIds[i] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[i*2];
         fMeterBar.drawAt(drawPos, height, 1.0 - depth);
         drawPos.setX(drawPos.getX() + spacing);
-        // fSlideLine.xScale = 1.0f;
-        // fSlideLine.yScale = yScale;
-        // fSlideLine.drawAt(drawPos);
 
         // Input 0
         drawPos.setX(drawPos.getX() + spacing-10);
@@ -327,11 +318,25 @@ void UIRTJam::onDisplay() {
         fSlideLine.yScale = yScale;
         fSlideLine.drawAt(drawPos);
     }
-    
-    // LabelBoxes
-    // for(int i=0; i<1; i++) {
-    //     labels[i]->drawMe();
-    // }
+
+    for(int i=1; i<MAX_JAMMERS; i++) {
+        if (fState.clientIds[i] != EMPTY_SLOT) {
+            drawPos.setPos(Corners[i-1]);
+            fNanoText.beginFrame(this);
+            fNanoText.fontFaceId(fNanoFont);
+            fNanoText.fontSize(16);
+            fNanoText.textAlign(NanoVG::ALIGN_CENTER|NanoVG::ALIGN_TOP);
+            fNanoText.fillColor(Color(1.0f, 1.0f, 1.0f));
+            fNanoText.textBox(
+                drawPos.getX(),
+                drawPos.getY() - 18.0f,
+                100.0f,
+                jamDirectory.findUser(fState.clientIds[i]).c_str(),
+                nullptr
+            );
+            fNanoText.endFrame();
+        }
+    }
 
     // printf("5001: %s\n", jamDirectory.findUser(5001).c_str());
     // if (clickOn) {
