@@ -69,6 +69,6 @@ deploy-linux:
 	scp bin/rtjam-vst.so  pi@music.basscleftech.com:/home/pi/www/html/linux
 	scp readme.html  pi@music.basscleftech.com:/home/pi/www/html/index.html
 	cp bin/rtjam ~/bin
-	cp bin/rtjam-vst.so  ~/vsts/Bassclef
+	cp bin/rtjam-vst.so  ~/vsts
 
 .PHONY: all clean install install-user submodule libs plugins gen

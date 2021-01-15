@@ -11,6 +11,9 @@ namespace JamNetStuff {
   }
 
   JamDirectory::JamDirectory() {
+  }
+
+  void JamDirectory::loadFromNetwork() {
     CURL *curl = curl_easy_init();
     if(curl) {
       CURLcode res;
@@ -33,7 +36,6 @@ namespace JamNetStuff {
       curl_easy_cleanup(curl);
     }
   }
-
   std::string JamDirectory::findUser(uint id) {
     std::map<uint, std::string>::iterator it = users.find(id);
     if ( it != users.end()) {

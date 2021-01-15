@@ -29,7 +29,7 @@
 
 #define DISTRHO_PLUGIN_BRAND "basscleftech.com"
 #define DISTRHO_PLUGIN_NAME  "RTJam"
-#define DISTRHO_PLUGIN_URI   "https://basscleftech.com/plugins/rtjam"
+#define DISTRHO_PLUGIN_URI   "http://basscleftech.com/plugins/rtjam"
 
 #define DISTRHO_PLUGIN_HAS_UI        1
 #define DISTRHO_UI_USE_NANOVG        1
