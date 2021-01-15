@@ -16,6 +16,7 @@ namespace JamNetStuff {
   void JamDirectory::loadFromNetwork() {
     CURL *curl = curl_easy_init();
     if(curl) {
+      readBuffer = "";
       CURLcode res;
       curl_easy_setopt(curl, CURLOPT_URL, "http://music.basscleftech.com/users/index.json");
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callback);
@@ -24,9 +25,13 @@ namespace JamNetStuff {
       curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
       if (http_code == 200 && res != CURLE_ABORTED_BY_CALLBACK)
       {
-        directory = json::parse(readBuffer);
-        for (auto& el : directory["users"]) {
-          users.insert(std::make_pair(el["id"], el["name"]));
+        try {
+          directory = json::parse(readBuffer);
+          for (auto& el : directory["users"]) {
+            users.insert(std::make_pair(el["id"], el["name"]));
+          }
+        } catch(...) {
+          printf("failed to parse server json\n");
         }
       }
       else

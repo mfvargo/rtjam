@@ -28,15 +28,18 @@
 #define UI_RTJAM_H
 
 #include "DistrhoUI.hpp"
+#include "NanoVG.hpp"
 #include "ImageWidgets.hpp"
 #include "../common/PartialImage.hpp"
 #include "RTJamArt.hpp"
 #include "levelMeters.hpp"
 #include "../common/MeterBar.hpp"
-// #include "../common/JamDirectory.hpp"
+#include "../common/JamDirectory.hpp"
 // #include "../common/LabelBox.hpp"
 
 #define MAX_ROOMS 3
+
+using DGL::NanoVG;
 
 START_NAMESPACE_DISTRHO
 
@@ -65,7 +68,7 @@ protected:
     void imageSliderDragFinished(ImageSlider* slider) override;
     void imageSliderValueChanged(ImageSlider* slider, float value) override;
 
-    void onNanoDisplay() override;
+    // void onNanoDisplay() override;
     void onDisplay() override;
 
     bool onKeyboard(const KeyboardEvent& ev) override;
@@ -87,7 +90,10 @@ private:
     bool clickOn;
     Point<int> Corners[MAX_JAMMERS-1];
 
-    // LabelBox* labels[MAX_JAMMERS];
+    NanoVG fNanoText;
+    NanoVG::FontId fNanoFont;
+
+    JamNetStuff::JamDirectory jamDirectory;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };
