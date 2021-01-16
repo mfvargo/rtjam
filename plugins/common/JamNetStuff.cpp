@@ -178,6 +178,9 @@ namespace JamNetStuff
     }
 
     void JamSocket::initClient(const char* servername, int port, uint32_t clientId) {
+        // Clear the channel map
+        channelMap.clear();
+        packet.clearChannelMap();
         // Try to set the Type of Service to Voice (for whatever that is worth)
         int tos_local = IPTOS_LOWDELAY;
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
@@ -246,6 +249,7 @@ namespace JamNetStuff
         }
         // Send a packet to the server!
         packet.encodeAudio(buffer, frames);
+        packet.encodeHeader();
         return sendData(&serverAddr);
     }
 
@@ -260,7 +264,7 @@ namespace JamNetStuff
         do {
             nBytes = readData();
             if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
-                // packet.dumpPacket("mikey: ");
+                packet.dumpPacket("mikey: ");
                 jamMixer->addData(&packet);
             }
         } while( isActivated && nBytes > 0);
@@ -290,6 +294,8 @@ namespace JamNetStuff
                 beatCount++;
             }
             packet.setBeatCount(beatCount%4);
+            // We encode the header just once.
+            packet.encodeHeader();
             // printf("nBytes: %d from %lu\n", nBytes, from_addr);
             // channelMap.dumpOut();
             for (int i=0; i<MAX_JAMMERS; i++) {
@@ -325,7 +331,6 @@ namespace JamNetStuff
         return nBytes;
     }
     int JamSocket::sendData(struct sockaddr_in* to_addr) {
-        packet.encodeHeader();
         int rval = sendto(
                 jamSocket,
                 packet.getPacket(),

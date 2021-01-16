@@ -259,6 +259,21 @@ void UIRTJam::onDisplay() {
 
     // Input section
     drawPos.setPos(10, 180);
+    // My Name
+    fNanoText.beginFrame(this);
+    fNanoText.fontFaceId(fNanoFont);
+    fNanoText.fontSize(16);
+    fNanoText.textAlign(NanoVG::ALIGN_CENTER|NanoVG::ALIGN_TOP);
+    fNanoText.fillColor(Color(0.0f, 1.0f, 0.0f));
+    fNanoText.textBox(
+        drawPos.getX(),
+        drawPos.getY() - 36.0f,
+        100.0f,
+        jamDirectory.findUser(fState.clientIds[0]).c_str(),
+        nullptr
+    );
+    fNanoText.endFrame();
+
     // Input level 0
     fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputLeft + 66)/60);
     drawPos.setX(drawPos.getX() + 32);
@@ -326,7 +341,7 @@ void UIRTJam::onDisplay() {
             fNanoText.fontFaceId(fNanoFont);
             fNanoText.fontSize(16);
             fNanoText.textAlign(NanoVG::ALIGN_CENTER|NanoVG::ALIGN_TOP);
-            fNanoText.fillColor(Color(1.0f, 1.0f, 1.0f));
+            fNanoText.fillColor(Color(0.0f, 1.0f, 0.0f));
             fNanoText.textBox(
                 drawPos.getX(),
                 drawPos.getY() - 18.0f,
