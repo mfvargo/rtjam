@@ -178,9 +178,6 @@ namespace JamNetStuff
     }
 
     void JamSocket::initClient(const char* servername, int port, uint32_t clientId) {
-        // Clear the channel map
-        channelMap.clear();
-        packet.clearChannelMap();
         // Try to set the Type of Service to Voice (for whatever that is worth)
         int tos_local = IPTOS_LOWDELAY;
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS,  &tos_local, sizeof(tos_local))) {
@@ -213,6 +210,9 @@ namespace JamNetStuff
 
         // Set the packet to client mode
         packet.setIsClient(true);
+        // Clear the channel map
+        channelMap.clear();
+        packet.clearChannelMap();
     }
 
     void JamSocket::initServer(short port) {
