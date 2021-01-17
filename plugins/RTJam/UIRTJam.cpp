@@ -147,13 +147,13 @@ UIRTJam::UIRTJam()
 
 UIRTJam::~UIRTJam() {
     // Delete the sliders
-    /*
     for (int i=0; i<MIX_CHANNELS; i++) {
         delete fVol[i];
     }
     for (int i=0; i<MAX_ROOMS; i++) {
         delete fRooms[i];
     }
+    /*
     // This is some threadsafe way to null a pointer in the DSP module
     if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
     {
