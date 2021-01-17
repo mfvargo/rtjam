@@ -46,7 +46,8 @@ START_NAMESPACE_DISTRHO
 class UIRTJam : public UI,
                 public ImageButton::Callback,
                 public ImageSlider::Callback,
-                public ImageSwitch::Callback
+                public ImageSwitch::Callback,
+                public ImageKnob::Callback
 {
 public:
     UIRTJam();
@@ -67,6 +68,9 @@ protected:
     void imageSliderDragStarted(ImageSlider* slider) override;
     void imageSliderDragFinished(ImageSlider* slider) override;
     void imageSliderValueChanged(ImageSlider* slider, float value) override;
+    void imageKnobDragStarted(ImageKnob* knob) override;
+    void imageKnobDragFinished(ImageKnob* knob) override;
+    void imageKnobValueChanged(ImageKnob* knob, float value) override;
 
     // void onNanoDisplay() override;
     void onDisplay() override;
@@ -76,6 +80,10 @@ protected:
     bool onMouse(const MouseEvent& ev) override;
     bool onMotion(const MotionEvent& ev) override;
     bool onScroll(const ScrollEvent& ev) override;
+
+    // Draw a channels u/x
+    void drawChannel(int channel);
+    void drawText(int x, int y, const char* strBuf);
 
 private:
     Image fImgBackground;
@@ -94,6 +102,7 @@ private:
     NanoVG::FontId fNanoFont;
 
     JamNetStuff::JamDirectory jamDirectory;
+    std::vector<ImageKnob*> fKnobs;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };

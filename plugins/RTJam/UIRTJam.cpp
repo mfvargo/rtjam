@@ -45,12 +45,31 @@ UIRTJam::UIRTJam()
 {
     fNanoText.loadSharedResources();
     fNanoFont = fNanoText.findFont(NANOVG_DEJAVU_SANS_TTF);
+    Image sliderImage(Art::smallSliderData, Art::smallSliderWidth, Art::smallSliderHeight);
 
+    // Master Volume
+    fSliderMaster = new ImageSlider(this, sliderImage);
+    fSliderMaster->setId(PluginRTJam::paramMasterVol);
+    fSliderMaster->setInverted(true);
+    fSliderMaster->setStartPos(158, 3);
+    fSliderMaster->setEndPos(158, 88);
+    fSliderMaster->setRange(-30.0f, 12.0);
+    fSliderMaster->setCallback(this);
+    // knobs
+    // Image knobImage(Art::knobData, Art::knobWidth, Art::knobHeight);
+    // {
+    //     ImageKnob* const knob(new ImageKnob(this, knobImage, ImageKnob::Vertical));
+    //     knob->setId(PluginRTJam::paramMasterVol);
+    //     knob->setAbsolutePos(162, 45);
+    //     knob->setRange(-30.0f, 12.0f);
+    //     knob->setDefault(0.0f);
+    //     knob->setCallback(this);
+    //     fKnobs.push_back(knob);
+    // }
     // Read envrionment
     clickOn = getenv("CLICK_ON") != NULL;
     
     // level sliders
-    Image sliderImage(Art::smallSliderData, Art::smallSliderWidth, Art::smallSliderHeight);
     Point<int> sliderPosStart(20, 180);
     Point<int> sliderPosEnd(20, 350);
 
@@ -89,8 +108,8 @@ UIRTJam::UIRTJam()
         sliderPosEnd.setPos(sliderPosStart.getX(), sliderPosStart.getY() + 120);
 
         // Input 0
-        sliderPosStart.setX(sliderPosStart.getX() + spacing-7);
-        sliderPosEnd.setX(sliderPosEnd.getX() + spacing - 7);
+        sliderPosStart.setX(sliderPosStart.getX() + spacing-6);
+        sliderPosEnd.setX(sliderPosEnd.getX() + spacing - 6);
         fVol[i*2] = new ImageSlider(this, sliderImage);
         fVol[i*2]->setId(PluginRTJam::paramChanGain1 + i*2);
         fVol[i*2]->setInverted(true);
@@ -99,8 +118,8 @@ UIRTJam::UIRTJam()
         fVol[i*2]->setRange(mixerLow, mixerHigh);
         fVol[i*2]->setCallback(this);
         // Input 1
-        sliderPosStart.setX(sliderPosStart.getX() + spacing);
-        sliderPosEnd.setX(sliderPosEnd.getX() + spacing);
+        sliderPosStart.setX(sliderPosStart.getX() + spacing+4);
+        sliderPosEnd.setX(sliderPosEnd.getX() + spacing+4);
         fVol[i*2+1] = new ImageSlider(this, sliderImage);
         fVol[i*2+1]->setId(PluginRTJam::paramChanGain1 + i*2+1);
         fVol[i*2+1]->setInverted(true);
@@ -119,47 +138,22 @@ UIRTJam::UIRTJam()
         fRooms[i]->setCallback(this);
     }
     fRooms[0]->setDown(true);
-    // Master Volume
-    fSliderMaster = new ImageSlider(this, sliderImage);
-    fSliderMaster->setId(PluginRTJam::paramMasterVol);
-    fSliderMaster->setInverted(true);
-    fSliderMaster->setStartPos(158, 3);
-    fSliderMaster->setEndPos(158, 88);
-    fSliderMaster->setRange(mixerLow, mixerHigh);
-    fSliderMaster->setCallback(this);
+
 
     // set default values
     programLoaded(0);
-
-    // loadSharedResources();
-    // NanoVG::FontId notoSansId = createFontFromMemory("noto_sans", (const uchar *)font_notosans::notosans_ttf, font_notosans::notosans_ttf_size, 0);
-    // printf("NototFont ID: %d\n", notoSansId);
-    // NanoVG::FontId dejaVuSansId = findFont(NANOVG_DEJAVU_SANS_TTF);
-    // printf("DejaFont ID: %d\n", dejaVuSansId);
-
-    // LabelBoxes
-    // for(int i=0; i<2; i++) {
-    //     labels[i] = new LabelBox(this, Size<uint>(400, 400));
-    //     labels[i]->setText("Bobby");
-    //     labels[i]->setFontId(notoSansId);
-    //     labels[i]->setFontSize(36.0f);
-    //     // labels[i]->setAlign(ALIGN_LEFT | ALIGN_MIDDLE);
-    //     // labels[i]->setMargin(Margin(0, 0, labels[i]->getHeight() / 2.0f, 0));
-    //     labels[i]->setAbsolutePos(i*100, 20); 
-    //     labels[i]->setVisible(true);
-    // }
 
 }
 
 UIRTJam::~UIRTJam() {
     // Delete the sliders
-    /*
     for (int i=0; i<MIX_CHANNELS; i++) {
         delete fVol[i];
     }
     for (int i=0; i<MAX_ROOMS; i++) {
         delete fRooms[i];
     }
+    /*
     // This is some threadsafe way to null a pointer in the DSP module
     if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
     {
@@ -255,7 +249,6 @@ void UIRTJam::onDisplay() {
     fImgBackground.draw();
 
     Point<int> drawPos(40, 20);
-    float yScale = 0.7f;
 
     // Input section
     drawPos.setPos(10, 180);
@@ -308,51 +301,9 @@ void UIRTJam::onDisplay() {
     fSlideLine.drawAt(drawPos);
 
     // Channel meters post fader
-    const int height = 140;
-    const int spacing = 27;
     for(int i=1; i<MAX_JAMMERS; i++) {
-        drawPos.setPos(Corners[i-1]);
-        // Smoother
-        const float depth = fState.clientIds[i] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[i*2];
-        fMeterBar.drawAt(drawPos, height, 1.0 - depth);
-        drawPos.setX(drawPos.getX() + spacing);
-
-        // Input 0
-        drawPos.setX(drawPos.getX() + spacing-10);
-        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2] + 60)/60));
-        drawPos.setX(drawPos.getX() + spacing);
-        fSlideLine.xScale = 1.0f;
-        fSlideLine.yScale = yScale;
-        fSlideLine.drawAt(drawPos);
-
-        // Input 1
-        drawPos.setX(drawPos.getX() + spacing);
-        fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[i*2+1] + 60)/60));
-        drawPos.setX(drawPos.getX() + spacing);
-        fSlideLine.xScale = 1.0f;
-        fSlideLine.yScale = yScale;
-        fSlideLine.drawAt(drawPos);
+        drawChannel(i);
     }
-
-    for(int i=1; i<MAX_JAMMERS; i++) {
-        if (fState.clientIds[i] != EMPTY_SLOT) {
-            drawPos.setPos(Corners[i-1]);
-            fNanoText.beginFrame(this);
-            fNanoText.fontFaceId(fNanoFont);
-            fNanoText.fontSize(16);
-            fNanoText.textAlign(NanoVG::ALIGN_CENTER|NanoVG::ALIGN_TOP);
-            fNanoText.fillColor(Color(0.0f, 1.0f, 0.0f));
-            fNanoText.textBox(
-                drawPos.getX(),
-                drawPos.getY() - 18.0f,
-                100.0f,
-                jamDirectory.findUser(fState.clientIds[i]).c_str(),
-                nullptr
-            );
-            fNanoText.endFrame();
-        }
-    }
-
     // printf("5001: %s\n", jamDirectory.findUser(5001).c_str());
     // if (clickOn) {
     //     // Metronome
@@ -364,9 +315,75 @@ void UIRTJam::onDisplay() {
     // }
 }
 
+void UIRTJam::drawChannel(int chan) {
+    Point<int> drawPos(Corners[chan-1]);
+    const int height = 140;
+    const int spacing = 27;
+    char strBuf[32+1];
+    strBuf[32] = '\0';
+
+    // Smooth indicator
+    const float depth = fState.clientIds[chan] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[chan*2];
+    fMeterBar.drawAt(drawPos, height, 1.0 - depth);
+    std::snprintf(strBuf, 32, "%0.02f", depth);
+    drawText(drawPos.getX() - 40, drawPos.getY() + height + 5, strBuf);
+
+    drawPos.setX(drawPos.getX() + spacing);
+
+    // Slide Line for vol control
+    fSlideLine.xScale = 1.0f;
+    fSlideLine.yScale = 0.7f;
+
+    // Input 0 section
+    std::snprintf(strBuf, 32, "%02d dB", int(fVol[chan*2]->getValue()));
+    // printf("chan %d: vol changed to %s\n", chan, strBuf);
+    drawText(drawPos.getX() - 14, drawPos.getY() + height + 5, strBuf);
+    drawPos.setX(drawPos.getX() + spacing-10);
+    fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[chan*2] + 60)/60));
+    drawPos.setX(drawPos.getX() + spacing);
+    fSlideLine.drawAt(drawPos);
+
+    // Input 1 section
+    std::snprintf(strBuf, 32, "%02d dB", int(fVol[chan*2+1]->getValue()));
+    drawText(drawPos.getX(), drawPos.getY() + height + 5, strBuf);
+    drawPos.setX(drawPos.getX() + 4 + spacing);
+    fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[chan*2+1] + 60)/60));
+    drawPos.setX(drawPos.getX() + spacing);
+    fSlideLine.drawAt(drawPos);
+
+    // Name for the jammer
+    if (fState.clientIds[chan] != EMPTY_SLOT) {
+        drawPos = Corners[chan-1];
+        drawText(drawPos.getX(), drawPos.getY() - 18, jamDirectory.findUser(fState.clientIds[chan]).c_str());
+    }
+}
+
+void UIRTJam::drawText(int x, int y, const char* strBuf) {
+    fNanoText.beginFrame(this);
+    fNanoText.fontFaceId(fNanoFont);
+    fNanoText.fontSize(16);
+    fNanoText.textAlign(NanoVG::ALIGN_CENTER|NanoVG::ALIGN_TOP);
+    fNanoText.fillColor(Color(0.0f, 1.0f, 0.0f));
+    fNanoText.textBox(x, y, 100.0f, strBuf, nullptr);
+    fNanoText.endFrame();
+}
 
 // -----------------------------------------------------------------------
 // Optional widget callbacks; return true to stop event propagation, false otherwise.
+void UIRTJam::imageKnobDragStarted(ImageKnob* knob)
+{
+    editParameter(knob->getId(), true);
+}
+
+void UIRTJam::imageKnobDragFinished(ImageKnob* knob)
+{
+    editParameter(knob->getId(), false);
+}
+
+void UIRTJam::imageKnobValueChanged(ImageKnob* knob, float value)
+{
+    setParameterValue(knob->getId(), value);
+}
 
 /**
   A function called when a key is pressed or released.

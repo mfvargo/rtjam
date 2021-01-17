@@ -266,6 +266,9 @@ namespace JamNetStuff
             if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
                 // packet.dumpPacket("mikey: ");
                 jamMixer->addData(&packet);
+            } else {
+                // No data make sure to timeout the channelmap
+                packet.checkChannelTimeouts();
             }
         } while( isActivated && nBytes > 0);
         return rval;

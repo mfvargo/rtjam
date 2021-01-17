@@ -25,6 +25,16 @@ namespace RTJamArt
     const unsigned int background_2Width    = 760;
     const unsigned int background_2Height   = 414;
 
+    extern const char* input_meter_onData;
+    const unsigned int input_meter_onDataSize = 9552;
+    const unsigned int input_meter_onWidth    = 12;
+    const unsigned int input_meter_onHeight   = 199;
+
+    extern const char* knobData;
+    const unsigned int knobDataSize = 528384;
+    const unsigned int knobWidth    = 32;
+    const unsigned int knobHeight   = 4128;
+
     extern const char* meter_offData;
     const unsigned int meter_offDataSize = 7164;
     const unsigned int meter_offWidth    = 12;
