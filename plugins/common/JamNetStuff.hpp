@@ -155,6 +155,7 @@ namespace JamNetStuff
       uint32_t getSequenceNo();
       void dumpPacket(const char*);
       int getChannel();
+      void checkChannelTimeouts() { channelMap.pruneStaleChannels(time(NULL)); };
       void setIsClient(bool val) { isClient = val; };
 
       void clearChannelMap();
