@@ -79,7 +79,7 @@ namespace JamNetStuff
       int getChannel(uint32_t clientId, sockaddr_in *addr = NULL);
       int getChannelBySenderIp(uint32_t clientId, sockaddr_in *addr);
       void setMyId(uint32_t Id);
-      void dumpOut();
+      void dumpOut(bool asIp = true);
       void clear();
       uint32_t getClientId(int idx) { return channels[idx].clientId; };
       void getClientAddr(int idx, sockaddr_in *addr);

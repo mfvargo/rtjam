@@ -58,8 +58,8 @@ namespace JamNetStuff {
         if (addr != NULL) {
           memcpy(&channels[i].Address, addr, sizeof channels[i].Address);
         }
-        printf("adding %d: ", i);
-        dumpOut();
+        printf("client adding %d: ", i);
+        dumpOut(false);
         return i;
       }
     }
@@ -87,8 +87,7 @@ namespace JamNetStuff {
         if (addr != NULL) {
           memcpy(&channels[i].Address, addr, sizeof channels[i].Address);
         }
-        printf("adding %d: ", i);
-        dumpOut();
+        printf("server adding %d: ", i);
         return i;
       }
     }
@@ -99,18 +98,21 @@ namespace JamNetStuff {
     // Never clear out slot 0 cause that's the local dude
     for (int i=startAt; i<MAX_JAMMERS; i++) {
       if (channels[i].clientId != EMPTY_SLOT && (now - channels[i].KeepAlive) > EXPIRATION_IN_SECONDS) {
-        printf("nuking %d: ", i);
-        dumpOut();
+        printf("nuking %d: %u\n", i, channels[i].clientId);
         channels[i].clientId = EMPTY_SLOT;
         memset(&channels[i].Address, '\0', sizeof channels[i].Address);
       }
     }
   }
 
-  void ChannelMap::dumpOut() {
+  void ChannelMap::dumpOut(bool asIp) {
     char ipString[24];
     for (int i=0; i<MAX_JAMMERS; i++) {
-      makeIpString(channels[i].clientId, ipString);
+      if (asIp) {
+        makeIpString(channels[i].clientId, ipString);
+      } else {
+        sprintf(ipString, "%u", channels[i].clientId);
+      }
       printf("%s  ", ipString);
     }
     printf("\n");

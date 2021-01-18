@@ -322,6 +322,13 @@ void UIRTJam::drawChannel(int chan) {
     char strBuf[32+1];
     strBuf[32] = '\0';
 
+    // If nobody is there, then don't draw them
+    if (fState.clientIds[chan] == EMPTY_SLOT) {
+        fVol[chan*2]->setVisible(false);
+        fVol[chan*2+1]->setVisible(false);
+        return;
+    }
+
     // Smooth indicator
     const float depth = fState.clientIds[chan] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[chan*2];
     fMeterBar.drawAt(drawPos, height, 1.0 - depth);
