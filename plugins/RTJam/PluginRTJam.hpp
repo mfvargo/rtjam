@@ -31,8 +31,8 @@
 #include "extra/Mutex.hpp"
 #include "../common/JamNetStuff.hpp"
 #include "../common/JamDirectory.hpp"
-
 #include "../common/Settings.hpp"
+#include "MVerb.h"
 
 class UIRTJam;
 struct RTJamState;
@@ -80,6 +80,7 @@ public:
         paramRoom0,
         paramRoom1,
         paramRoom2,
+        paramReverbChanOne,
         paramCount
     };
 
@@ -170,6 +171,10 @@ private:
 
     float dbToFloat(float value);    
     int frameCount;
+
+    bool reverbOnInputOne;
+    float* reverbBuf[2];
+    MVerb<float> fVerb;
 
     Mutex fMutex;
     RTJamState* fState;

@@ -49,6 +49,9 @@ PluginRTJam::PluginRTJam()
     
     // set default values
     loadProgram(0);
+
+    // ReverbToggle
+    reverbOnInputOne = true;
 }
 
 PluginRTJam::~PluginRTJam() {
@@ -252,6 +255,7 @@ void PluginRTJam::initProgramName(uint32_t index, String& programName) {
 */
 void PluginRTJam::sampleRateChanged(double newSampleRate) {
     fSampleRate = newSampleRate;
+    fVerb.setSampleRate(newSampleRate);
 }
 
 /**
@@ -322,7 +326,10 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
                 // Switch to this room
                 switchRoom(index);
             }
-        break;
+            break;
+        case paramReverbChanOne:
+            reverbOnInputOne = (value > 0.5f);
+            break;
     }
 }
 
@@ -341,8 +348,15 @@ float PluginRTJam::dbToFloat(float value) {
 void PluginRTJam::loadProgram(uint32_t index) {
     printf("loading program %u\n", index);
 
-    // Initialize the jam User directory
-    // jamDirectory.loadFromNetwork();
+    fVerb.setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
+    fVerb.setParameter(MVerb<float>::DENSITY, 0.5f);
+    fVerb.setParameter(MVerb<float>::BANDWIDTHFREQ, 0.5f);
+    fVerb.setParameter(MVerb<float>::DECAY, 0.5f);
+    fVerb.setParameter(MVerb<float>::PREDELAY, 0.5f);
+    fVerb.setParameter(MVerb<float>::SIZE, 0.75f);
+    fVerb.setParameter(MVerb<float>::GAIN, 1.0f);
+    fVerb.setParameter(MVerb<float>::MIX, 0.5f);
+    fVerb.setParameter(MVerb<float>::EARLYMIX, 0.15f);
 
     if (index != 0)
         return;
@@ -362,6 +376,7 @@ void PluginRTJam::activate() {
     jamMixer.gains[0] = dbToFloat(6.0);
     jamMixer.gains[1] = dbToFloat(6.0);
     jamSocket.isActivated = true;
+    fVerb.reset();
 }
 
 void PluginRTJam::deactivate() {
@@ -372,7 +387,6 @@ void PluginRTJam::deactivate() {
 
 void PluginRTJam::run(const float** inputs, float** outputs,
                       uint32_t frames) {
-
     // Get input levels
     float leftPow = 0.0;
     float rightPow = 0.0;
@@ -395,25 +409,41 @@ void PluginRTJam::run(const float** inputs, float** outputs,
     leftInput.addSample(leftPow);
     rightInput.addSample(rightPow);
 
+    // Apply reverb to inputs
+    float left[frames];
+    float right[frames];
+    float* tempOut[2];
+    tempOut[0] = left;
+    tempOut[1] = right;
+    float inLeft[frames];
+    float inRight[frames];
+    float* tempIn[2];
+    tempIn[0] = inLeft;
+    tempIn[1] = inRight;
+    for (uint32_t i=0; i<frames; i++) {
+        // Only give the left input to the reverb engine
+        inLeft[i] = inputs[0][i];
+        inRight[i] = 0.0f;
+    }
+    fVerb.process((const float**) tempIn, tempOut, static_cast<int>(frames));
+    for (uint32_t i=0; i<frames; i++) {
+        if (!reverbOnInputOne) {
+            tempOut[0][i] = inputs[0][i];
+        }
+        tempOut[1][i] = inputs[1][i]; // Copy the right channel back in
+    }
+
     // Local monitoring
-    jamMixer.addLocalMonitor(inputs, frames);
+    jamMixer.addLocalMonitor((const float**) tempOut, frames);
 
     // Do the network thingy..
-    jamSocket.sendPacket(inputs, frames);
+    jamSocket.sendPacket((const float**) tempOut, frames);
     jamSocket.readPackets(&jamMixer);
 
     // Feed the output from the mixer
     jamMixer.getMix(outputs, frames);
     uint32_t ids[MAX_JAMMERS];
     jamSocket.getClientIds(ids);
-    if (++frameCount%2000 == 0) {
-        // for (int i=0; i< MAX_JAMMERS; i++) {
-        //     printf("%d: %s\t", i, jamDirectory.findUser(ids[i]).c_str());
-        // }
-        // printf("\n");
-        // jamMixer.dumpOut();
-    }
-
     
     // Update data to be shared with the U/X
     const MutexLocker csm(fMutex);
