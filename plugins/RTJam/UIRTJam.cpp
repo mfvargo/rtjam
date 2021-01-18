@@ -139,6 +139,13 @@ UIRTJam::UIRTJam()
     }
     fRooms[0]->setDown(true);
 
+    fReverb = new ImageSwitch(this,
+                    Image(Art::room_offData, Art::room_offWidth, Art::room_offHeight, GL_BGR),
+                    Image(Art::room_onData, Art::room_onWidth, Art::room_onHeight, GL_BGR));
+    fReverb->setId(PluginRTJam::paramReverbChanOne);
+    fReverb->setAbsolutePos(10, 385);
+    fReverb->setCallback(this);
+    fReverb->setDown(true);
 
     // set default values
     programLoaded(0);
@@ -153,6 +160,8 @@ UIRTJam::~UIRTJam() {
     for (int i=0; i<MAX_ROOMS; i++) {
         delete fRooms[i];
     }
+
+    delete fReverb;
     /*
     // This is some threadsafe way to null a pointer in the DSP module
     if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
@@ -465,8 +474,11 @@ void UIRTJam::imageSwitchClicked(ImageSwitch* button, bool down) {
                 button->setDown(true);
             }
 
-        break;
+            break;
         case PluginRTJam::paramInputMonitor:
+            setParameterValue(button->getId(), down);
+            break;
+        case PluginRTJam::paramReverbChanOne:
             setParameterValue(button->getId(), down);
         break;
     }
