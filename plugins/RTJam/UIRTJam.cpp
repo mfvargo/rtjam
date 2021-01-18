@@ -328,6 +328,9 @@ void UIRTJam::drawChannel(int chan) {
         fVol[chan*2+1]->setVisible(false);
         return;
     }
+    // show the controls
+    fVol[chan*2]->setVisible(true);
+    fVol[chan*2+1]->setVisible(true);
 
     // Smooth indicator
     const float depth = fState.clientIds[chan] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[chan*2];
