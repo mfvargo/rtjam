@@ -60,7 +60,7 @@ UIRTJam::UIRTJam()
     {
         ImageKnob* const knob(new ImageKnob(this, knobImage, ImageKnob::Vertical));
         knob->setId(PluginRTJam::paramReverbMix);
-        knob->setAbsolutePos(10, 380);
+        knob->setAbsolutePos(10, 365);
         knob->setRange(0.0f, 1.0f);
         knob->setDefault(0.1f);
         knob->setValue(0.1f);
@@ -379,6 +379,10 @@ void UIRTJam::drawChannel(int chan) {
         drawPos = Corners[chan-1];
         drawText(drawPos.getX(), drawPos.getY() - 18, jamDirectory.findUser(fState.clientIds[chan]).c_str());
     }
+    // Reverb Level
+    std::snprintf(strBuf, 32, "%02d%%", int(fKnobs[0]->getValue() * 100));
+    drawText(-20, 395, strBuf);
+
 }
 
 void UIRTJam::drawText(int x, int y, const char* strBuf) {
