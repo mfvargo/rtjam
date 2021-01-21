@@ -233,6 +233,15 @@ void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
             parameter.ranges.min = -60.0f;
             parameter.ranges.max = 12.0f;
             break;
+        case paramReverbMix:
+            parameter.hints      = kParameterIsAutomable;
+            parameter.name       = "Reverb";
+            parameter.symbol     = "reverb";
+            parameter.unit       = "amount";
+            parameter.ranges.def = 0.1f;
+            parameter.ranges.min = 0.0f;
+            parameter.ranges.max = 1.0f;
+            break;
     }
 }
 
@@ -330,6 +339,11 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
         case paramReverbChanOne:
             reverbOnInputOne = (value > 0.5f);
             break;
+        case paramReverbMix:
+            fVerb.setParameter(MVerb<float>::MIX, value);
+            break;
+
+
     }
 }
 
@@ -355,8 +369,8 @@ void PluginRTJam::loadProgram(uint32_t index) {
     fVerb.setParameter(MVerb<float>::PREDELAY, 0.5f);
     fVerb.setParameter(MVerb<float>::SIZE, 0.75f);
     fVerb.setParameter(MVerb<float>::GAIN, 1.0f);
-    fVerb.setParameter(MVerb<float>::MIX, 0.5f);
-    fVerb.setParameter(MVerb<float>::EARLYMIX, 0.15f);
+    fVerb.setParameter(MVerb<float>::MIX, 0.1f);
+    fVerb.setParameter(MVerb<float>::EARLYMIX, 0.5f);
 
     if (index != 0)
         return;
