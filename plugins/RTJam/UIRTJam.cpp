@@ -279,6 +279,12 @@ void UIRTJam::onDisplay() {
     drawPos.setX(drawPos.getX() + 24);
     fMeterBar.drawAt(drawPos, 170, 1.0 - ((fState.channelLevels[0] + 60)/60));
 
+    // Reverb Level
+    char strBuf[32+1];
+    strBuf[32] = '\0';
+    std::snprintf(strBuf, 32, "%02d%%", int(fKnobs[0]->getValue() * 100));
+    drawText(-20, 395, strBuf);
+
     // Input level 1
     drawPos.setX(111);
     fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputRight + 66)/60);
@@ -367,10 +373,6 @@ void UIRTJam::drawChannel(int chan) {
         drawPos = Corners[chan-1];
         drawText(drawPos.getX(), drawPos.getY() - 18, jamDirectory.findUser(fState.clientIds[chan]).c_str());
     }
-    // Reverb Level
-    std::snprintf(strBuf, 32, "%02d%%", int(fKnobs[0]->getValue() * 100));
-    drawText(-20, 395, strBuf);
-
 }
 
 void UIRTJam::drawText(int x, int y, const char* strBuf) {
