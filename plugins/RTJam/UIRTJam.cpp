@@ -56,22 +56,23 @@ UIRTJam::UIRTJam()
     fSliderMaster->setRange(-30.0f, 12.0);
     fSliderMaster->setCallback(this);
     // knobs
-    // Image knobImage(Art::knobData, Art::knobWidth, Art::knobHeight);
-    // {
-    //     ImageKnob* const knob(new ImageKnob(this, knobImage, ImageKnob::Vertical));
-    //     knob->setId(PluginRTJam::paramMasterVol);
-    //     knob->setAbsolutePos(162, 45);
-    //     knob->setRange(-30.0f, 12.0f);
-    //     knob->setDefault(0.0f);
-    //     knob->setCallback(this);
-    //     fKnobs.push_back(knob);
-    // }
+    Image knobImage(Art::knobData, Art::knobWidth, Art::knobHeight);
+    {
+        ImageKnob* const knob(new ImageKnob(this, knobImage, ImageKnob::Vertical));
+        knob->setId(PluginRTJam::paramReverbMix);
+        knob->setAbsolutePos(10, 380);
+        knob->setRange(0.0f, 1.0f);
+        knob->setDefault(0.1f);
+        knob->setValue(0.1f);
+        knob->setCallback(this);
+        fKnobs.push_back(knob);
+    }
     // Read envrionment
     clickOn = getenv("CLICK_ON") != NULL;
     
     // level sliders
     Point<int> sliderPosStart(20, 180);
-    Point<int> sliderPosEnd(20, 350);
+    Point<int> sliderPosEnd(20, 330);
 
     float mixerLow = -30.0f;
     float mixerHigh = 12.0f;
@@ -139,13 +140,13 @@ UIRTJam::UIRTJam()
     }
     fRooms[0]->setDown(true);
 
-    fReverb = new ImageSwitch(this,
-                    Image(Art::room_offData, Art::room_offWidth, Art::room_offHeight, GL_BGR),
-                    Image(Art::room_onData, Art::room_onWidth, Art::room_onHeight, GL_BGR));
-    fReverb->setId(PluginRTJam::paramReverbChanOne);
-    fReverb->setAbsolutePos(10, 385);
-    fReverb->setCallback(this);
-    fReverb->setDown(true);
+    // fReverb = new ImageSwitch(this,
+    //                 Image(Art::room_offData, Art::room_offWidth, Art::room_offHeight, GL_BGR),
+    //                 Image(Art::room_onData, Art::room_onWidth, Art::room_onHeight, GL_BGR));
+    // fReverb->setId(PluginRTJam::paramReverbChanOne);
+    // fReverb->setAbsolutePos(10, 385);
+    // fReverb->setCallback(this);
+    // fReverb->setDown(true);
 
     // set default values
     programLoaded(0);
@@ -161,7 +162,7 @@ UIRTJam::~UIRTJam() {
         delete fRooms[i];
     }
 
-    delete fReverb;
+    // delete fReverb;
     /*
     // This is some threadsafe way to null a pointer in the DSP module
     if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
@@ -200,6 +201,9 @@ void UIRTJam::parameterChanged(uint32_t index, float value) {
           break;
       case PluginRTJam::paramMasterVol:
           fSliderMaster->setValue(value);
+          break;
+      case PluginRTJam::paramReverbMix:
+          fKnobs[0]->setValue(value);
           break;
     }
 }
@@ -277,27 +281,27 @@ void UIRTJam::onDisplay() {
     fNanoText.endFrame();
 
     // Input level 0
-    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputLeft + 66)/60);
+    fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputLeft + 66)/60);
     drawPos.setX(drawPos.getX() + 32);
     // Slider line
     fSlideLine.xScale = 1.0f;
-    fSlideLine.yScale = 1.0f;
+    fSlideLine.yScale = 0.85f;
     fSlideLine.drawAt(drawPos);
     // Output level 0
     drawPos.setX(drawPos.getX() + 24);
-    fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[0] + 60)/60));
+    fMeterBar.drawAt(drawPos, 170, 1.0 - ((fState.channelLevels[0] + 60)/60));
 
     // Input level 1
     drawPos.setX(111);
-    fMeterBar.drawAt(drawPos, 200, 1.0 - (fState.inputRight + 66)/60);
+    fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputRight + 66)/60);
     // Slider line
     drawPos.setX(drawPos.getX() + 32);
     fSlideLine.xScale = 1.0f;
-    fSlideLine.yScale = 1.0f;
+    fSlideLine.yScale = 0.85f;
     fSlideLine.drawAt(drawPos);
     // Output level 1
     drawPos.setX(drawPos.getX() + 24);
-    fMeterBar.drawAt(drawPos, 200, 1.0 - ((fState.channelLevels[1] + 60)/60));
+    fMeterBar.drawAt(drawPos, 170, 1.0 - ((fState.channelLevels[1] + 60)/60));
 
     // Master Volume section
     drawPos.setPos(150, 10);

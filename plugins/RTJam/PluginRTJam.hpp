@@ -81,6 +81,7 @@ public:
         paramRoom1,
         paramRoom2,
         paramReverbChanOne,
+        paramReverbMix,
         paramCount
     };
 
