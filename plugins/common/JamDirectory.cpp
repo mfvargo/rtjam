@@ -20,6 +20,7 @@ namespace JamNetStuff {
       CURLcode res;
       curl_easy_setopt(curl, CURLOPT_URL, "http://music.basscleftech.com/users/index.json");
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, callback);
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT, 2); 
       res = curl_easy_perform(curl);
       long http_code = 0;
       curl_easy_getinfo (curl, CURLINFO_RESPONSE_CODE, &http_code);
