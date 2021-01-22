@@ -1,6 +1,6 @@
 #!/bin/bash
 #/usr/bin/jackd -dalsa -r48000 -p64 -n2 -D -Chw:SigmaI2SCodec,1 -Phw:SigmaI2SCodec,0
-wget -O /home/pi/rtjam music.basscleftech.com/pi/rtjam 
+wget --tries=1 -T 2 -O /home/pi/rtjam music.basscleftech.com/pi/rtjam 
 chmod +x /home/pi/rtjam
 sudo sh -c "echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
 jack_control start
