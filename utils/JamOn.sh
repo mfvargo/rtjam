@@ -10,6 +10,7 @@ jack_control dps rate 48000
 jack_control dps nperiods 2
 jack_control dps period 128
 sleep 2
+cd
 /home/pi/rtjam &
 sleep 2
 jack_connect RTJam:out1 system:playback_1
