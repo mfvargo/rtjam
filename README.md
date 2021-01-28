@@ -46,14 +46,15 @@ The RTJam software also builds on the Raspberry Pi 4 and can be run as a "standa
 
 ![Pi App](Standalone.png)
 
-- Input 1/2 - Shows pre and post fader levels for the users inputs
-- 4 player controls - Each control corresponds to another person in the room. The controls are level sliders for that user's two channels.
+- Room selector - chooses which jam room to occupy
+- Master volume - slider for overall level in the outputs
+- Bottom left faders - Shows pre and post fader levels for the users inputs
+- Player controls (right half side) - Each control set corresponds to another person in the room. The controls are level sliders for that user's two channels.
 
 ### Broadcast Server
-The server just listens for packets from VST clients.  The server dynamically creates channels based on the source address of the client packets and forwards packets to all active listeners.  There is currently no session control.  When you start talking the server will allocate a channel to you if one is open.  If you don't send any packets for 2 seconds, your channel is made available.
+The server just listens for packets from VST clients.  The server dynamically creates channels based on the source address of the client packets and forwards packets to all active listeners.  There is currently no session control.  When you start transmitting the server will allocate a channel to you if one is open.  If you don't send any packets for 1 second, your channel is made available.
 
-TODO: The server needs to timestamp and save the packet streams into an archive that can later be imported into some DAW software for mixing.  It might also be possible to have the VST keep the channels demuxed and provide them to the DAW there for recording.
-
+The server also creates a room mix for each room it hosts.  The PCM output of this mix is written to a FIFO file that can be read by ices or some other podcasting software.
 ### TODOS
 * make server name configurable
 * ensure all clients running the same framerate
@@ -86,30 +87,37 @@ Terminal=false
 Hidden=-false
 ```
 Contents of /home/pi/Desktop/JamOn.sh
+
 ```
 #!/bin/bash
+wget --tries=1 -T 2 -O /home/pi/rtjam music.basscleftech.com/pi/rtjam 
+chmod +x /home/pi/rtjam
+sudo sh -c "echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
 jack_control start
 jack_control ds alsa
-# Note that the device goes with the USB audio device
-jack_control dps device hw:USB
+jack_control dps device hw:USB   # Note device name depends on USB device!
 jack_control dps rate 48000
 jack_control dps nperiods 2
-jack_control dps period 64
-sleep 3
+jack_control dps period 128
+sleep 2
+cd
 /home/pi/rtjam &
-/home/pi/MVerb &
-sleep 3
+sleep 2
 jack_connect RTJam:out1 system:playback_1
 jack_connect RTJam:out2 system:playback_2
-jack_connect system:capture_1 MVerb:in1
-jack_connect MVerb:out1 RTJam:in1
+jack_connect system:capture_1 RTJam:in1
 jack_connect system:capture_2 RTJam:in2
 sleep 1
+
 ```
 ### Using With Sample DAW (Ardour)
 
-You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the RTJam plugin inserted.  I then route outputs 3-12 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
+You can use the VST in a DAW to record sessions for mixing.  In the screen shots below, I have two inputs routed into a channel with the RTJam plugin inserted.  I then route outputs 3-16 of the plugin to separate mono channels that can be record armed and tracked.  Post jam session those tracks can be mixed/engineered. It would also be possible to run a real time mix of those to provide a "house" mix for some kind of live show.
 
-![Ardour Editor](ArdourEditor.png)
+Mixer view of session
 
 ![Ardour Mixer](ArdourMixer.png)
+
+Routing Grid (route the individual tracks from the VST to separate tracks)
+
+![Routing Grid](RoutingGrid.png)
