@@ -4,11 +4,11 @@ Real Time Music Jam
 
 The Real Time Music Jam software is intended to provide low latency audio over the network that will enable performers to make music as if they were in the same place. The system is comprised of a broadcast server that listens on a UDP port for jam packets and some number of clients that create/consume audio data.
 
-The server keeps a table of up to 5 jammers in the "room" and will forward each packet it receives to the other jammers in the room.  It does not transmit the packet back to the orginator (client provides local monitoring).  Multiple servers can be run each on their own udp port (--port option) each corresponding to it's own "room"
+The server keeps a table of up to 7 jammers in the "room" and will forward each packet it receives to the other jammers in the room.  It does not transmit the packet back to the orginator (client provides local monitoring).  The server starts 4 separate threads of excecution each one hosting a room on UDP ports 7891-7894.
 
 Each jam packet has two separate channels of audio so the jammers can have a channel for voice and guitar, stereo keyboards, or whatever they choose.  The two channels are isochronous for that person.
 
-So in this way a room consists of up to 5 jammers each with two channels or 10 separate audio channels
+So in this way a room consists of up to 7 jammers each with two channels or 14 separate audio channels
 
 ## Latency Breakdown
 
@@ -25,7 +25,7 @@ So the bulk of the delay is network transit and jitter buffer.
 
 ## Get The code
 ```
-git clone --recurse-submodules git@github.com:mfvargo/rtjam.git
+git clone --recurse-submodules https://github.com/mfvargo/rtjam.git
 cd rtjam
 make
 ```
@@ -37,7 +37,7 @@ The RTJam plugin is a VST built using the DISTRO/DPF open source framework https
 
 The Plugin will take frames from it's input and push them using UDP to a jamrtime broadcast server.  It will then receive packets from the server that originate from other jamrtime users.  The VST then mixes those channels into a stereo output.  That's the room.
 
-The VST has 12 outputs.  The first two are the mixed channels based on the sliders in the VST.  Outputs 3-12 are the individual channels from the participants in the room.  Using the VST in a DAW package allows all 8 channels to be recorded separately for later mixing.
+The VST has 14 outputs.  The first two are the mixed channels based on the sliders in the VST.  Outputs 3-12 are the individual channels from the participants in the room.  Using the VST in a DAW package allows all 8 channels to be recorded separately for later mixing.
 
 ### Jack Standalone (bin/rtjam)
 The RTJam software also builds on the Raspberry Pi 4 and can be run as a "standalone JACK" application.  This has been the most successful implementation for playing music realtime on the internet.  The Pi has a very stable multimedia jack port that can run 64 sample frames with only 2 period of buffer without the dreaded XRUN issues you see on most other platforms.
