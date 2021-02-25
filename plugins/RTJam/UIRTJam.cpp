@@ -342,7 +342,7 @@ void UIRTJam::drawChannel(int chan) {
     // Smooth indicator
     const float depth = fState.clientIds[chan] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[chan*2];
     fMeterBar.drawAt(drawPos, height, 1.0 - depth);
-    std::snprintf(strBuf, 32, "%0.02f", depth);
+    std::snprintf(strBuf, 32, "%0.0f", depth * 40);
     drawText(drawPos.getX() - 40, drawPos.getY() + height + 5, strBuf);
 
     drawPos.setX(drawPos.getX() + spacing);

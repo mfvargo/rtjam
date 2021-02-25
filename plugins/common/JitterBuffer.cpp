@@ -56,8 +56,8 @@ namespace JamNetStuff
     }
 
     float JitterBuffer::getAvgDepth() {
-        return (targetDepth * 1.0) / MAX_DEPTH;
-        // return bufferStats.mean / targetDepth;
+        // return (targetDepth * 1.0) / MAX_DEPTH;
+        return bufferStats.mean / 1920;  // 1.0 means 40msec
     }
 
     void JitterBuffer::putIn(const float* buffer, int frames, uint32_t seqNo) {
