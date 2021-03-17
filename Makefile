@@ -20,6 +20,8 @@ plugins: libs
 	$(MAKE) all -C plugins/RTJam
 	$(MAKE) all -C plugins/server
 	$(MAKE) all -C plugins/nojack
+	$(MAKE) all -C plugins/uxfree
+	
 
 ifneq ($(CROSS_COMPILING),true)
 gen: plugins dpf/utils/lv2_ttl_generator
@@ -45,6 +47,8 @@ clean:
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	$(MAKE) clean -C plugins/RTJam
 	$(MAKE) clean -C plugins/server
+	$(MAKE) clean -C plugins/nojack
+	$(MAKE) clean -C plugins/uxfree
 	rm -rf bin build
 
 install: all

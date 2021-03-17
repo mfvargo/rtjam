@@ -2,8 +2,6 @@
 #include <iostream>
 #include <fstream>
 
-START_NAMESPACE_DISTRHO
-
   Settings::Settings() {
     // do some constructing
     defValues = {
@@ -44,6 +42,3 @@ START_NAMESPACE_DISTRHO
       infile >> defValues;
     }
   }
-
-
-END_NAMESPACE_DISTRHO
