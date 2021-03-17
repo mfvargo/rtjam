@@ -41,14 +41,21 @@ static void signal_handler ( int sig )
 int
 process ( jack_nframes_t nframes, void *arg )
 {
+    float* inputs[2];
+    float* outputs[2];
+    inputs[0] = (float*) jack_port_get_buffer ( input_ports[0], nframes );
+    inputs[1] = (float*) jack_port_get_buffer ( input_ports[1], nframes );
+    outputs[0] = (float*) jack_port_get_buffer ( output_ports[0], nframes );
+    outputs[1] = (float*) jack_port_get_buffer ( output_ports[1], nframes );
+    pluginRTJam.run((const float**) inputs, outputs, nframes);
     int i;
-    jack_default_audio_sample_t *in, *out;
-    for ( i = 0; i < 2; i++ )
-    {
-        in = (jack_default_audio_sample_t *) jack_port_get_buffer ( input_ports[i], nframes );
-        out = (jack_default_audio_sample_t *) jack_port_get_buffer ( output_ports[i], nframes );
-        memcpy ( out, in, nframes * sizeof ( jack_default_audio_sample_t ) );
-    }
+    // jack_default_audio_sample_t *in, *out;
+    // for ( i = 0; i < 2; i++ )
+    // {
+    //     in = (jack_default_audio_sample_t *) jack_port_get_buffer ( input_ports[i], nframes );
+    //     out = (jack_default_audio_sample_t *) jack_port_get_buffer ( output_ports[i], nframes );
+    //     memcpy ( out, in, nframes * sizeof ( jack_default_audio_sample_t ) );
+    // }
     return 0;
 }
 
@@ -138,6 +145,9 @@ main ( int argc, char *argv[] )
             exit ( 1 );
         }
     }
+
+    /* Fire up the server connection */
+    pluginRTJam.connect("music.basscleftech.com", 7892, 2334);
 
     /* Tell the JACK server that we are ready to roll.  Our
      * process() callback will start running now. */
