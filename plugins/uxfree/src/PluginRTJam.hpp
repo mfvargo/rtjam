@@ -4,6 +4,7 @@
 #include "JamNetStuff.hpp"
 #include "JamDirectory.hpp"
 #include "Settings.hpp"
+#include "LevelData.hpp"
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -17,7 +18,11 @@ class PluginRTJam {
   private:
     JamNetStuff::JamSocket m_jamSocket;
     JamNetStuff::JamMixer m_jamMixer;
+    JamNetStuff::StreamTimeStats leftInput;
+    JamNetStuff::StreamTimeStats rightInput;
     float* m_outputs[NUM_OUTPUTS];
+    LevelData m_levelData;
+    uint64_t m_framecount;
 };
 
 #endif

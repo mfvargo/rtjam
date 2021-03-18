@@ -1,9 +1,3 @@
-/** @file thru_client.c
- *
- * @brief This simple through client demonstrates the basic features of JACK
- * as they would be used by many applications.
- */
-
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -14,17 +8,13 @@
 #include <unistd.h>
 #endif
 #include <jack/jack.h>
-
 #include "PluginRTJam.hpp"
-
-PluginRTJam pluginRTJam;
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
 jack_client_t *client;
 
-static void signal_handler ( int sig )
-{
+static void signal_handler ( int sig ) {
     jack_client_close ( client );
     fprintf ( stderr, "signal received, exiting ...\n" );
     exit ( 0 );
@@ -33,29 +23,19 @@ static void signal_handler ( int sig )
 /**
  * The process callback for this JACK application is called in a
  * special realtime thread once for each audio cycle.
- *
- * This client follows a simple rule: when the JACK transport is
- * running, copy the input port to the output.  When it stops, exit.
  */
 
-int
-process ( jack_nframes_t nframes, void *arg )
+int process ( jack_nframes_t nframes, void *arg )
 {
+    PluginRTJam* p_pluginRTJam = (PluginRTJam* ) arg;
     float* inputs[2];
     float* outputs[2];
     inputs[0] = (float*) jack_port_get_buffer ( input_ports[0], nframes );
     inputs[1] = (float*) jack_port_get_buffer ( input_ports[1], nframes );
     outputs[0] = (float*) jack_port_get_buffer ( output_ports[0], nframes );
     outputs[1] = (float*) jack_port_get_buffer ( output_ports[1], nframes );
-    pluginRTJam.run((const float**) inputs, outputs, nframes);
-    int i;
-    // jack_default_audio_sample_t *in, *out;
-    // for ( i = 0; i < 2; i++ )
-    // {
-    //     in = (jack_default_audio_sample_t *) jack_port_get_buffer ( input_ports[i], nframes );
-    //     out = (jack_default_audio_sample_t *) jack_port_get_buffer ( output_ports[i], nframes );
-    //     memcpy ( out, in, nframes * sizeof ( jack_default_audio_sample_t ) );
-    // }
+    // Call the run function
+    p_pluginRTJam->run((const float**) inputs, outputs, nframes);
     return 0;
 }
 
@@ -63,47 +43,29 @@ process ( jack_nframes_t nframes, void *arg )
  * JACK calls this shutdown_callback if the server ever shuts down or
  * decides to disconnect the client.
  */
-void
-jack_shutdown ( void *arg )
-{
+void jack_shutdown ( void *arg ) {
     free ( input_ports );
     free ( output_ports );
     exit ( 1 );
 }
 
-int
-main ( int argc, char *argv[] )
-{
+int main ( int argc, char *argv[]) {
+
     int i;
     const char **ports;
-    const char *client_name;
+    const char *client_name = "rtjam";
     const char *server_name = NULL;
     jack_options_t options = JackNullOption;
     jack_status_t status;
 
-	if (argc >= 2) {		/* client name specified? */
-		client_name = argv[1];
-		if (argc >= 3) {	/* server name specified? */
-			server_name = argv[2];
-			int my_option = JackNullOption | JackServerName;
-			options = (jack_options_t)my_option;
-		}
-	} else {			/* use basename of argv[0] */
-		client_name = strrchr(argv[0], '/');
-		if (client_name == 0) {
-			client_name = argv[0];
-		} else {
-			client_name++;
-		}
-	}
+    PluginRTJam pluginRTJam;
 
 
     /* open a client connection to the JACK server */
 
     client = jack_client_open ( client_name, options, &status, server_name );
     if ( client == NULL ) {
-        fprintf ( stderr, "jack_client_open() failed, "
-                  "status = 0x%2.0x\n", status );
+        fprintf ( stderr, "jack_client_open() failed, status = 0x%2.0x\n", status );
         if ( status & JackServerFailed ) {
             fprintf ( stderr, "Unable to connect to JACK server\n" );
         }
@@ -117,16 +79,7 @@ main ( int argc, char *argv[] )
         fprintf ( stderr, "unique name `%s' assigned\n", client_name );
     }
 
-    /* tell the JACK server to call `process()' whenever
-       there is work to be done.
-    */
-
-    jack_set_process_callback ( client, process, 0 );
-
-    /* tell the JACK server to call `jack_shutdown()' if
-       it ever shuts down, either entirely, or if it
-       just decides to stop calling us.
-    */
+    jack_set_process_callback ( client, process, &pluginRTJam );
 
     jack_on_shutdown ( client, jack_shutdown, 0 );
 
@@ -147,7 +100,7 @@ main ( int argc, char *argv[] )
     }
 
     /* Fire up the server connection */
-    pluginRTJam.connect("music.basscleftech.com", 7892, 2334);
+    pluginRTJam.connect("music.basscleftech.com", 7892, 2335);
 
     /* Tell the JACK server that we are ready to roll.  Our
      * process() callback will start running now. */
@@ -190,28 +143,16 @@ main ( int argc, char *argv[] )
     free ( ports );
 
     /* install a signal handler to properly quits jack client */
-#ifdef WIN32
-    signal ( SIGINT, signal_handler );
-    signal ( SIGABRT, signal_handler );
-    signal ( SIGTERM, signal_handler );
-#else
     signal ( SIGQUIT, signal_handler );
     signal ( SIGTERM, signal_handler );
     signal ( SIGHUP, signal_handler );
     signal ( SIGINT, signal_handler );
-#endif
 
     /* keep running until the transport stops */
-
     while (1)
     {
-#ifdef WIN32
-        Sleep ( 1000 );
-#else
         sleep ( 1 );
-#endif
     }
-
     jack_client_close ( client );
     exit ( 0 );
 }

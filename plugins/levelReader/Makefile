@@ -1,19 +1,13 @@
-TARGET ?= ../../bin/uxfree
+TARGET ?= ../../bin/leverReader
 SRC_DIRS ?= ./src ../common
 
 CC = gcc
 
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
-	./src/uxfree.cpp \
-	./src/PluginRTJam.cpp \
+	./src/levelReader.cpp \
 	../common/LevelData.cpp \
-	../common/JamNetStuff.cpp \
-	../common/JamMixer.cpp \
-	../common/JitterBuffer.cpp \
-	../common/ChannelMap.cpp \
 	../common/SharedMemory.cpp \
-	../common/TimersAndStats.cpp
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)
