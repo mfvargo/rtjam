@@ -14,5 +14,5 @@ void LevelData::lock() {
 }
 
 void LevelData::unlock() {
-    m_sharedMemory.Lock();
+    m_sharedMemory.UnLock();
 }

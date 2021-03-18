@@ -23,6 +23,7 @@ class PluginRTJam {
     float* m_outputs[NUM_OUTPUTS];
     LevelData m_levelData;
     uint64_t m_framecount;
+    RTJamLevels m_levels;
 };
 
 #endif

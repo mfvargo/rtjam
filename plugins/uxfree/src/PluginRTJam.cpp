@@ -54,21 +54,25 @@ void PluginRTJam::run(const float** inputs, float** outputs, uint32_t frames) {
   leftInput.addSample(leftPow);
   rightInput.addSample(rightPow);
 
+  // Store organized levels
+  for (int i = 0; i < MIX_CHANNELS; i++) {
+    m_levels.channelLevels[i] = m_jamMixer.channelLevels[i];
+    m_levels.bufferDepths[i] = m_jamMixer.bufferDepths[i];
+  }
+  for (int i=0; i< MAX_JAMMERS; i++) {
+    m_levels.clientIds[i] = ids[i];
+  }
+  m_levels.masterLevel = m_jamMixer.masterLevel;
+  m_levels.inputLeft = leftInput.mean;
+  m_levels.inputRight = rightInput.mean;
+  m_levels.beat = m_jamMixer.getBeat();
+
   // Update levels in shared mem
-  if (m_framecount > 4800) {
-    // every 100 msec
+  if (m_framecount > 24000) {
+    // every 500 msec
     m_framecount = 0;
-    for (int i = 0; i < MIX_CHANNELS; i++) {
-      m_levelData.m_pJamLevels->channelLevels[i] = m_jamMixer.channelLevels[i];
-      m_levelData.m_pJamLevels->bufferDepths[i] = m_jamMixer.bufferDepths[i];
-    }
-    for (int i=0; i< MAX_JAMMERS; i++) {
-      m_levelData.m_pJamLevels->clientIds[i] = ids[i];
-    }
-    m_levelData.m_pJamLevels->masterLevel = m_jamMixer.masterLevel;
-    m_levelData.m_pJamLevels->inputLeft = leftInput.mean;
-    m_levelData.m_pJamLevels->inputRight = rightInput.mean;
-    m_levelData.m_pJamLevels->beat = m_jamMixer.getBeat();
+    memcpy(m_levelData.m_pJamLevels, &m_levels, sizeof(RTJamLevels));
+    m_levelData.unlock();
   }
 
 

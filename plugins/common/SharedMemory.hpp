@@ -56,7 +56,6 @@ public:
       A_WRITE = PROT_WRITE,
    } ATTACH_MODE;
  
-   static const string sLockSemaphoreName;
 public:
    CSharedMemory(const string& sName );
    ~CSharedMemory();

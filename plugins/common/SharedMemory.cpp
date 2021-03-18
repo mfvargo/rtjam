@@ -4,15 +4,13 @@
 #include <cstdio>
 #include <cstdlib>
  
-const string CSharedMemory::sLockSemaphoreName = "/semaphoreInit";
-
 CSharedMemory::CSharedMemory( const string& sName ):m_sName(sName),m_Ptr(NULL),m_iD(-1),
    m_SemID(NULL), m_nSize(0)
 {
    /**
    * Semaphore open
    */
-   m_SemID = sem_open(sLockSemaphoreName.c_str(), O_CREAT, S_IRUSR | S_IWUSR, 1);
+   m_SemID = sem_open(sName.c_str(), O_CREAT, S_IRUSR | S_IWUSR, 1);
 }
  
 bool CSharedMemory::Create( size_t nSize, int mode /*= READ_WRITE*/ )
@@ -71,19 +69,26 @@ bool CSharedMemory::Detach()
  
 bool CSharedMemory::Lock()
 {
+   int sval;
+   sem_getvalue(m_SemID, &sval);
+   printf("sem val: %d\n", sval);
    sem_wait(m_SemID);
    return true;
 }
  
 bool CSharedMemory::UnLock()
 {
-   sem_post(m_SemID);
+   int sval;
+   // sem_getvalue(m_SemID, &sval);
+   // if (sval == 0) {
+      sem_post(m_SemID);
+   // }
    return true;
 }
  
 CSharedMemory::~CSharedMemory()
 {
-   Clear();
+   // Clear();
 }
  
 void CSharedMemory::Clear()
@@ -110,7 +115,7 @@ void CSharedMemory::Clear()
       /**
       * Semaphore unlink: Remove a named semaphore  from the system.
       */
-      if ( sem_unlink(sLockSemaphoreName.c_str()) < 0 )
+      if ( sem_unlink(m_sName.c_str()) < 0 )
       {
          perror("sem_unlink");
       }
