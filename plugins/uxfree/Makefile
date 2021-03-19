@@ -8,11 +8,13 @@ SRCS = \
 	./src/uxfree.cpp \
 	./src/PluginRTJam.cpp \
 	../common/LevelData.cpp \
+	../common/ParamData.cpp \
 	../common/JamNetStuff.cpp \
 	../common/JamMixer.cpp \
 	../common/JitterBuffer.cpp \
 	../common/ChannelMap.cpp \
 	../common/SharedMemory.cpp \
+	../common/MessageQueue.cpp \
 	../common/TimersAndStats.cpp
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))

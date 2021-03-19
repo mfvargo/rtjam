@@ -99,6 +99,9 @@ int main ( int argc, char *argv[]) {
         }
     }
 
+    /* init shared memory threads */
+    pluginRTJam.init();
+    
     /* Fire up the server connection */
     pluginRTJam.connect("music.basscleftech.com", 7892, 2335);
 

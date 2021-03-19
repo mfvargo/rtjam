@@ -2,6 +2,20 @@
 
 #define MAX_FIFO_FRAME_SIZE 1024
 
+void levelPush(PluginRTJam* pJamPlugin) {
+  while (1) {
+    std::this_thread::sleep_for(std::chrono::microseconds(1000000));
+    pJamPlugin->syncLevels();
+  }
+}
+
+void paramFetch(PluginRTJam* pJamPlugin) {
+  pJamPlugin->paramFlush();
+  while(1) {
+    pJamPlugin->getParams();
+  }
+}
+
 PluginRTJam::PluginRTJam() {
   m_framecount = 0;
   for (int i=0; i<NUM_OUTPUTS; i++) {
@@ -13,6 +27,25 @@ PluginRTJam::~PluginRTJam() {
   for (int i=0; i<NUM_OUTPUTS; i++) {
     delete m_outputs[i];
   }
+}
+
+void PluginRTJam::init() {
+  m_threads.push_back(std::thread(levelPush, this)); 
+  m_threads.push_back(std::thread(paramFetch, this)); 
+}
+
+void PluginRTJam::syncLevels() {
+  memcpy(m_levelData.m_pJamLevels, &m_levels, sizeof(RTJamLevels));
+  m_levelData.unlock();
+}
+
+void PluginRTJam::paramFlush() {
+  m_paramData.flush();
+}
+
+void PluginRTJam::getParams() {
+  m_paramData.receive(&m_param);
+  printf("received param %d: %s\n", m_param.param, m_param.sValue);
 }
 
 void PluginRTJam::connect(const char* host, int port, uint32_t id) {
@@ -66,15 +99,6 @@ void PluginRTJam::run(const float** inputs, float** outputs, uint32_t frames) {
   m_levels.inputLeft = leftInput.mean;
   m_levels.inputRight = rightInput.mean;
   m_levels.beat = m_jamMixer.getBeat();
-
-  // Update levels in shared mem
-  if (m_framecount > 24000) {
-    // every 500 msec
-    m_framecount = 0;
-    memcpy(m_levelData.m_pJamLevels, &m_levels, sizeof(RTJamLevels));
-    m_levelData.unlock();
-  }
-
 
   for ( int i = 0; i < 2; i++ ) {
     memcpy(outputs[i], m_outputs[i], frames * sizeof(float));

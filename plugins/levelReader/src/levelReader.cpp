@@ -1,4 +1,5 @@
 #include "LevelData.hpp"
+#include "ParamData.hpp"
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -10,8 +11,16 @@ int main(int argc, char* argv[])
 {
   int cnt = 0;
   LevelData levelData;
+  ParamData paramData;
+  RTJamParam param;
 
-  while(cnt < 10000) {
+  paramData.flush();
+
+  while(cnt < 3000) {
+    // send a param
+    param.param = 1;
+    sprintf(param.sValue, "dude! %d", rand());
+    paramData.send(&param);
     levelData.lock();
       printf("%d:reading level Data\n", cnt++);
       for (int i=0; i<MAX_JAMMERS; i++) {

@@ -1,12 +1,11 @@
-#ifndef SHARED_MEMORY_RTJAM
-#define SHARED_MEMORY_RTJAM
+#ifndef MESSAGE_QUEUE_RTJAM
+#define MESSAGE_QUEUE_RTJAM
 
 #include<string>
 #include <sys/mman.h>
 #include <sys/stat.h>        /* For mode constants */
-#include <sys/mman.h>
 #include <fcntl.h>           /* For O_* constants */
-#include <semaphore.h>
+#include <mqueue.h>
 #include <unistd.h>
 using namespace std;
  
@@ -14,22 +13,22 @@ using namespace std;
  *   Signals a problem with the execution of a SharedMemory call.
  */
  
-class CSharedMemoryException: public std::exception
+class CMessageQueueException: public std::exception
 {
 public:
     /**
-   *   Construct a SharedMemoryException with a explanatory message.
+   *   Construct a MessageQueueException with a explanatory message.
    *   @param message explanatory message
    *   @param bSysMsg true if system message (from strerror(errno))
    *   should be postfixed to the user provided message
    */
-    CSharedMemoryException(const string &message, bool bSysMsg = false) throw();
+    CMessageQueueException(const string &message, bool bSysMsg = false) throw();
  
  
     /** Destructor.
      * Virtual to allow for subclassing.
      */
-    virtual ~CSharedMemoryException() throw ();
+    virtual ~CMessageQueueException() throw ();
  
     /** Returns a pointer to the (constant) error description.
      *  @return A pointer to a \c const \c char*. The underlying memory
@@ -44,43 +43,19 @@ protected:
     std::string m_sMsg;
 };
  
-class CSharedMemory
+class CMessageQueue
 {
 public:
-   enum
-   {
-      C_READ_ONLY  = O_RDONLY,
-      C_READ_WRITE = O_RDWR,
-   } CREATE_MODE;
-    
-   enum
-   {
-      A_READ  = PROT_READ,
-      A_WRITE = PROT_WRITE,
-   } ATTACH_MODE;
+   CMessageQueue(const string& sName, int msgSize );
+   ~CMessageQueue();
+   void flush();
+   void send(void* msg, int size);
+   void recv(void* msg, int size);
  
-public:
-   CSharedMemory(const string& sName );
-   ~CSharedMemory();
- 
-   
-   bool Create(size_t nSize, int mode = C_READ_WRITE);
-   bool Attach(int mode = A_READ | A_WRITE);
-   bool Detach();
-   bool Lock();
-   bool UnLock();
-   int GetID() { return m_iD; }
-   void* GetData() { return m_Ptr; };
-   const void* GetData() const { return m_Ptr; }
-private:
-   void Clear();
 private:
    string m_sName;
-   int m_iD;
-   sem_t* m_SemID;
-   size_t m_nSize;
-   void* m_Ptr;
- 
+   mqd_t m_queueID;
+   mq_attr m_attrs;
 };
 
 #endif

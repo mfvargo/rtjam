@@ -7,6 +7,8 @@ CC = gcc
 SRCS = \
 	./src/levelReader.cpp \
 	../common/LevelData.cpp \
+	../common/ParamData.cpp \
+	../common/MessageQueue.cpp \
 	../common/SharedMemory.cpp \
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
