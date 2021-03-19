@@ -35,6 +35,8 @@ class PluginRTJam {
     uint64_t m_framecount;
     RTJamLevels m_levels;
     std::vector<std::thread> m_threads;
+    Settings m_settings;
+    JamNetStuff::JamDirectory m_jamDirectory;
 };
 
 #endif

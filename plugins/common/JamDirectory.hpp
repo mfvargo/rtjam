@@ -13,6 +13,7 @@ namespace JamNetStuff {
       JamDirectory();
       void loadFromNetwork();
       std::string findUser(uint id);
+      void printOut();
 
     private:
       json directory;

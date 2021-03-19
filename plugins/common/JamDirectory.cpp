@@ -51,4 +51,9 @@ namespace JamNetStuff {
     }
   }
 
+  void JamDirectory::printOut() {
+    for (auto& el : users) {
+      printf("id: %d, name: %s\n", el.first, el.second.c_str());
+    }
+  }
 }

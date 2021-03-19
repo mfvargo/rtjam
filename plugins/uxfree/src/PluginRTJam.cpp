@@ -33,6 +33,12 @@ PluginRTJam::~PluginRTJam() {
 }
 
 void PluginRTJam::init() {
+  m_jamDirectory.loadFromNetwork();
+  m_jamDirectory.printOut();
+  m_settings.loadFromFile();
+  std::string serverName = m_settings.getOrSetValue("server", std::string(SERVER_NAME));
+  printf("server: %s\n", serverName.c_str());
+  m_settings.saveToFile();
   m_threads.push_back(std::thread(levelPush, this)); 
   m_threads.push_back(std::thread(paramFetch, this)); 
 }
