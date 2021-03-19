@@ -23,6 +23,7 @@ class PluginRTJam {
     void connect(const char* host, int port, uint32_t id);
 
   private:
+    float dbToFloat(float value);
     JamNetStuff::JamSocket m_jamSocket;
     JamNetStuff::JamMixer m_jamMixer;
     JamNetStuff::StreamTimeStats leftInput;

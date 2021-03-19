@@ -103,7 +103,7 @@ int main ( int argc, char *argv[]) {
     pluginRTJam.init();
     
     /* Fire up the server connection */
-    pluginRTJam.connect("music.basscleftech.com", 7892, 2335);
+    // pluginRTJam.connect("music.basscleftech.com", 7892, 2335);
 
     /* Tell the JACK server that we are ready to roll.  Our
      * process() callback will start running now. */

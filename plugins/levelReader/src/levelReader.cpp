@@ -16,13 +16,20 @@ int main(int argc, char* argv[])
 
   paramData.flush();
 
-  while(cnt < 3000) {
+  param.param = paramRoomChange;
+  param.iValue = 7892;
+  param.iValue2 = 4567;
+  sprintf(param.sValue, "music.basscleftech.com");
+  paramData.send(&param);
+
+  while(cnt++ < 3000) {
     // send a param
-    param.param = 1;
+    param.param = paramMasterVol;
+    param.fValue = cnt%2 ? -60.0 : 0.0;
     sprintf(param.sValue, "dude! %d", rand());
     paramData.send(&param);
     levelData.lock();
-      printf("%d:reading level Data\n", cnt++);
+      printf("%d:reading level Data\n", cnt);
       for (int i=0; i<MAX_JAMMERS; i++) {
         printf("Depth: %0.0f  ", levelData.m_pJamLevels->bufferDepths[i] * 40);
       }

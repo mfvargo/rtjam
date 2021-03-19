@@ -4,9 +4,35 @@
 #include "JamNetStuff.hpp"
 #include "MessageQueue.hpp"
 
+enum RTJamParameters
+  {
+      paramChanGain1 = 0,
+      paramChanGain2,
+      paramChanGain3,
+      paramChanGain4,
+      paramChanGain5,
+      paramChanGain6,
+      paramChanGain7,
+      paramChanGain8,
+      paramChanGain9,
+      paramChanGain10,
+      paramChanGain11,
+      paramChanGain12,
+      paramChanGain13,
+      paramChanGain14,
+      paramMasterVol,
+      paramInputMonitor,
+      paramRoom0,
+      paramRoom1,
+      paramRoom2,
+      paramReverbChanOne,
+      paramReverbMix,
+      paramRoomChange,
+      paramCount
+};
 
 struct RTJamParam {
-  int param;
+  RTJamParameters param;
   int iValue;
   int iValue2;
   float fValue;

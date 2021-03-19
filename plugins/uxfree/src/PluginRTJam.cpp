@@ -2,6 +2,9 @@
 
 #define MAX_FIFO_FRAME_SIZE 1024
 
+static const float kAMP_DB = 8.656170245f;
+
+
 void levelPush(PluginRTJam* pJamPlugin) {
   while (1) {
     std::this_thread::sleep_for(std::chrono::microseconds(1000000));
@@ -43,9 +46,46 @@ void PluginRTJam::paramFlush() {
   m_paramData.flush();
 }
 
+float PluginRTJam::dbToFloat(float value) {
+    if (value < -59.5) {
+        return 0.0f;
+    }
+    return std::exp( (value/72.0f) * 72.0f / kAMP_DB);
+}
+
 void PluginRTJam::getParams() {
   m_paramData.receive(&m_param);
   printf("received param %d: %s\n", m_param.param, m_param.sValue);
+  switch(m_param.param) {
+    case paramChanGain1:
+    case paramChanGain2:
+    case paramChanGain3:
+    case paramChanGain4:
+    case paramChanGain5:
+    case paramChanGain6:
+    case paramChanGain7:
+    case paramChanGain8:
+    case paramChanGain9:
+    case paramChanGain10:
+    case paramChanGain11:
+    case paramChanGain12:
+    case paramChanGain13:
+    case paramChanGain14:
+      if (m_param.fValue < -29.9) {
+          m_param.fValue = -60.0;
+      }
+      m_jamMixer.gains[m_param.param - paramChanGain1] = dbToFloat(m_param.fValue);
+      break;
+    case paramMasterVol:
+      m_jamMixer.masterVol = dbToFloat(m_param.fValue);
+      break;
+    case paramReverbMix:
+      // fVerb.setParameter(MVerb<float>::MIX, value);
+      break;
+    case paramRoomChange:
+      connect(m_param.sValue, m_param.iValue, m_param.iValue2);
+      break;
+  }
 }
 
 void PluginRTJam::connect(const char* host, int port, uint32_t id) {
