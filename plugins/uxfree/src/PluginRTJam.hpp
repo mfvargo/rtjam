@@ -2,12 +2,10 @@
 #define PLUGIN_RTJAM_HPP
 
 #include "JamNetStuff.hpp"
-#include "JamDirectory.hpp"
-#include "Settings.hpp"
 #include "LevelData.hpp"
 #include "ParamData.hpp"
 #include <thread>
-
+#include <vector>
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -21,6 +19,7 @@ class PluginRTJam {
     void paramFlush();
     void getParams();
     void connect(const char* host, int port, uint32_t id);
+    void disconnect();
 
   private:
     float dbToFloat(float value);
@@ -35,8 +34,6 @@ class PluginRTJam {
     uint64_t m_framecount;
     RTJamLevels m_levels;
     std::vector<std::thread> m_threads;
-    Settings m_settings;
-    JamNetStuff::JamDirectory m_jamDirectory;
 };
 
 #endif
