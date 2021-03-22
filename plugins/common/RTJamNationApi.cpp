@@ -9,58 +9,104 @@ RTJamNationApi::RTJamNationApi(string urlbase) {
   m_urlBase = urlbase;
 }
 
-void RTJamNationApi::testMe(string url) {
-  resultJson = json::parse("{}");
-  restincurl::Client client;
-  client.Build()->Get(m_urlBase + url)
-      .Trace()
-      .Option(CURLOPT_SSL_VERIFYPEER, 0L)
-      .AcceptJson()
-      .Header("X-Client", "restincurl")
-      .Trace()
-      .WithCompletion([](const restincurl::Result& result) {
-        clog << result.msg << endl;
-        try {
-          resultJson = json::parse(result.body);
-        } catch (...) {
-          clog << "Failed to parse server json" << endl;
-        }
-        clog << "In callback! HTTP result code was " << result.http_response_code << endl;
-        clog << "Data was " << result.body.size() << " bytes." << endl;
-        clog << resultJson << endl;
-        // m_resultBody = json::parse(result.body);
-      })
-      .Execute();
-
-  // If the client goes out of scope, it will terminate all ongoing
-  // requests, so we need to wait here for the request to finish.
-
-  // Tell client that we want to close when the request is finish
-  client.CloseWhenFinished();
-
-  // Wait for the worker-thread in the client to quit
-  client.WaitForFinish();
+bool RTJamNationApi::status() {
+  json args;
+  return get(m_urlBase + "status", args);
 }
 
 bool RTJamNationApi::jamUnitPing(string token) {
+  json args;
+  args["token"] = token;
+  return put(m_urlBase + "jamUnit/ping", args);
+}
+
+bool RTJamNationApi::broadcastUnitPing(string token) {
+  json args;
+  args["token"] = token;
+  return put(m_urlBase + "broadcastUnit/ping", args);
+}
+
+bool RTJamNationApi::activateRoom(string token, string name, int port) {
+  json args;
+  args["token"] = token;
+  args["name"] = name;
+  args["port"] = port;
+  return post(m_urlBase + "room", args);
+}
+
+
+bool RTJamNationApi::get(string url, json body) {
   string data;
   restincurl::Client client;
   CURLcode curlCode;
 
-  client.Build()->Put(m_urlBase + "jamUnit/" + token)
-        .Option(CURLOPT_VERBOSE, 1L)
+  client.Build()->Get(url)
+        .Option(CURLOPT_VERBOSE, 0L)
         .AcceptJson()
         .StoreData(data)
         .WithJson()
-        .SendData<string>("{}")
+        .SendData<string>(body.dump())
         .Header("X-Client", "restincurl")
         .WithCompletion([&](const Result& result) {
+          curlCode = result.curl_code;
           clog << result.msg << endl;
           clog << "PUT response: " << data << endl;
         })
-        .Execute();
-  client.CloseWhenFinished();
-  client.WaitForFinish();
+        .ExecuteSynchronous();
+  if (curlCode == CURLE_OK) {
+    try {
+      m_resultBody = json::parse(data);
+    } catch (...) {
+      clog << "Failed to parse server json" << endl;
+    }
+  }
+  return (curlCode == CURLE_OK);
+}
+bool RTJamNationApi::put(string url, json body) {
+  string data;
+  restincurl::Client client;
+  CURLcode curlCode;
+
+  client.Build()->Put(url)
+        .Option(CURLOPT_VERBOSE, 0L)
+        .AcceptJson()
+        .StoreData(data)
+        .WithJson()
+        .SendData<string>(body.dump())
+        .Header("X-Client", "restincurl")
+        .WithCompletion([&](const Result& result) {
+          curlCode = result.curl_code;
+          clog << result.msg << endl;
+          clog << "PUT response: " << data << endl;
+        })
+        .ExecuteSynchronous();
+  if (curlCode == CURLE_OK) {
+    try {
+      m_resultBody = json::parse(data);
+    } catch (...) {
+      clog << "Failed to parse server json" << endl;
+    }
+  }
+  return (curlCode == CURLE_OK);
+}
+bool RTJamNationApi::post(string url, json body) {
+  string data;
+  restincurl::Client client;
+  CURLcode curlCode;
+
+  client.Build()->Post(url)
+        .Option(CURLOPT_VERBOSE, 0L)
+        .AcceptJson()
+        .StoreData(data)
+        .WithJson()
+        .SendData<string>(body.dump())
+        .Header("X-Client", "restincurl")
+        .WithCompletion([&](const Result& result) {
+          curlCode = result.curl_code;
+          clog << result.msg << endl;
+          clog << "PUT response: " << data << endl;
+        })
+        .ExecuteSynchronous();
   if (curlCode == CURLE_OK) {
     try {
       m_resultBody = json::parse(data);
