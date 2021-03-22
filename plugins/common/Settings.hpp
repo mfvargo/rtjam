@@ -3,6 +3,7 @@
 
 #include "json.hpp"
 using json = nlohmann::json;
+using namespace std;
 
 class Settings {
   public:
@@ -16,8 +17,10 @@ class Settings {
 
   protected:
     json defValues;
+    string m_filename;
 
   private:
+  
 };
 
 #endif

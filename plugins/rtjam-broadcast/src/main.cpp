@@ -2,6 +2,7 @@
 #include <string.h>
 #include "JamNetStuff.hpp"
 #include "Settings.hpp"
+#include "RTJamNationApi.hpp"
 #include <vector>
 #include <thread>
 #include <mutex>
@@ -27,14 +28,21 @@ void packet_thread(short port) {
 int main(int argc, char **argv) {
   Settings settings;
   settings.loadFromFile();
-  std::string rtjamNation = settings.getOrSetValue("rtjam-nation", std::string("rtjam-nation.basscleftech.com"));
+  string urlBase = settings.getOrSetValue("rtjam-nation", std::string("rtjam-nation.basscleftech.com"));
+  string token = settings.getOrSetValue("rtjam-broadcast-token", "");
   settings.saveToFile();
-  cout << rtjamNation << endl;
-  short port = 7891;
-  roomThreads.push_back(std::thread(packet_thread, port++));
-  roomThreads.push_back(std::thread(packet_thread, port++));
-  roomThreads.push_back(std::thread(packet_thread, port++));
-  roomThreads.push_back(std::thread(packet_thread, port++));
+  RTJamNationApi api(urlBase);
+  while (api.broadcastUnitPing(token) == false) {
+    clog << "waiting to checkin with the nation" << endl;
+    sleep(5);
+  }
+
+  for (short port = 7891; port < 7895; port++) {
+    char roomName[100];
+    sprintf(roomName, "Room: %d", port);
+    api.activateRoom(token, roomName, port);
+    roomThreads.push_back(std::thread(packet_thread, port));
+  }
   // Now wait for the threads to exit
   for (auto & element : roomThreads) {
     element.join();

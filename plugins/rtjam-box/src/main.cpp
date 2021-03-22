@@ -18,11 +18,11 @@ int main(int argc, char* argv[])
   Settings settings;
   settings.loadFromFile();
   string urlBase = settings.getOrSetValue("rtjam-nation", "rtjam-nation.basscleftech.com/api/");
-  string token = settings.getOrSetValue("rtjam-token", "");
+  string token = settings.getOrSetValue("rtjam-unit-token", "");
   settings.saveToFile();
   RTJamNationApi api(urlBase);
 
-  // api.testMe("status");
+  api.status();
 
   api.jamUnitPing(token);
 

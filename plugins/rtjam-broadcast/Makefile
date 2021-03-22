@@ -12,6 +12,7 @@ SRCS = \
 	../common/ChannelMap.cpp \
 	../common/TimersAndStats.cpp \
 	../common/Settings.cpp \
+	../common/RTJamNationApi.cpp \
 	
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
@@ -19,7 +20,7 @@ DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread
+LDLIBS := -lm -lstdc++ -lpthread -lcurl
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP
 
