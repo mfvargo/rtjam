@@ -1,6 +1,7 @@
 #include "LevelData.hpp"
 #include "ParamData.hpp"
 #include "RTJamNationApi.hpp"
+#include "Settings.hpp"
 #include <iostream>
 #include <string>
 #include <unistd.h>
@@ -14,13 +15,17 @@ int main(int argc, char* argv[])
   LevelData levelData;
   ParamData paramData;
   RTJamParam param;
-  RTJamNationApi api;
+  Settings settings;
+  settings.loadFromFile();
+  string urlBase = settings.getOrSetValue("rtjam-nation", "rtjam-nation.basscleftech.com/api/");
+  string token = settings.getOrSetValue("rtjam-token", "");
+  settings.saveToFile();
+  RTJamNationApi api(urlBase);
 
-  // api.testMe("http://music.basscleftech.com/users/index.json");
+  // api.testMe("status");
 
-  // sleep(1);
-  
-  api.testMe("https://dev.neucourt.com/api/status");
+  api.jamUnitPing(token);
+
 
   // paramData.flush();
 

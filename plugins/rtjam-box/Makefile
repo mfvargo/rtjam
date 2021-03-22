@@ -1,16 +1,17 @@
-TARGET ?= ../../bin/leverReader
+TARGET ?= ../../bin/rtjam-box
 SRC_DIRS ?= ./src ../common
 
 CC = gcc
 
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
-	./src/levelReader.cpp \
+	./src/main.cpp \
 	../common/LevelData.cpp \
 	../common/ParamData.cpp \
 	../common/MessageQueue.cpp \
 	../common/SharedMemory.cpp \
 	../common/RTJamNationApi.cpp \
+	../common/Settings.cpp \
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)
