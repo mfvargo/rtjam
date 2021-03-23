@@ -44,9 +44,9 @@
   }
 
   void Settings::saveToFile() {
+    // Open a file and save the settings (pretty with indent 2)
     std::ofstream outFile(m_filename);
-    outFile << defValues;
-    // Open a file and save the settings
+    outFile << defValues.dump(2);
   }
 
   void Settings::loadFromFile() {

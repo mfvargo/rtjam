@@ -15,12 +15,13 @@ class RTJamNationApi {
     bool jamUnitPing(string token);
     bool broadcastUnitPing(string token);
     bool activateRoom(string token, string name, int port);
+    bool playerList(string roomToken);
+    json m_resultBody;
 
   private:
     bool put(string url, json body);
     bool get(string url, json body);
     bool post(string url, json body);
-    json m_resultBody;
     string m_urlBase;
     void getLanIp();
     string m_lanIp;

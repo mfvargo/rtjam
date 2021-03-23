@@ -47,6 +47,11 @@ bool RTJamNationApi::activateRoom(string token, string name, int port) {
   return post(m_urlBase + "room", args);
 }
 
+bool RTJamNationApi::playerList(string roomToken) {
+  json args;
+  args["token"] = roomToken;
+  return put(m_urlBase + "room/playerList", args);
+}
 
 bool RTJamNationApi::get(string url, json body) {
   string data;

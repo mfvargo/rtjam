@@ -13,6 +13,7 @@ SRCS = \
 	../common/TimersAndStats.cpp \
 	../common/Settings.cpp \
 	../common/RTJamNationApi.cpp \
+	../common/PlayerList.cpp \
 	
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
