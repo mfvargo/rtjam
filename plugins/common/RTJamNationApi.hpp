@@ -22,5 +22,7 @@ class RTJamNationApi {
     bool post(string url, json body);
     json m_resultBody;
     string m_urlBase;
+    void getLanIp();
+    string m_lanIp;
 };
 

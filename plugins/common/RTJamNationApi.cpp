@@ -1,4 +1,13 @@
 #include "RTJamNationApi.hpp"
+#include <stdio.h>
+#include <ifaddrs.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <net/if.h>
+#include <arpa/inet.h>
+
 
 using namespace std;
 using namespace restincurl;
@@ -7,6 +16,7 @@ json resultJson;
 
 RTJamNationApi::RTJamNationApi(string urlbase) {
   m_urlBase = urlbase;
+  getLanIp();
 }
 
 bool RTJamNationApi::status() {
@@ -17,12 +27,14 @@ bool RTJamNationApi::status() {
 bool RTJamNationApi::jamUnitPing(string token) {
   json args;
   args["token"] = token;
+  args["lanIp"] = m_lanIp;
   return put(m_urlBase + "jamUnit/ping", args);
 }
 
 bool RTJamNationApi::broadcastUnitPing(string token) {
   json args;
   args["token"] = token;
+  args["lanIp"] = m_lanIp;
   return put(m_urlBase + "broadcastUnit/ping", args);
 }
 
@@ -31,6 +43,7 @@ bool RTJamNationApi::activateRoom(string token, string name, int port) {
   args["token"] = token;
   args["name"] = name;
   args["port"] = port;
+  args["lanIp"] = m_lanIp;
   return post(m_urlBase + "room", args);
 }
 
@@ -115,4 +128,23 @@ bool RTJamNationApi::post(string url, json body) {
     }
   }
   return (curlCode == CURLE_OK);
+}
+
+void RTJamNationApi::getLanIp() {
+  ifaddrs *addrs;
+  getifaddrs(&addrs);
+  ifaddrs *tmp = addrs;
+
+  while (tmp) 
+  {
+      if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET)
+      {
+          struct sockaddr_in *pAddr = (struct sockaddr_in *)tmp->ifa_addr;
+          m_lanIp = inet_ntoa(pAddr->sin_addr);
+      }
+
+      tmp = tmp->ifa_next;
+  }
+
+  freeifaddrs(addrs);
 }

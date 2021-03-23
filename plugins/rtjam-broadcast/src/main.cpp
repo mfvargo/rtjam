@@ -43,6 +43,11 @@ int main(int argc, char **argv) {
     api.activateRoom(token, roomName, port);
     roomThreads.push_back(std::thread(packet_thread, port));
   }
+
+  while(1) {
+    sleep(10);
+    api.broadcastUnitPing(token);
+  }
   // Now wait for the threads to exit
   for (auto & element : roomThreads) {
     element.join();
