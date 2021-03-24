@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include "../common/jamrtime.h"
 #include <mutex>
+#include <vector>
 
 #define EMPTY_SLOT 40000
 
@@ -101,6 +102,27 @@ namespace JamNetStuff
       void makeIpString(unsigned long s_addr, char* ipString);
   };
 
+  struct Player {
+    uint32_t clientId;
+    time_t KeepAlive;
+    sockaddr_in Address;
+  };
+
+  class PlayerList {
+    public:
+      PlayerList();
+      void setAllowedClientIds(std::vector<unsigned>& ids);
+      bool isAllowed(unsigned clientId);
+      int updateChannel(unsigned clientId, sockaddr_in* addr);
+      int numPlayers();
+      Player get(int i);
+      void Prune();
+      void dump(std::string msg);
+    private:
+      std::vector<unsigned> m_allowedClientIds;
+      std::vector<Player> m_players;
+      int m_roomSize;
+  };
 
   #define JITTER_SAMPLES 96000
 
@@ -228,6 +250,7 @@ namespace JamNetStuff
       int sendPacket(const float** buffer, int frames);
       int readPackets(JamMixer*);
       int readAndBroadcast(JamMixer*);
+      int doPacket();
       bool isActivated;
 
       void initServer(short port);
@@ -238,6 +261,7 @@ namespace JamNetStuff
     
     private:
       ChannelMap channelMap;
+      PlayerList m_playerList;
       JamPacket packet;
       int jamSocket;
       struct sockaddr_in serverAddr;

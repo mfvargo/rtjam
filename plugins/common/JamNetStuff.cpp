@@ -169,6 +169,72 @@ namespace JamNetStuff
         return &jamMessage;
     }
 
+    PlayerList::PlayerList() {
+        m_roomSize = 7;
+        m_allowedClientIds.clear();
+    }
+
+    void PlayerList::setAllowedClientIds(std::vector<unsigned>& ids) {
+        m_allowedClientIds = ids;
+    }
+
+    bool PlayerList::isAllowed(unsigned /* id*/ ) {
+        // TODO implement allowed list search and max room size
+        return true;
+    }
+
+    void PlayerList::dump(std::string msg) {
+        printf("%s clients: [ ", msg.c_str());
+        for (Player p : m_players) {
+            printf("%u-%lu, ", p.clientId, p.KeepAlive);
+        }
+        printf("]\n");
+    }
+    void PlayerList::Prune() {
+        // See if any of the clients have disappeared
+        time_t now = time(NULL);
+        for (auto it = m_players.begin(); it != m_players.end(); ) {
+            if ((now - (*it).KeepAlive) > EXPIRATION_IN_SECONDS) {
+                m_players.erase(it);
+                dump("prune");
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    int PlayerList::updateChannel(unsigned clientId, sockaddr_in* addr) {
+        time_t now = time(NULL);
+        int i=0;
+        // Do we know about this guy?
+        for (auto it = m_players.begin(); it != m_players.end(); ++it) {
+            if ((*it).clientId == clientId) {
+                (*it).KeepAlive = now;
+                return i;
+            }
+            i++;
+        }
+        // If we got here, we don't know him.  Do we have space to add him?
+        if (i <= m_roomSize) {
+            Player p;
+            p.clientId = clientId;
+            p.KeepAlive = now;
+            p.Address = *addr;
+            m_players.push_back(p);
+            dump("add");
+        }
+        // TODO implement channel map find and update
+        return -1;
+    }
+
+    int PlayerList::numPlayers() {
+        return m_players.size();
+    }
+
+    Player PlayerList::get(int i) {
+        return m_players.at(i);
+    }
+
     JamSocket::JamSocket() {
         isActivated = false;
         beatCount = 0;
@@ -272,6 +338,31 @@ namespace JamNetStuff
             }
         } while( isActivated && nBytes > 0);
         return rval;
+    }
+
+    int JamSocket::doPacket() {
+        int nBytes = readData();
+        // If there was an error, just bail out here.
+        m_playerList.Prune();
+        if (nBytes < 0) return nBytes;
+        uint32_t clientId = packet.getClientIdFromPacket();
+        // Check if that client is an allowed person in the room
+        if (!m_playerList.isAllowed(clientId)) return 0;
+        // Get server assigned channel
+        int serverChannel = m_playerList.updateChannel(clientId, &senderAddr);
+        // Check for full room,  a negative serverChannel means we can handle them
+        if (serverChannel < 0) return 0;
+        // If we get here, we have a valid player and need to broadcast them
+        packet.setServerChannel(serverChannel);
+        packet.encodeHeader();
+        for (int i=0; i<m_playerList.numPlayers(); i++) {
+            Player player = m_playerList.get(i);
+            // Get the addresses and send
+            if(player.clientId != clientId) {
+                sendData(&player.Address);
+            }
+        }
+        return nBytes;
     }
 
     int JamSocket::readAndBroadcast(JamMixer* jamMixer) {
