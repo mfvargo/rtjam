@@ -94,7 +94,7 @@ bool RTJamNationApi::put(string url, json body) {
         .Header("X-Client", "restincurl")
         .WithCompletion([&](const Result& result) {
           curlCode = result.curl_code;
-          clog << result.msg << endl;
+          clog << result.curl_code << ": " << result.msg << endl;
           // clog << "PUT response: " << data << endl;
         })
         .ExecuteSynchronous();

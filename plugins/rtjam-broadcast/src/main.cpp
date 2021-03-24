@@ -22,7 +22,7 @@ void packet_thread(short port, json room) {
   jamSocket.isActivated = true;
   // Loop and broadcast data
   while (1) {
-    int nBytes = jamSocket.doPacket();
+    int nBytes = jamSocket.doPacket(NULL);
   }
 }
 

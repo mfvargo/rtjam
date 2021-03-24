@@ -25,6 +25,7 @@ namespace JamNetStuff
 
     // reset to default values
     void JamMixer::reset() {
+        mMutex.lock();
         for (int i=0; i<MIX_CHANNELS; i++) {
             gains[i] = 1.0;
             channelLevels[i] = 0;
@@ -35,6 +36,7 @@ namespace JamNetStuff
         masterVol = 1.0;
         masterLevel = 0.0f;
         masterStats.windowSize = 30.0;
+        mMutex.unlock();
     }
 
     /* print out some stats */
@@ -108,12 +110,16 @@ namespace JamNetStuff
     }
 
     void JamMixer::addLocalMonitor(const float** input, uint32_t frames) {
+        mMutex.lock();
         jitterBuffers[0].putIn(input[0], frames, 1);
         jitterBuffers[1].putIn(input[1], frames, 1);
+        mMutex.unlock();
     }
 
     void JamMixer::setBufferSmoothness(int channel, float smooth) {
+        mMutex.lock();
         jitterBuffers[2*channel].setSmoothness(smooth);
         jitterBuffers[2*channel + 1].setSmoothness(smooth);
+        mMutex.unlock();
     }
 }

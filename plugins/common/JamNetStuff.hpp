@@ -78,7 +78,6 @@ namespace JamNetStuff
     public:
       ChannelMap();
       int getChannel(uint32_t clientId, sockaddr_in *addr = NULL);
-      int getChannelBySenderIp(uint32_t clientId, sockaddr_in *addr);
       void setMyId(uint32_t Id);
       void dumpOut(bool asIp = true);
       void clear();
@@ -122,6 +121,7 @@ namespace JamNetStuff
       std::vector<unsigned> m_allowedClientIds;
       std::vector<Player> m_players;
       int m_roomSize;
+      std::mutex m_mutex;
   };
 
   #define JITTER_SAMPLES 96000
@@ -249,18 +249,15 @@ namespace JamNetStuff
       JamSocket();
       int sendPacket(const float** buffer, int frames);
       int readPackets(JamMixer*);
-      int readAndBroadcast(JamMixer*);
-      int doPacket();
+      int doPacket(JamMixer*);
       bool isActivated;
 
       void initServer(short port);
       void initClient(const char* servername, int port, uint32_t clientId);
-      void channelDump() { channelMap.dumpOut(); };
       void setTempo(int newTempo) { tempo = newTempo; };
       void getClientIds(uint32_t* ids) { packet.getClientIds(ids); };
     
     private:
-      ChannelMap channelMap;
       PlayerList m_playerList;
       JamPacket packet;
       int jamSocket;

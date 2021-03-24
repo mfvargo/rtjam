@@ -276,8 +276,6 @@ namespace JamNetStuff
 
         // Set the packet to client mode
         packet.setIsClient(true);
-        // Clear the channel map
-        channelMap.clear();
         packet.clearChannelMap();
     }
 
@@ -340,7 +338,7 @@ namespace JamNetStuff
         return rval;
     }
 
-    int JamSocket::doPacket() {
+    int JamSocket::doPacket(JamMixer* jamMixer) {
         int nBytes = readData();
         // If there was an error, just bail out here.
         m_playerList.Prune();
@@ -353,7 +351,18 @@ namespace JamNetStuff
         // Check for full room,  a negative serverChannel means we can handle them
         if (serverChannel < 0) return 0;
         // If we get here, we have a valid player and need to broadcast them
+        if (jamMixer != NULL) {
+            jamMixer->addData(&packet);
+        }
         packet.setServerChannel(serverChannel);
+        // TODO: Put back in the beat count
+        //         uint64_t deltaT = packet.getServerTime() - lastClickTime;
+        //         if (deltaT > (60 * 1e6 / tempo )) {  // 120BPM
+        //             // We have passed a click boundary
+        //             lastClickTime = packet.getServerTime();
+        //             beatCount++;
+        //         }
+        //         packet.setBeatCount(beatCount%4);
         packet.encodeHeader();
         for (int i=0; i<m_playerList.numPlayers(); i++) {
             Player player = m_playerList.get(i);
@@ -365,47 +374,6 @@ namespace JamNetStuff
         return nBytes;
     }
 
-    int JamSocket::readAndBroadcast(JamMixer* jamMixer) {
-        // This is the read and broadcast for the server
-        int nBytes = readData();
-        time_t now = time(NULL);
-        channelMap.pruneStaleChannels(now, 0);
-        if (nBytes > 0) {
-            if (packet.getServerChannel() == SET_TEMPO_CHAN) {
-                // We have a tempo change
-                tempo = packet.getBeatCount();
-            }
-            // Put the packet into the mixer
-            if (jamMixer != NULL) {
-                jamMixer->addData(&packet);
-            }
-            uint32_t clientId = packet.getClientIdFromPacket();
-            packet.setServerChannel(channelMap.getChannelBySenderIp(clientId, &senderAddr));
-            uint64_t deltaT = packet.getServerTime() - lastClickTime;
-            if (deltaT > (60 * 1e6 / tempo )) {  // 120BPM
-                // We have passed a click boundary
-                lastClickTime = packet.getServerTime();
-                beatCount++;
-            }
-            packet.setBeatCount(beatCount%4);
-            // We encode the header just once.
-            packet.encodeHeader();
-            // printf("nBytes: %d from %lu\n", nBytes, from_addr);
-            // channelMap.dumpOut();
-            for (int i=0; i<MAX_JAMMERS; i++) {
-                // Don't send back an echo to the sender
-                sockaddr_in addr;
-                uint32_t to_client = channelMap.getClientId(i);
-                if (to_client != EMPTY_SLOT && to_client != clientId) {
-                // if (to_addr != EMPTY_SLOT) {
-                    channelMap.getClientAddr(i, &addr);
-                    sendData(&addr);
-                }
-            }
-        }
-        // Get IP address (as unsigned long)
-        return nBytes;
-    }
     int JamSocket::readData() {
         addr_size = sizeof(serverAddr);
         int nBytes = recvfrom(

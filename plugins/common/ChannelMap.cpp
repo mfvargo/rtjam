@@ -66,34 +66,6 @@ namespace JamNetStuff {
     return -1;
   }
 
-  int ChannelMap::getChannelBySenderIp(uint32_t clientId, sockaddr_in *addr) {
-    // dumpOut();
-    time_t now = time(NULL);
-    // Clear out the dead wood
-    pruneStaleChannels(now);
-    // Find us if we are there!
-    for (int i=0; i<MAX_JAMMERS; i++) {
-      if (channels[i].Address.sin_addr.s_addr == addr->sin_addr.s_addr && 
-          channels[i].Address.sin_port == addr->sin_port) {
-        channels[i].KeepAlive = now;
-        return i;
-      }
-    }
-    // If we got here, we don't know this dude.  put him in an open slot
-    for (int i=0; i<MAX_JAMMERS; i++) {
-      if (channels[i].clientId == EMPTY_SLOT) {
-        channels[i].clientId = clientId;
-        channels[i].KeepAlive = now;
-        if (addr != NULL) {
-          memcpy(&channels[i].Address, addr, sizeof channels[i].Address);
-        }
-        printf("server adding %d: ", i);
-        return i;
-      }
-    }
-    return -1;
-  }
-
   void ChannelMap::pruneStaleChannels(time_t now, int startAt) {
     // Never clear out slot 0 cause that's the local dude
     for (int i=startAt; i<MAX_JAMMERS; i++) {
