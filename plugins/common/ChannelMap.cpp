@@ -30,15 +30,10 @@ namespace JamNetStuff {
     for (int i=0; i<MAX_JAMMERS; i++) {
       channels[i].clientId = EMPTY_SLOT;   // Illegal value, max is 32k
       channels[i].KeepAlive = time(NULL);
-      memset(&channels[i].Address, '\0', sizeof channels[i].Address);
     }
   }
 
-  void ChannelMap::getClientAddr(int idx, sockaddr_in *addr) { 
-    memcpy(addr, &channels[idx].Address, sizeof channels[idx].Address); 
-  };
-
-  int ChannelMap::getChannel(uint32_t clientId, sockaddr_in *addr) {
+  int ChannelMap::getChannel(uint32_t clientId) {
     // dumpOut();
     time_t now = time(NULL);
     // Clear out the dead wood
@@ -55,11 +50,8 @@ namespace JamNetStuff {
       if (channels[i].clientId == EMPTY_SLOT) {
         channels[i].clientId = clientId;
         channels[i].KeepAlive = now;
-        if (addr != NULL) {
-          memcpy(&channels[i].Address, addr, sizeof channels[i].Address);
-        }
         printf("client adding %d: ", i);
-        dumpOut(false);
+        dumpOut();
         return i;
       }
     }
@@ -72,31 +64,15 @@ namespace JamNetStuff {
       if (channels[i].clientId != EMPTY_SLOT && (now - channels[i].KeepAlive) > EXPIRATION_IN_SECONDS) {
         printf("nuking %d: %u\n", i, channels[i].clientId);
         channels[i].clientId = EMPTY_SLOT;
-        memset(&channels[i].Address, '\0', sizeof channels[i].Address);
       }
     }
   }
 
-  void ChannelMap::dumpOut(bool asIp) {
-    char ipString[24];
+  void ChannelMap::dumpOut() {
     for (int i=0; i<MAX_JAMMERS; i++) {
-      if (asIp) {
-        makeIpString(channels[i].clientId, ipString);
-      } else {
-        sprintf(ipString, "%u", channels[i].clientId);
-      }
-      printf("%s  ", ipString);
+      printf("%u", channels[i].clientId);
     }
     printf("\n");
-  }
-
-  void ChannelMap::makeIpString(unsigned long s_addr, char* ipString) {
-    unsigned char octet[4]  = {0,0,0,0};
-    for (int i=0; i<4; i++)
-    {
-        octet[i] = ( s_addr >> (i*8) ) & 0xFF;
-    }
-    sprintf(ipString, "%03d.%03d.%03d.%03d", octet[0],octet[1],octet[2],octet[3]);
   }
 
 }

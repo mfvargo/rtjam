@@ -153,7 +153,6 @@ namespace JamNetStuff
     }
 
     int JamPacket::getChannel() {
-        // channelMap.dumpOut();
         return channelMap.getChannel(jamMessage.ClientId);
     }
 

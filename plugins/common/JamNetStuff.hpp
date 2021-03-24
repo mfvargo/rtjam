@@ -77,12 +77,11 @@ namespace JamNetStuff
   class ChannelMap {
     public:
       ChannelMap();
-      int getChannel(uint32_t clientId, sockaddr_in *addr = NULL);
+      int getChannel(uint32_t clientId);
       void setMyId(uint32_t Id);
-      void dumpOut(bool asIp = true);
+      void dumpOut();
       void clear();
       uint32_t getClientId(int idx) { return channels[idx].clientId; };
-      void getClientAddr(int idx, sockaddr_in *addr);
       void pruneStaleChannels(time_t now, int startAt = 1);
       void getClientIds(uint32_t* ids) {
         for(int i=0; i<MAX_JAMMERS; i++) {
@@ -94,11 +93,9 @@ namespace JamNetStuff
       struct Channel {
         uint32_t clientId;
         time_t KeepAlive;
-        sockaddr_in Address;
       };
       uint32_t myId;
       Channel channels[MAX_JAMMERS];
-      void makeIpString(unsigned long s_addr, char* ipString);
   };
 
   struct Player {
