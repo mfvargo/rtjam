@@ -28,6 +28,7 @@ enum RTJamParameters
       paramReverbChanOne,
       paramReverbMix,
       paramRoomChange,
+      paramDisconnect,
       paramCount
 };
 

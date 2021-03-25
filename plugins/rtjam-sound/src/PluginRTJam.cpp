@@ -87,6 +87,9 @@ void PluginRTJam::getParams() {
     case paramRoomChange:
       connect(m_param.sValue, m_param.iValue, m_param.iValue2);
       break;
+    case paramDisconnect:
+      disconnect();
+      break;
   }
 }
 

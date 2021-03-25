@@ -70,7 +70,7 @@ namespace JamNetStuff {
 
   void ChannelMap::dumpOut() {
     for (int i=0; i<MAX_JAMMERS; i++) {
-      printf("%u", channels[i].clientId);
+      printf("%u ", channels[i].clientId);
     }
     printf("\n");
   }

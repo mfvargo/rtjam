@@ -79,10 +79,10 @@ bool CSharedMemory::Lock()
 bool CSharedMemory::UnLock()
 {
    int sval;
-   // sem_getvalue(m_SemID, &sval);
-   // if (sval == 0) {
+   sem_getvalue(m_SemID, &sval);
+   if (sval == 0) {
       sem_post(m_SemID);
-   // }
+   }
    return true;
 }
  

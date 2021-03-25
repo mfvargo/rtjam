@@ -25,29 +25,29 @@ int main(int argc, char* argv[])
   api.status();
 
   api.jamUnitPing(token);
+  clog << api.m_resultBody.dump(2) << endl;
 
 
-  // paramData.flush();
+  paramData.flush();
 
-  // param.param = paramRoomChange;
-  // param.iValue = 7892;
-  // param.iValue2 = 4567;
-  // sprintf(param.sValue, "music.basscleftech.com");
-  // paramData.send(&param);
+  param.param = paramRoomChange;
+  param.iValue = 7891;
+  param.iValue2 = 4567;
+  sprintf(param.sValue, "192.168.1.245");
+  paramData.send(&param);
 
-  // while(cnt++ < 3000) {
-  //   // send a param
-  //   param.param = paramMasterVol;
-  //   param.fValue = cnt%2 ? -60.0 : 0.0;
-  //   sprintf(param.sValue, "dude! %d", rand());
-  //   paramData.send(&param);
-  //   levelData.lock();
-  //     printf("%d:reading level Data\n", cnt);
-  //     for (int i=0; i<MAX_JAMMERS; i++) {
-  //       printf("Depth: %0.0f  ", levelData.m_pJamLevels->bufferDepths[i] * 40);
-  //     }
-  //     printf("\ninput %f\n", levelData.m_pJamLevels->inputLeft);
-  //     // sleep(1);
-  // }
- 
+  while(cnt++ < 10) {
+    // send a param
+    levelData.lock();
+    printf("%d:reading level Data\n", cnt);
+    for (int i=0; i<MAX_JAMMERS; i++) {
+      printf("Depth: %0.0f  ", levelData.m_pJamLevels->bufferDepths[i] * 40);
+    }
+    printf("\ninput %f\n", levelData.m_pJamLevels->inputLeft);
+    // sleep(1);
+  }
+
+  param.param = paramDisconnect;
+  paramData.send(&param);
+
 }
