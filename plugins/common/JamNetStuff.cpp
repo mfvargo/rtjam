@@ -402,4 +402,20 @@ namespace JamNetStuff
             );
         return rval;
     }
+
+    std::string JamSocket::getMacAddress() {
+        char mac[32];
+        struct ifreq ifr;
+        ifr.ifr_addr.sa_family = AF_INET;
+        strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
+        ioctl(jamSocket, SIOCGIFHWADDR, &ifr);
+        sprintf(mac, "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n",
+            (unsigned char)ifr.ifr_hwaddr.sa_data[0],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[1],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[2],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[3],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[4],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
+        return mac;
+    }
 }

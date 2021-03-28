@@ -35,6 +35,7 @@ PluginRTJam::~PluginRTJam() {
 }
 
 void PluginRTJam::init() {
+  printf("mac: %s", m_jamSocket.getMacAddress().c_str());
   m_threads.push_back(std::thread(levelPush, this)); 
   m_threads.push_back(std::thread(paramFetch, this)); 
 }

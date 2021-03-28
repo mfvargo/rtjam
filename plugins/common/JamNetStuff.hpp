@@ -14,7 +14,9 @@
 #define JAM_NET_STUFF_HPP_INCLUDED
 
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netinet/in.h>
+#include <net/if.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/time.h>
@@ -253,6 +255,7 @@ namespace JamNetStuff
       void initClient(const char* servername, int port, uint32_t clientId);
       void setTempo(int newTempo) { tempo = newTempo; };
       void getClientIds(uint32_t* ids) { packet.getClientIds(ids); };
+      std::string getMacAddress();
     
     private:
       PlayerList m_playerList;
