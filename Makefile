@@ -64,9 +64,12 @@ install-user: all
 # --------------------------------------------------------------
 
 deploy-pi:
-	cp bin/rtjam ~/www/html/pi
+# cp bin/rtjam ~/www/html/pi
 	cp utils/JamOn.sh ~/www/html/pi
 	cp utils/Update.sh ~/www/html/pi
+	cp bin/rtjam-sound ~/www/html/pi
+	cp bin/rtjam-box ~/www/html/pi
+	cp bin/rtjam-broadcast ~/www/html/pi
 
 deploy-mac:
 	zip -r bin/rtjam.vst.zip bin/rtjam.vst

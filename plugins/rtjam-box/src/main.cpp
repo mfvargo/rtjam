@@ -9,14 +9,16 @@
 #include <cstdlib>
 #include<cstdio>
 
+#include <inttypes.h>
+
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>
 
-class Echo: public Fastcgipp::Request<wchar_t>
+class Echo: public Fastcgipp::Request<char>
 {
 public:
     Echo():
-        Fastcgipp::Request<wchar_t>(50*1024)
+        Fastcgipp::Request<char>(50*1024)
     {}
 
 
@@ -28,22 +30,40 @@ private:
       // get request goes here
       memcpy(&m_jamLevels, m_levelData.m_pJamLevels, sizeof(RTJamLevels));
       for (int i=0; i<MIX_CHANNELS; i++) {
-        out << L"chan: " << i << L"  Depth:  " << m_jamLevels.bufferDepths[i] * 40;
-        out << L" level:  " << m_jamLevels.channelLevels[i] << L"<br/>";
+        out << "chan: " << i << "  Depth:  " << m_jamLevels.bufferDepths[i] * 40;
+        out << " level:  " << m_jamLevels.channelLevels[i] << "<br/>";
       }
     }
     void doPut() {
-        // put request goes here
+        RTJamParam param;
+        for(const auto& post: environment().posts) {
+            if (post.first == "command") {
+                param.param = (RTJamParameters) atoi(post.second.c_str());
+            }
+            if (post.first == "sValue") {
+                snprintf(param.sValue, 126, "%s", post.second.c_str());
+            }
+            if (post.first == "iValue1") {
+                param.iValue = atoi(post.second.c_str());
+            }
+            if (post.first == "iValue2") {
+                param.iValue2 = atoi(post.second.c_str());
+            }
+        }
+        ParamData paramData;
+        paramData.flush();
+        paramData.send(&param);
     }
     void writeBody() {
         using Fastcgipp::Encoding;
-        out <<  L"<h1>RTJAM_BOX</h1>";
+        out <<  "<h1>RTJAM_BOX</h1>";
         switch(environment().requestMethod) {
             case Fastcgipp::Http::RequestMethod::GET:
                 doGet();
             break;
             case Fastcgipp::Http::RequestMethod::PUT:
                 doPut();
+                echostuff();
             break;
             default:
             break;
@@ -55,24 +75,24 @@ private:
     {
         using Fastcgipp::Encoding;
 
-        out << L"Set-Cookie: echoCookie=" << Encoding::URL << L"<\"rtjam_cook\">;"
-            << Encoding::NONE << L"; path=/\n";
+        out << "Set-Cookie: echoCookie=" << Encoding::URL << "<\"rtjam_cook\">;"
+            << Encoding::NONE << "; path=/\n";
 
-        out << L"Content-Type: text/html; charset=utf-8\r\n\r\n";
+        out << "Content-Type: text/html; charset=utf-8\r\n\r\n";
         out <<
-        L"<!DOCTYPE html>\n"
-        L"<html>"
-            L"<head>"
-                L"<meta charset='utf-8' />"
-                L"<title>fastcgi++: Echo</title>"
-            L"</head>";
+        "<!DOCTYPE html>\n"
+        "<html>"
+            "<head>"
+                "<meta charset='utf-8' />"
+                "<title>fastcgi++: Echo</title>"
+            "</head>";
         out << 
-        L"<body>";
+        "<body>";
         writeBody();
 
  
-        out << L"</body>"
-                L"</html>";
+        out << "</body>"
+                "</html>";
  
         return true;
     }
@@ -81,21 +101,21 @@ private:
         using Fastcgipp::Encoding;
 
         out <<
-        L"<h2>Environment Parameters</h2>"
-        L"<p>"
-            L"<b>FastCGI Version:</b> "
-                << Fastcgipp::Protocol::version << L"<br />"
-            L"<b>fastcgi++ Version:</b> " << Fastcgipp::version << L"<br />"
-            L"<b>Hostname:</b> " << Encoding::HTML << environment().host
-                << Encoding::NONE << L"<br />"
-            L"<b>Origin Server:</b> " << Encoding::HTML << environment().origin
-                << Encoding::NONE << L"<br />"
-            L"<b>User Agent:</b> " << Encoding::HTML << environment().userAgent
-                << Encoding::NONE << L"<br />"
-            L"<b>Accepted Content Types:</b> " << Encoding::HTML
+        "<h2>Environment Parameters</h2>"
+        "<p>"
+            "<b>FastCGI Version:</b> "
+                << Fastcgipp::Protocol::version << "<br />"
+            "<b>fastcgi++ Version:</b> " << Fastcgipp::version << "<br />"
+            "<b>Hostname:</b> " << Encoding::HTML << environment().host
+                << Encoding::NONE << "<br />"
+            "<b>Origin Server:</b> " << Encoding::HTML << environment().origin
+                << Encoding::NONE << "<br />"
+            "<b>User Agent:</b> " << Encoding::HTML << environment().userAgent
+                << Encoding::NONE << "<br />"
+            "<b>Accepted Content Types:</b> " << Encoding::HTML
                 << environment().acceptContentTypes << Encoding::NONE
-                << L"<br />"
-            L"<b>Accepted Languages:</b> " << Encoding::HTML;
+                << "<br />"
+            "<b>Accepted Languages:</b> " << Encoding::HTML;
         if(!environment().acceptLanguages.empty())
         {
             auto language = environment().acceptLanguages.cbegin();
@@ -108,145 +128,145 @@ private:
                 out << ',';
             }
         }
-        out << Encoding::NONE << L"<br />"
-            L"<b>Accepted Characters Sets:</b> " << Encoding::HTML
-                << environment().acceptCharsets << Encoding::NONE << L"<br />"
-            L"<b>Referer:</b> " << Encoding::HTML << environment().referer
-                << Encoding::NONE << L"<br />"
-            L"<b>Content Type:</b> " << Encoding::HTML
-                << environment().contentType << Encoding::NONE << L"<br />"
-            L"<b>Root:</b> " << Encoding::HTML << environment().root
-                << Encoding::NONE << L"<br />"
-            L"<b>Script Name:</b> " << Encoding::HTML
-                << environment().scriptName << Encoding::NONE << L"<br />"
-            L"<b>Request URI:</b> " << Encoding::HTML
-                << environment().requestUri << Encoding::NONE << L"<br />"
-            L"<b>Request Method:</b> " << environment().requestMethod
-                << L"<br />"
-            L"<b>Content Length:</b> " << environment().contentLength
-                << L" bytes<br />"
-            L"<b>Keep Alive Time:</b> " << environment().keepAlive
-                << L" seconds<br />"
-            L"<b>Server Address:</b> " << environment().serverAddress
-                << L"<br />"
-            L"<b>Server Port:</b> " << environment().serverPort << L"<br />"
-            L"<b>Client Address:</b> " << environment().remoteAddress << L"<br />"
-            L"<b>Client Port:</b> " << environment().remotePort << L"<br />"
-            L"<b>Etag:</b> " << environment().etag << L"<br />"
-            L"<b>If Modified Since:</b> " << Encoding::HTML <<
-        L"</p>";
+        out << Encoding::NONE << "<br />"
+            "<b>Accepted Characters Sets:</b> " << Encoding::HTML
+                << environment().acceptCharsets << Encoding::NONE << "<br />"
+            "<b>Referer:</b> " << Encoding::HTML << environment().referer
+                << Encoding::NONE << "<br />"
+            "<b>Content Type:</b> " << Encoding::HTML
+                << environment().contentType << Encoding::NONE << "<br />"
+            "<b>Root:</b> " << Encoding::HTML << environment().root
+                << Encoding::NONE << "<br />"
+            "<b>Script Name:</b> " << Encoding::HTML
+                << environment().scriptName << Encoding::NONE << "<br />"
+            "<b>Request URI:</b> " << Encoding::HTML
+                << environment().requestUri << Encoding::NONE << "<br />"
+            "<b>Request Method:</b> " << environment().requestMethod
+                << "<br />"
+            "<b>Content Length:</b> " << environment().contentLength
+                << " bytes<br />"
+            "<b>Keep Alive Time:</b> " << environment().keepAlive
+                << " seconds<br />"
+            "<b>Server Address:</b> " << environment().serverAddress
+                << "<br />"
+            "<b>Server Port:</b> " << environment().serverPort << "<br />"
+            "<b>Client Address:</b> " << environment().remoteAddress << "<br />"
+            "<b>Client Port:</b> " << environment().remotePort << "<br />"
+            "<b>Etag:</b> " << environment().etag << "<br />"
+            "<b>If Modified Since:</b> " << Encoding::HTML <<
+        "</p>";
  
         out <<
-        L"<h2>Path Info</h2>";
+        "<h2>Path Info</h2>";
         if(environment().pathInfo.size())
         {
             out <<
-        L"<p>";
-            std::wstring preTab;
+        "<p>";
+            std::string preTab;
             for(const auto& element: environment().pathInfo)
             {
                 out << preTab << Encoding::HTML << element << Encoding::NONE
-                    << L"<br />";
-                preTab += L"&nbsp;&nbsp;&nbsp;&nbsp;";
+                    << "<br />";
+                preTab += "&nbsp;&nbsp;&nbsp;&nbsp;";
             }
             out <<
-        L"</p>";
+        "</p>";
         }
         else
             out <<
-        L"<p>No Path Info</p>";
+        "<p>No Path Info</p>";
  
         out <<
-        L"<h2>Other Environment Parameters</h2>";
+        "<h2>Other Environment Parameters</h2>";
         if(!environment().others.empty())
             for(const auto& other: environment().others)
-                out << L"<b>" << Encoding::HTML << other.first << Encoding::NONE
-                    << L":</b> " << Encoding::HTML << other.second
-                    << Encoding::NONE << L"<br />";
+                out << "<b>" << Encoding::HTML << other.first << Encoding::NONE
+                    << ":</b> " << Encoding::HTML << other.second
+                    << Encoding::NONE << "<br />";
         else
             out <<
-        L"<p>No Other Environment Parameters</p>";
+        "<p>No Other Environment Parameters</p>";
  
         out <<
-        L"<h2>GET Data</h2>";
+        "<h2>GET Data</h2>";
         if(!environment().gets.empty())
             for(const auto& get: environment().gets)
-                out << L"<b>" << Encoding::HTML << get.first << Encoding::NONE
-                    << L":</b> " << Encoding::HTML << get.second
-                    << Encoding::NONE << L"<br />";
+                out << "<b>" << Encoding::HTML << get.first << Encoding::NONE
+                    << ":</b> " << Encoding::HTML << get.second
+                    << Encoding::NONE << "<br />";
         else
             out <<
-        L"<p>No GET data</p>";
+        "<p>No GET data</p>";
  
         out <<
-        L"<h2>POST Data</h2>";
+        "<h2>POST Data</h2>";
         if(!environment().posts.empty())
             for(const auto& post: environment().posts)
-                out << L"<b>" << Encoding::HTML << post.first << Encoding::NONE
-                    << L":</b> " << Encoding::HTML << post.second
-                    << Encoding::NONE << L"<br />";
+                out << "<b>" << Encoding::HTML << post.first << Encoding::NONE
+                    << ":</b> " << Encoding::HTML << post.second
+                    << Encoding::NONE << "<br />";
         else
             out <<
-        L"<p>No POST data</p>";
+        "<p>No POST data</p>";
  
         out <<
-        L"<h2>Cookies</h2>";
+        "<h2>Cookies</h2>";
         if(!environment().cookies.empty())
             for(const auto& cookie: environment().cookies)
-                out << L"<b>" << Encoding::HTML << cookie.first
-                    << Encoding::NONE << L":</b> " << Encoding::HTML
-                    << cookie.second << Encoding::NONE << L"<br />";
+                out << "<b>" << Encoding::HTML << cookie.first
+                    << Encoding::NONE << ":</b> " << Encoding::HTML
+                    << cookie.second << Encoding::NONE << "<br />";
         else
             out <<
-        L"<p>No Cookies</p>";
+        "<p>No Cookies</p>";
  
         out <<
-        L"<h2>Files</h2>";
+        "<h2>Files</h2>";
         if(!environment().files.empty())
         {
             for(const auto& file: environment().files)
             {
                 out <<
-        L"<h3>" << Encoding::HTML << file.first << Encoding::NONE << L"</h3>"
-        L"<p>"
-            L"<b>Filename:</b> " << Encoding::HTML << file.second.filename
-                << Encoding::NONE << L"<br />"
-            L"<b>Content Type:</b> " << Encoding::HTML
-                << file.second.contentType << Encoding::NONE << L"<br />"
-            L"<b>Size:</b> " << file.second.size << L"<br />"
-            L"<b>Data:</b>"
-        L"</p>"
-        L"<pre>";
+        "<h3>" << Encoding::HTML << file.first << Encoding::NONE << "</h3>"
+        "<p>"
+            "<b>Filename:</b> " << Encoding::HTML << file.second.filename
+                << Encoding::NONE << "<br />"
+            "<b>Content Type:</b> " << Encoding::HTML
+                << file.second.contentType << Encoding::NONE << "<br />"
+            "<b>Size:</b> " << file.second.size << "<br />"
+            "<b>Data:</b>"
+        "</p>"
+        "<pre>";
                 dump(file.second.data.get(), file.second.size);
                 out <<
-        L"</pre>";
+        "</pre>";
             }
         }
         else
             out <<
-        L"<p>No files</p>";
+        "<p>No files</p>";
  
         out <<
-        L"<h1>Form</h1>"
-        L"<h3>multipart/form-data</h3>"
-        L"<form action='?getVar=testing&amp;secondGetVar=tested&amp;"
-            L"utf8GetVarTest=проверка&amp;enctype=multipart' method='post' "
-            L"enctype='multipart/form-data' accept-charset='utf-8'>"
-            L"Name: <input type='text' name='+= aquí está el campo' value='Él "
-                L"está con un niño' /><br />"
-            L"File: <input type='file' name='aFile' /> <br />"
-            L"<input type='submit' name='submit' value='submit' />"
-        L"</form>"
-        L"<h3>application/x-www-form-urlencoded</h3>"
-        L"<form action='?getVar=testing&amp;secondGetVar=tested&amp;"
-            L"utf8GetVarTest=проверка&amp;enctype=url-encoded' method='post' "
-            L"enctype='application/x-www-form-urlencoded' "
-            L"accept-charset='utf-8'>"
-            L"Name: <input type='text' name='+= aquí está el campo' value='Él "
-                L"está con un niño' /><br />"
-            L"File: <input type='file' name='aFile' /><br />"
-            L"<input type='submit' name='submit' value='submit' />"
-        L"</form>";
+        "<h1>Form</h1>"
+        "<h3>multipart/form-data</h3>"
+        "<form action='?getVar=testing&amp;secondGetVar=tested&amp;"
+            "utf8GetVarTest=проверка&amp;enctype=multipart' method='post' "
+            "enctype='multipart/form-data' accept-charset='utf-8'>"
+            "Name: <input type='text' name='+= aquí está el campo' value='Él "
+                "está con un niño' /><br />"
+            "File: <input type='file' name='aFile' /> <br />"
+            "<input type='submit' name='submit' value='submit' />"
+        "</form>"
+        "<h3>application/x-www-form-urlencoded</h3>"
+        "<form action='?getVar=testing&amp;secondGetVar=tested&amp;"
+            "utf8GetVarTest=проверка&amp;enctype=url-encoded' method='post' "
+            "enctype='application/x-www-form-urlencoded' "
+            "accept-charset='utf-8'>"
+            "Name: <input type='text' name='+= aquí está el campo' value='Él "
+                "está con un niño' /><br />"
+            "File: <input type='file' name='aFile' /><br />"
+            "<input type='submit' name='submit' value='submit' />"
+        "</form>";
     }
 };
 
