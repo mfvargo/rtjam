@@ -27,14 +27,28 @@ private:
     RTJamLevels m_jamLevels;
 
     void doGet() {
-      // get request goes here
-      memcpy(&m_jamLevels, m_levelData.m_pJamLevels, sizeof(RTJamLevels));
-      for (int i=0; i<MIX_CHANNELS; i++) {
-        out << "chan: " << i << "  Depth:  " << m_jamLevels.bufferDepths[i] * 40;
-        out << " level:  " << m_jamLevels.channelLevels[i] << "<br/>";
-      }
+        // This get called on GETs
+        if (environment().requestUri.find("params") != std::string::npos) {
+            getParamForm();
+        } else {
+            getLevels();
+        }
+
     }
-    void doPut() {
+    void getLevels() {
+        json result = json::array();
+        // get request goes here
+        memcpy(&m_jamLevels, m_levelData.m_pJamLevels, sizeof(RTJamLevels));
+        for (int i=0; i<MIX_CHANNELS; i++) {
+            result.push_back({ 
+                {"channel", i}, 
+                {"depth", m_jamLevels.bufferDepths[i] * 40},
+                {"level", m_jamLevels.channelLevels[i]}
+            });
+        }
+        out << result.dump(2);
+    }
+    void setParam() {
         RTJamParam param;
         for(const auto& post: environment().posts) {
             if (post.first == "command") {
@@ -53,19 +67,39 @@ private:
         ParamData paramData;
         paramData.flush();
         paramData.send(&param);
+        out << "OK";
+    }
+    void getParamForm() {
+        out <<
+        "<h1>Set Param Form</h1>"
+        "<form method='post' "
+            "enctype='application/x-www-form-urlencoded' "
+            "accept-charset='utf-8'>"
+            "Command: <input type='text' name='command' value='21'/><br />"
+            "sValue: <input type='text' name='sValue' value='192.168.1.229'/><br />"
+            "iValue1: <input type='text' name='iValue1' value='7891'/><br />"
+            "iValue2: <input type='text' name='iValue2' value='5025'/><br />"
+            "<input type='submit' name='submit' value='submit' />"
+        "</form>";
+
+        // "<form action='/rtjambox/param' method='put' "
+        //     "enctype='application/x-www-form-urlencoded' "
+        //     "accept-charset='utf-8'>"
+
     }
     void writeBody() {
         using Fastcgipp::Encoding;
-        out <<  "<h1>RTJAM_BOX</h1>";
         switch(environment().requestMethod) {
             case Fastcgipp::Http::RequestMethod::GET:
+                // echostuff();
                 doGet();
             break;
-            case Fastcgipp::Http::RequestMethod::PUT:
-                doPut();
-                echostuff();
+            case Fastcgipp::Http::RequestMethod::POST:
+                setParam();
+                // echostuff();
             break;
             default:
+                echostuff();
             break;
         }
 
@@ -77,7 +111,6 @@ private:
 
         out << "Set-Cookie: echoCookie=" << Encoding::URL << "<\"rtjam_cook\">;"
             << Encoding::NONE << "; path=/\n";
-
         out << "Content-Type: text/html; charset=utf-8\r\n\r\n";
         out <<
         "<!DOCTYPE html>\n"
@@ -86,15 +119,12 @@ private:
                 "<meta charset='utf-8' />"
                 "<title>fastcgi++: Echo</title>"
             "</head>";
-        out << 
-        "<body>";
+        out << "<body>";
+ 
         writeBody();
-
  
-        out << "</body>"
-                "</html>";
- 
-        return true;
+        out << "</body></html>";
+         return true;
     }
 
     void echostuff() {
