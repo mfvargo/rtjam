@@ -68,6 +68,7 @@ private:
         paramData.flush();
         paramData.send(&param);
         out << "OK";
+        getParamForm();
     }
     void getParamForm() {
         out <<
@@ -107,24 +108,29 @@ private:
 
     bool response()
     {
-        using Fastcgipp::Encoding;
+        try {
+            using Fastcgipp::Encoding;
 
-        out << "Set-Cookie: echoCookie=" << Encoding::URL << "<\"rtjam_cook\">;"
-            << Encoding::NONE << "; path=/\n";
-        out << "Content-Type: text/html; charset=utf-8\r\n\r\n";
-        out <<
-        "<!DOCTYPE html>\n"
-        "<html>"
-            "<head>"
-                "<meta charset='utf-8' />"
-                "<title>fastcgi++: Echo</title>"
-            "</head>";
-        out << "<body>";
- 
-        writeBody();
- 
-        out << "</body></html>";
-         return true;
+            out << "Set-Cookie: echoCookie=" << Encoding::URL << "<\"rtjam_cook\">;"
+                << Encoding::NONE << "; path=/\n";
+            out << "Content-Type: text/html; charset=utf-8\r\n\r\n";
+            out <<
+            "<!DOCTYPE html>\n"
+            "<html>"
+                "<head>"
+                    "<meta charset='utf-8' />"
+                    "<title>fastcgi++: Echo</title>"
+                "</head>";
+            out << "<body>";
+    
+            writeBody();
+    
+            out << "</body></html>";
+            return true;
+        } catch (std::exception& e) {
+            std::clog << e.what() << std::endl;
+        }
+        return true;
     }
 
     void echostuff() {

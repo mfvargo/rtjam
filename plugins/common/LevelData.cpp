@@ -1,4 +1,5 @@
 #include "LevelData.hpp"
+#include <iostream>
 
 LevelData::LevelData() : m_sharedMemory("rtjamValues") {
     m_sharedMemory.Create(sizeof(RTJamLevels));
@@ -7,6 +8,7 @@ LevelData::LevelData() : m_sharedMemory("rtjamValues") {
 }
 
 LevelData::~LevelData() {
+    m_sharedMemory.Detach();
 }
 
 void LevelData::lock() {
