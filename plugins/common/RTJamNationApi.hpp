@@ -24,6 +24,8 @@ class RTJamNationApi {
     bool post(string url, json body);
     string m_urlBase;
     void getLanIp();
+    void getMacAddress();
     string m_lanIp;
+    string m_macAddress;
 };
 
