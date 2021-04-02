@@ -5,6 +5,8 @@
 
 using namespace std;
 
+LevelData BoxAPI::m_levelData;
+
 vector<thread> myThreads;
 
 int fastCGIStuff() {

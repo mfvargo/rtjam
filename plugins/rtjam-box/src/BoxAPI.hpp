@@ -19,7 +19,7 @@ public:
 
 
 private:
-    LevelData m_levelData;
+    static LevelData m_levelData;
     RTJamLevels m_jamLevels;
 
     void doGet() {
