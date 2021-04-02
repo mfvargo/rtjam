@@ -22,7 +22,16 @@ RTJamNationApi::RTJamNationApi(string urlbase) {
 
 bool RTJamNationApi::status() {
   json args;
+  args["lanIp"] = m_lanIp;
+  args["macAddress"] = m_macAddress;
   return get(m_urlBase + "status", args);
+}
+
+bool RTJamNationApi::jamUnitDeviceRegister() {
+  json args;
+  args["lanIp"] = m_lanIp;
+  args["macAddress"] = m_macAddress;
+  return post(m_urlBase + "jamUnit", args);
 }
 
 bool RTJamNationApi::jamUnitPing(string token) {
@@ -61,8 +70,9 @@ bool RTJamNationApi::get(string url, json body) {
   string data;
   restincurl::Client client;
   CURLcode curlCode;
+  long httpResponseCode;
 
-  client.Build()->Get("192.168.1.65:8080")
+  client.Build()->Get(url)
         .Option(CURLOPT_VERBOSE, 0L)
         .AcceptJson()
         .StoreData(data)
@@ -71,12 +81,12 @@ bool RTJamNationApi::get(string url, json body) {
         .Header("X-Client", "restincurl")
         .WithCompletion([&](const Result& result) {
           curlCode = result.curl_code;
-          clog << result.msg << endl;
-          // clog << "PUT response: " << data << endl;
+          httpResponseCode = result.http_response_code;
         })
         .ExecuteSynchronous();
   if (curlCode == CURLE_OK) {
     try {
+      m_httpResponseCode = httpResponseCode;
       m_resultBody = json::parse(data);
     } catch (...) {
       clog << "Failed to parse server json" << endl;
@@ -88,6 +98,7 @@ bool RTJamNationApi::put(string url, json body) {
   string data;
   restincurl::Client client;
   CURLcode curlCode;
+  long httpResponseCode;
 
   client.Build()->Put(url)
         .Option(CURLOPT_VERBOSE, 0L)
@@ -98,12 +109,12 @@ bool RTJamNationApi::put(string url, json body) {
         .Header("X-Client", "restincurl")
         .WithCompletion([&](const Result& result) {
           curlCode = result.curl_code;
-          clog << result.curl_code << ": " << result.msg << endl;
-          // clog << "PUT response: " << data << endl;
+          httpResponseCode = result.http_response_code;
         })
         .ExecuteSynchronous();
   if (curlCode == CURLE_OK) {
     try {
+      m_httpResponseCode = httpResponseCode;
       m_resultBody = json::parse(data);
     } catch (...) {
       clog << "Failed to parse server json" << endl;
@@ -115,6 +126,7 @@ bool RTJamNationApi::post(string url, json body) {
   string data;
   restincurl::Client client;
   CURLcode curlCode;
+  long httpResponseCode;
 
   client.Build()->Post(url)
         .Option(CURLOPT_VERBOSE, 0L)
@@ -125,12 +137,12 @@ bool RTJamNationApi::post(string url, json body) {
         .Header("X-Client", "restincurl")
         .WithCompletion([&](const Result& result) {
           curlCode = result.curl_code;
-          clog << result.msg << endl;
-          // clog << "PUT response: " << data << endl;
+          httpResponseCode = result.http_response_code;
         })
         .ExecuteSynchronous();
   if (curlCode == CURLE_OK) {
     try {
+      m_httpResponseCode = httpResponseCode;
       m_resultBody = json::parse(data);
     } catch (...) {
       clog << "Failed to parse server json" << endl;

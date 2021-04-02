@@ -12,11 +12,13 @@ class RTJamNationApi {
   public:
     RTJamNationApi(string urlbase);
     bool status();
+    bool jamUnitDeviceRegister();
     bool jamUnitPing(string token);
     bool broadcastUnitPing(string token);
     bool activateRoom(string token, string name, int port);
     bool playerList(string roomToken);
     json m_resultBody;
+    long m_httpResponseCode;
 
   private:
     bool put(string url, json body);

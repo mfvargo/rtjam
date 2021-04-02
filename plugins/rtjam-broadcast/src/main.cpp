@@ -10,7 +10,7 @@
 
 using namespace std;
 
-vector<std::thread> roomThreads;
+vector<thread> roomThreads;
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 #define FIFO_FRAME_SIZE 960
