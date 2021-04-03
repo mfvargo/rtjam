@@ -34,12 +34,12 @@ int jamNationStuff() {
                 clog << "got a token: " << token << endl;
             }
         } else {
-            if (!api.jamUnitPing(token)) {
+            if (!api.jamUnitPing(token) || api.m_httpResponseCode != 200) {
                 // Something is wrong with this token
                 token = "";
             };
         }
-        clog << api.m_resultBody.dump(2) << endl;
+        // clog << api.m_resultBody.dump(2) << endl;
         sleep(10);
     }
     return 0;
