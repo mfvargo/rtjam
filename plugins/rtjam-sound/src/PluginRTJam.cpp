@@ -58,7 +58,7 @@ float PluginRTJam::dbToFloat(float value) {
 
 void PluginRTJam::getParams() {
   m_paramData.receive(&m_param);
-  printf("received param %d: %s\n", m_param.param, m_param.sValue);
+  printf("received param %d: %s, %f, %d, %d\n", m_param.param, m_param.sValue, m_param.fValue, m_param.iValue, m_param.iValue2);
   switch(m_param.param) {
     case paramChanGain1:
     case paramChanGain2:

@@ -53,6 +53,9 @@ private:
             if (post.first == "sValue") {
                 snprintf(param.sValue, 126, "%s", post.second.c_str());
             }
+            if (post.first == "fValue") {
+                param.fValue = atof(post.second.c_str());
+            }
             if (post.first == "iValue1") {
                 param.iValue = atoi(post.second.c_str());
             }
@@ -74,6 +77,7 @@ private:
             "accept-charset='utf-8'>"
             "Command: <input type='text' name='command' value='21'/><br />"
             "sValue: <input type='text' name='sValue' value='music.basscleftech.com'/><br />"
+            "fValue: <input type='text' name='fValue' value='0.0'/><br />"
             "iValue1: <input type='text' name='iValue1' value='7891'/><br />"
             "iValue2: <input type='text' name='iValue2' value='5025'/><br />"
             "<input type='submit' name='submit' value='submit' />"
