@@ -31,6 +31,7 @@ int jamNationStuff() {
             if (api.jamUnitDeviceRegister() && api.m_httpResponseCode == 200) {
                 // get the token
                 token = api.m_resultBody["jamUnit"]["token"];
+                clog << "got a token: " << token << endl;
             }
         } else {
             if (!api.jamUnitPing(token)) {
