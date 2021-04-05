@@ -21,7 +21,7 @@ int fastCGIStuff() {
 int jamNationStuff() {
     Settings settings;
     settings.loadFromFile();
-    string urlBase = settings.getOrSetValue("rtjam-nation", "rtjam-nation.basscleftech.com/api/");
+    string urlBase = settings.getOrSetValue("rtjam-nation", "rtjam-nation.basscleftech.com/api/1/");
     settings.saveToFile();
     string token = "";
     RTJamNationApi api(urlBase);
