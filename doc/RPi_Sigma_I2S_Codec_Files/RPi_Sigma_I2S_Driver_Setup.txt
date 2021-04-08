@@ -1,0 +1,15 @@
+Sigma Audio Interface - I2S Driver Setup
+
+
+1. Copy sigma-i2s-codec.dtbo (overlay file) to /boot/overlays directory on RPi
+
+2. edit /boot/config.txt and add the following lines at end of file to enable I2S pins and load driver
+
+# enable I2S and start driver for Sigma I2S audio interface board
+dtparam=i2s=on
+dtoverlay=sigma-i2s-codec
+
+
+The form for jack command with this driver is:
+
+$ /usr/bin/jackd -dalsa -r48000 -p128 -n2 -D -Chw:SigmaI2SCodec,1 -Phw:SigmaI2SCodec,0 -i2 -o2 &
