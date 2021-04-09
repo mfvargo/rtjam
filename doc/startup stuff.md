@@ -1,3 +1,6 @@
+# startup code for jamUnit
+
+```
 [Unit]
 Description=PM2 process manager
 Documentation=https://pm2.keymetrics.io/
@@ -20,3 +23,4 @@ ExecStop=/usr/local/lib/node_modules/pm2/bin/pm2 kill
 
 [Install]
 WantedBy=multi-user.target
+```
