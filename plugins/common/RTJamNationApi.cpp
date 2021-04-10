@@ -42,6 +42,13 @@ bool RTJamNationApi::jamUnitPing(string token) {
   return put(m_urlBase + "jamUnit/ping", args);
 }
 
+bool RTJamNationApi::broadcastUnitDeviceRegister() {
+  json args;
+  args["lanIp"] = m_lanIp;
+  args["macAddress"] = m_macAddress;
+  return post(m_urlBase + "broadcastUnit", args);
+}
+
 bool RTJamNationApi::broadcastUnitPing(string token) {
   json args;
   args["token"] = token;

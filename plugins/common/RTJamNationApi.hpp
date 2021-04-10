@@ -14,6 +14,7 @@ class RTJamNationApi {
     bool status();
     bool jamUnitDeviceRegister();
     bool jamUnitPing(string token);
+    bool broadcastUnitDeviceRegister();
     bool broadcastUnitPing(string token);
     bool activateRoom(string token, string name, int port);
     bool playerList(string roomToken);
