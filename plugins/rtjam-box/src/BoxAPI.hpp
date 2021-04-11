@@ -16,10 +16,11 @@ public:
     BoxAPI():
         Fastcgipp::Request<char>(50*1024)
     {}
+    static string s_token;
 
 
 private:
-    static LevelData m_levelData;
+    static LevelData s_levelData;
     RTJamLevels m_jamLevels;
 
     void doGet() {
@@ -32,14 +33,21 @@ private:
 
     }
     void getLevels() {
-        json result = json::array();
-        // get request goes here
-        memcpy(&m_jamLevels, m_levelData.m_pJamLevels, sizeof(RTJamLevels));
-        for (int i=0; i<MIX_CHANNELS; i++) {
-            result.push_back({ 
-                {"channel", i}, 
-                {"depth", m_jamLevels.bufferDepths[i] * 40},
-                {"level", m_jamLevels.channelLevels[i]}
+        memcpy(&m_jamLevels, s_levelData.m_pJamLevels, sizeof(RTJamLevels));
+        json result = {
+            { "jamUnitToken", s_token },
+            { "masterLevel", m_jamLevels.masterLevel },
+            { "inputLeft", m_jamLevels.inputLeft },
+            { "inputRight", m_jamLevels.inputRight },
+            { "beat", m_jamLevels.beat },
+            { "players", json::array() },
+        };
+        for (int i=0; i<MAX_JAMMERS; i++) {
+            result["players"].push_back({ 
+                {"clientId", i},
+                { "depth", m_jamLevels.bufferDepths[i*2] * 40},
+                {"level0", m_jamLevels.channelLevels[i*2]},
+                {"level1", m_jamLevels.channelLevels[(i+1)*2]},
             });
         }
         out << result.dump(2);

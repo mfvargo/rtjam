@@ -5,7 +5,8 @@
 
 using namespace std;
 
-LevelData BoxAPI::m_levelData;
+LevelData BoxAPI::s_levelData;
+string BoxAPI::s_token = "";
 
 vector<thread> myThreads;
 
@@ -31,6 +32,7 @@ int jamNationStuff() {
             if (api.jamUnitDeviceRegister() && api.m_httpResponseCode == 200) {
                 // get the token
                 token = api.m_resultBody["jamUnit"]["token"];
+                BoxAPI::s_token = token;
                 clog << "got a token: " << token << endl;
             }
         } else {
