@@ -317,6 +317,8 @@ namespace JamNetStuff
     }
 
     int JamSocket::readPackets(JamMixer* jamMixer) {
+        // Stale out any channels
+        packet.checkChannelTimeouts();
         if (!isActivated) {
             return 0;
         }
@@ -326,12 +328,9 @@ namespace JamNetStuff
 
         do {
             nBytes = readData();
+            // check if we got any data and if this is from the current server (ignore residual packets from previous room)
             if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
-                // packet.dumpPacket("mikey: ");
                 jamMixer->addData(&packet);
-            } else {
-                // No data make sure to timeout the channelmap
-                packet.checkChannelTimeouts();
             }
         } while( isActivated && nBytes > 0);
         return rval;
