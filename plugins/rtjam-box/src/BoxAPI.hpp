@@ -44,7 +44,7 @@ private:
         };
         for (int i=0; i<MAX_JAMMERS; i++) {
             result["players"].push_back({ 
-                {"clientId", i},
+                {"clientId", m_jamLevels.clientIds[i]},
                 { "depth", m_jamLevels.bufferDepths[i*2] * 40},
                 {"level0", m_jamLevels.channelLevels[i*2]},
                 {"level1", m_jamLevels.channelLevels[(i+1)*2]},
