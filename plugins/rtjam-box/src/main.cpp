@@ -7,6 +7,7 @@ using namespace std;
 
 LevelData BoxAPI::s_levelData;
 string BoxAPI::s_token = "";
+bool isRunning = true;
 
 vector<thread> myThreads;
 
@@ -16,6 +17,7 @@ int fastCGIStuff() {
     manager.listen("/tmp/rtjambox.sock", 0666);
     manager.start();
     manager.join();
+    isRunning = false;
     return 0;
 }
 
@@ -26,7 +28,7 @@ int jamNationStuff() {
     settings.saveToFile();
     string token = "";
     RTJamNationApi api(urlBase);
-    while(1) {
+    while(isRunning) {
         if (token == "") {
             // We don't have a token.  Register the device.
             if (api.jamUnitDeviceRegister() && api.m_httpResponseCode == 200) {
