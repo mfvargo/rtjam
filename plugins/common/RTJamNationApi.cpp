@@ -89,7 +89,6 @@ bool RTJamNationApi::get(string url, json body) {
         .WithCompletion([&](const Result& result) {
           curlCode = result.curl_code;
           httpResponseCode = result.http_response_code;
-          clog << "url: " << url << " http_code: " << httpResponseCode << endl;
         })
         .ExecuteSynchronous();
   if (curlCode == CURLE_OK) {
@@ -118,7 +117,6 @@ bool RTJamNationApi::put(string url, json body) {
         .WithCompletion([&](const Result& result) {
           curlCode = result.curl_code;
           httpResponseCode = result.http_response_code;
-          clog << "url: " << url << " http_code: " << httpResponseCode << endl;
         })
         .ExecuteSynchronous();
   if (curlCode == CURLE_OK) {
@@ -147,7 +145,6 @@ bool RTJamNationApi::post(string url, json body) {
         .WithCompletion([&](const Result& result) {
           curlCode = result.curl_code;
           httpResponseCode = result.http_response_code;
-          clog << "url: " << url << " http_code: " << httpResponseCode << endl;
         })
         .ExecuteSynchronous();
   if (curlCode == CURLE_OK) {

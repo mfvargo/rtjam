@@ -1,0 +1,18 @@
+[Unit]
+Description=rtjam service for jack
+After=network.target
+
+[Service]
+LimitRTPRIO=infinity
+LimitMEMLOCK=infinity
+ExecStart=jackd -dalsa -r48000 -n2 -p64 -D -Chw:SigmaI2SCodec,1 -Phw:SigmaI2SCodec,0 -i2 -o2 
+WorkingDirectory=/home/pi/rtjam
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+Environment="JACK_NO_AUDIO_RESERVATION=1"
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+
+[Install]
+WantedBy=multi-user.target
