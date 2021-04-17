@@ -1,11 +1,9 @@
 #ifndef JAMRTIME_SETTINGS_HPP_INCLUDED
 #define JAMRTIME_SETTINGS_HPP_INCLUDED
 
-#include "DistrhoPlugin.hpp"
 #include "json.hpp"
 using json = nlohmann::json;
-
-START_NAMESPACE_DISTRHO
+using namespace std;
 
 class Settings {
   public:
@@ -19,10 +17,10 @@ class Settings {
 
   protected:
     json defValues;
+    string m_filename;
 
   private:
+  
 };
-
-END_NAMESPACE_DISTRHO
 
 #endif

@@ -14,7 +14,9 @@
 #define JAM_NET_STUFF_HPP_INCLUDED
 
 #include <sys/socket.h>
+#include <sys/ioctl.h>
 #include <netinet/in.h>
+#include <net/if.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/time.h>
@@ -23,6 +25,7 @@
 #include <stdio.h>
 #include "../common/jamrtime.h"
 #include <mutex>
+#include <vector>
 
 #define EMPTY_SLOT 40000
 
@@ -76,13 +79,11 @@ namespace JamNetStuff
   class ChannelMap {
     public:
       ChannelMap();
-      int getChannel(uint32_t clientId, sockaddr_in *addr = NULL);
-      int getChannelBySenderIp(uint32_t clientId, sockaddr_in *addr);
+      int getChannel(uint32_t clientId);
       void setMyId(uint32_t Id);
-      void dumpOut(bool asIp = true);
+      void dumpOut();
       void clear();
       uint32_t getClientId(int idx) { return channels[idx].clientId; };
-      void getClientAddr(int idx, sockaddr_in *addr);
       void pruneStaleChannels(time_t now, int startAt = 1);
       void getClientIds(uint32_t* ids) {
         for(int i=0; i<MAX_JAMMERS; i++) {
@@ -94,13 +95,33 @@ namespace JamNetStuff
       struct Channel {
         uint32_t clientId;
         time_t KeepAlive;
-        sockaddr_in Address;
       };
       uint32_t myId;
       Channel channels[MAX_JAMMERS];
-      void makeIpString(unsigned long s_addr, char* ipString);
   };
 
+  struct Player {
+    uint32_t clientId;
+    time_t KeepAlive;
+    sockaddr_in Address;
+  };
+
+  class PlayerList {
+    public:
+      PlayerList();
+      void setAllowedClientIds(std::vector<unsigned>& ids);
+      bool isAllowed(unsigned clientId);
+      int updateChannel(unsigned clientId, sockaddr_in* addr);
+      int numPlayers();
+      Player get(int i);
+      void Prune();
+      void dump(std::string msg);
+    private:
+      std::vector<unsigned> m_allowedClientIds;
+      std::vector<Player> m_players;
+      int m_roomSize;
+      std::mutex m_mutex;
+  };
 
   #define JITTER_SAMPLES 96000
 
@@ -227,17 +248,17 @@ namespace JamNetStuff
       JamSocket();
       int sendPacket(const float** buffer, int frames);
       int readPackets(JamMixer*);
-      int readAndBroadcast(JamMixer*);
+      int doPacket(JamMixer*);
       bool isActivated;
 
       void initServer(short port);
       void initClient(const char* servername, int port, uint32_t clientId);
-      void channelDump() { channelMap.dumpOut(); };
       void setTempo(int newTempo) { tempo = newTempo; };
       void getClientIds(uint32_t* ids) { packet.getClientIds(ids); };
+      std::string getMacAddress();
     
     private:
-      ChannelMap channelMap;
+      PlayerList m_playerList;
       JamPacket packet;
       int jamSocket;
       struct sockaddr_in serverAddr;

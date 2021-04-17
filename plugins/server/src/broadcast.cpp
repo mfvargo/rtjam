@@ -67,7 +67,7 @@ void packet_thread(short port) {
   std::thread fifoThread = std::thread(fifo_thread, port, &jamMixer);
   // Loop and broadcast data
   while (1) {
-    jamSocket.readAndBroadcast(&jamMixer);
+    jamSocket.doPacket(&jamMixer);
   }
 }
 

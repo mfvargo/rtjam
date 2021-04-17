@@ -1,13 +1,25 @@
 #include "Settings.hpp"
 #include <iostream>
 #include <fstream>
-
-START_NAMESPACE_DISTRHO
+#include <unistd.h>
+#include <pwd.h>
 
   Settings::Settings() {
     // do some constructing
     defValues = {
     };
+    // find the home directory for settings.json
+    char *homedir = getenv("HOME");
+    if (homedir != NULL) {
+      m_filename = homedir;
+    } else {
+      uid_t uid = getuid();
+      struct passwd *pw = getpwuid(uid);
+      if (pw != NULL) {
+        m_filename = pw->pw_dir;
+      }
+    }
+    m_filename += "/settings.json";
   }
 
   int Settings::getOrSetValue(const char* key, int value) {
@@ -32,18 +44,15 @@ START_NAMESPACE_DISTRHO
   }
 
   void Settings::saveToFile() {
-    std::ofstream outFile("settings.json");
-    outFile << defValues;
-    // Open a file and save the settings
+    // Open a file and save the settings (pretty with indent 2)
+    std::ofstream outFile(m_filename);
+    outFile << defValues.dump(2);
   }
 
   void Settings::loadFromFile() {
     // Load settings from a file
-    std::ifstream infile("settings.json");
+    std::ifstream infile(m_filename);
     if (infile.is_open()) {
       infile >> defValues;
     }
   }
-
-
-END_NAMESPACE_DISTRHO

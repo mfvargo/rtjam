@@ -20,6 +20,10 @@ plugins: libs
 	$(MAKE) all -C plugins/RTJam
 	$(MAKE) all -C plugins/server
 	$(MAKE) all -C plugins/nojack
+	$(MAKE) all -C plugins/rtjam-broadcast
+	$(MAKE) all -C plugins/rtjam-sound
+	$(MAKE) all -C plugins/rtjam-box
+	
 
 ifneq ($(CROSS_COMPILING),true)
 gen: plugins dpf/utils/lv2_ttl_generator
@@ -45,6 +49,10 @@ clean:
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	$(MAKE) clean -C plugins/RTJam
 	$(MAKE) clean -C plugins/server
+	$(MAKE) clean -C plugins/nojack
+	$(MAKE) clean -C plugins/rtjam-broadcast
+	$(MAKE) clean -C plugins/rtjam-sound
+	$(MAKE) clean -C plugins/rtjam-box
 	rm -rf bin build
 
 install: all
@@ -56,9 +64,13 @@ install-user: all
 # --------------------------------------------------------------
 
 deploy-pi:
-	cp bin/rtjam ~/www/html/pi
-	cp utils/JamOn.sh ~/www/html/pi
-	cp utils/Update.sh ~/www/html/pi
+# cp bin/rtjam ~/www/html/pi
+#	cp utils/JamOn.sh ~/www/html/pi
+#	cp utils/Update.sh ~/www/html/pi
+	scp -i ~/.ssh/rtjam.cer bin/rtjam ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/rtjam.cer bin/rtjam-sound ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/rtjam.cer bin/rtjam-box ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 
 deploy-mac:
 	zip -r bin/rtjam.vst.zip bin/rtjam.vst

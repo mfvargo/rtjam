@@ -153,7 +153,6 @@ namespace JamNetStuff
     }
 
     int JamPacket::getChannel() {
-        // channelMap.dumpOut();
         return channelMap.getChannel(jamMessage.ClientId);
     }
 
@@ -167,6 +166,72 @@ namespace JamNetStuff
 
     void* JamPacket::getPacket() {
         return &jamMessage;
+    }
+
+    PlayerList::PlayerList() {
+        m_roomSize = 7;
+        m_allowedClientIds.clear();
+    }
+
+    void PlayerList::setAllowedClientIds(std::vector<unsigned>& ids) {
+        m_allowedClientIds = ids;
+    }
+
+    bool PlayerList::isAllowed(unsigned /* id*/ ) {
+        // TODO implement allowed list search and max room size
+        return true;
+    }
+
+    void PlayerList::dump(std::string msg) {
+        printf("%s clients: [ ", msg.c_str());
+        for (Player p : m_players) {
+            printf("%u-%lu, ", p.clientId, p.KeepAlive);
+        }
+        printf("]\n");
+    }
+    void PlayerList::Prune() {
+        // See if any of the clients have disappeared
+        time_t now = time(NULL);
+        for (auto it = m_players.begin(); it != m_players.end(); ) {
+            if ((now - (*it).KeepAlive) > EXPIRATION_IN_SECONDS) {
+                m_players.erase(it);
+                dump("prune");
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    int PlayerList::updateChannel(unsigned clientId, sockaddr_in* addr) {
+        time_t now = time(NULL);
+        int i=0;
+        // Do we know about this guy?
+        for (auto it = m_players.begin(); it != m_players.end(); ++it) {
+            if ((*it).clientId == clientId) {
+                (*it).KeepAlive = now;
+                return i;
+            }
+            i++;
+        }
+        // If we got here, we don't know him.  Do we have space to add him?
+        if (i <= m_roomSize) {
+            Player p;
+            p.clientId = clientId;
+            p.KeepAlive = now;
+            p.Address = *addr;
+            m_players.push_back(p);
+            dump("add");
+        }
+        // TODO implement channel map find and update
+        return -1;
+    }
+
+    int PlayerList::numPlayers() {
+        return m_players.size();
+    }
+
+    Player PlayerList::get(int i) {
+        return m_players.at(i);
     }
 
     JamSocket::JamSocket() {
@@ -210,8 +275,6 @@ namespace JamNetStuff
 
         // Set the packet to client mode
         packet.setIsClient(true);
-        // Clear the channel map
-        channelMap.clear();
         packet.clearChannelMap();
     }
 
@@ -254,6 +317,8 @@ namespace JamNetStuff
     }
 
     int JamSocket::readPackets(JamMixer* jamMixer) {
+        // Stale out any channels
+        packet.checkChannelTimeouts();
         if (!isActivated) {
             return 0;
         }
@@ -263,58 +328,50 @@ namespace JamNetStuff
 
         do {
             nBytes = readData();
+            // check if we got any data and if this is from the current server (ignore residual packets from previous room)
             if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port) {
-                // packet.dumpPacket("mikey: ");
                 jamMixer->addData(&packet);
-            } else {
-                // No data make sure to timeout the channelmap
-                packet.checkChannelTimeouts();
             }
         } while( isActivated && nBytes > 0);
         return rval;
     }
 
-    int JamSocket::readAndBroadcast(JamMixer* jamMixer) {
-        // This is the read and broadcast for the server
+    int JamSocket::doPacket(JamMixer* jamMixer) {
         int nBytes = readData();
-        time_t now = time(NULL);
-        channelMap.pruneStaleChannels(now, 0);
-        if (nBytes > 0) {
-            if (packet.getServerChannel() == SET_TEMPO_CHAN) {
-                // We have a tempo change
-                tempo = packet.getBeatCount();
-            }
-            // Put the packet into the mixer
-            if (jamMixer != NULL) {
-                jamMixer->addData(&packet);
-            }
-            uint32_t clientId = packet.getClientIdFromPacket();
-            packet.setServerChannel(channelMap.getChannelBySenderIp(clientId, &senderAddr));
-            uint64_t deltaT = packet.getServerTime() - lastClickTime;
-            if (deltaT > (60 * 1e6 / tempo )) {  // 120BPM
-                // We have passed a click boundary
-                lastClickTime = packet.getServerTime();
-                beatCount++;
-            }
-            packet.setBeatCount(beatCount%4);
-            // We encode the header just once.
-            packet.encodeHeader();
-            // printf("nBytes: %d from %lu\n", nBytes, from_addr);
-            // channelMap.dumpOut();
-            for (int i=0; i<MAX_JAMMERS; i++) {
-                // Don't send back an echo to the sender
-                sockaddr_in addr;
-                uint32_t to_client = channelMap.getClientId(i);
-                if (to_client != EMPTY_SLOT && to_client != clientId) {
-                // if (to_addr != EMPTY_SLOT) {
-                    channelMap.getClientAddr(i, &addr);
-                    sendData(&addr);
-                }
+        // If there was an error, just bail out here.
+        m_playerList.Prune();
+        if (nBytes < 0) return nBytes;
+        uint32_t clientId = packet.getClientIdFromPacket();
+        // Check if that client is an allowed person in the room
+        if (!m_playerList.isAllowed(clientId)) return 0;
+        // Get server assigned channel
+        int serverChannel = m_playerList.updateChannel(clientId, &senderAddr);
+        // Check for full room,  a negative serverChannel means we can handle them
+        if (serverChannel < 0) return 0;
+        // If we get here, we have a valid player and need to broadcast them
+        if (jamMixer != NULL) {
+            jamMixer->addData(&packet);
+        }
+        packet.setServerChannel(serverChannel);
+        // TODO: Put back in the beat count
+        //         uint64_t deltaT = packet.getServerTime() - lastClickTime;
+        //         if (deltaT > (60 * 1e6 / tempo )) {  // 120BPM
+        //             // We have passed a click boundary
+        //             lastClickTime = packet.getServerTime();
+        //             beatCount++;
+        //         }
+        //         packet.setBeatCount(beatCount%4);
+        packet.encodeHeader();
+        for (int i=0; i<m_playerList.numPlayers(); i++) {
+            Player player = m_playerList.get(i);
+            // Get the addresses and send
+            if(player.clientId != clientId) {
+                sendData(&player.Address);
             }
         }
-        // Get IP address (as unsigned long)
         return nBytes;
     }
+
     int JamSocket::readData() {
         addr_size = sizeof(serverAddr);
         int nBytes = recvfrom(
@@ -343,5 +400,21 @@ namespace JamNetStuff
                 sizeof(struct sockaddr)
             );
         return rval;
+    }
+
+    std::string JamSocket::getMacAddress() {
+        char mac[32];
+        struct ifreq ifr;
+        ifr.ifr_addr.sa_family = AF_INET;
+        strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);
+        ioctl(jamSocket, SIOCGIFHWADDR, &ifr);
+        sprintf(mac, "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x\n",
+            (unsigned char)ifr.ifr_hwaddr.sa_data[0],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[1],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[2],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[3],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[4],
+            (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
+        return mac;
     }
 }
