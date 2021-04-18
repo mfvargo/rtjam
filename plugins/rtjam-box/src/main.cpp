@@ -25,6 +25,7 @@ int jamNationStuff() {
     Settings settings;
     settings.loadFromFile();
     string urlBase = settings.getOrSetValue("rtjam-nation", "rtjam-nation.basscleftech.com/api/1/");
+    int version = stoi(settings.getOrSetValue("rtjam-unit-version", "0"));
     settings.saveToFile();
     string token = "";
     RTJamNationApi api(urlBase);
@@ -35,15 +36,17 @@ int jamNationStuff() {
                 // get the token
                 token = api.m_resultBody["jamUnit"]["token"];
                 BoxAPI::s_token = token;
-                clog << "got a token: " << token << endl;
             }
         } else {
             if (!api.jamUnitPing(token) || api.m_httpResponseCode != 200) {
                 // Something is wrong with this token
                 token = "";
             };
+            if (version < api.m_resultBody["version"]) {
+                clog << "new version exists" << endl;
+            }
+            // clog << "version: " << api.m_resultBody["version"] << endl;
         }
-        // clog << api.m_resultBody.dump(2) << endl;
         sleep(10);
     }
     return 0;

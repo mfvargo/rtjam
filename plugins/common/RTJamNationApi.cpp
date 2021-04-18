@@ -8,6 +8,10 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
+#ifndef GIT_HASH
+#define GIT_HASH "No Githash in Makefile"
+#endif
+
 
 using namespace std;
 using namespace restincurl;
@@ -39,6 +43,7 @@ bool RTJamNationApi::jamUnitPing(string token) {
   args["token"] = token;
   args["lanIp"] = m_lanIp;
   args["macAddress"] = m_macAddress;
+  args["gitHash"] = GIT_HASH;
   return put(m_urlBase + "jamUnit/ping", args);
 }
 
@@ -54,6 +59,7 @@ bool RTJamNationApi::broadcastUnitPing(string token) {
   args["token"] = token;
   args["lanIp"] = m_lanIp;
   args["macAddress"] = m_macAddress;
+  args["gitHash"] = GIT_HASH;
   return put(m_urlBase + "broadcastUnit/ping", args);
 }
 
