@@ -17,6 +17,8 @@
 ### Install nginx
 - sudo apt install nginx
 
+### TODO: Document crontab that updates
+
 
 ## Script to run stuff
 
