@@ -44,6 +44,7 @@ int jamNationStuff() {
             };
             if (version < api.m_resultBody["version"]) {
                 clog << "new version exists" << endl;
+                exit(0);
             }
             // clog << "version: " << api.m_resultBody["version"] << endl;
         }
