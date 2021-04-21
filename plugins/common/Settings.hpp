@@ -14,6 +14,7 @@ class Settings {
       void setValue(const char* key, std::string value);
       void saveToFile();
       void loadFromFile();
+      void saveVersionFile();
 
   protected:
     json defValues;

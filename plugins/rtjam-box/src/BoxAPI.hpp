@@ -40,6 +40,7 @@ private:
             { "inputLeft", m_jamLevels.inputLeft },
             { "inputRight", m_jamLevels.inputRight },
             { "beat", m_jamLevels.beat },
+            { "connected", m_jamLevels.isConnected },
             { "players", json::array() },
         };
         for (int i=0; i<MAX_JAMMERS; i++) {

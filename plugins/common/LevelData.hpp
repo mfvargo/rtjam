@@ -13,6 +13,7 @@ struct RTJamLevels {
   float inputLeft;
   float inputRight;
   char beat;
+  bool isConnected;
 };
 
 class LevelData {

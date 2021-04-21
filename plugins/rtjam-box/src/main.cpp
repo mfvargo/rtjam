@@ -23,8 +23,10 @@ int fastCGIStuff() {
 
 int jamNationStuff() {
     Settings settings;
+    settings.saveVersionFile();
     settings.loadFromFile();
     string urlBase = settings.getOrSetValue("rtjam-nation", "rtjam-nation.basscleftech.com/api/1/");
+    settings.setValue("gitCommit", GIT_HASH);
     int version = stoi(settings.getOrSetValue("rtjam-unit-version", "0"));
     settings.saveToFile();
     string token = "";
@@ -42,11 +44,6 @@ int jamNationStuff() {
                 // Something is wrong with this token
                 token = "";
             };
-            if (version < api.m_resultBody["version"]) {
-                clog << "new version exists" << endl;
-                exit(0);
-            }
-            // clog << "version: " << api.m_resultBody["version"] << endl;
         }
         sleep(10);
     }
