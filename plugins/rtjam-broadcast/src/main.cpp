@@ -27,6 +27,7 @@ void packet_thread(short port, json room) {
 
 int main(int argc, char **argv) {
   Settings settings;
+  settings.saveVersionFile();
   settings.loadFromFile();
   string urlBase = settings.getOrSetValue("rtjam-nation", std::string("http://rtjam-nation.basscleftech.com/api/1/"));
   string token = "";
