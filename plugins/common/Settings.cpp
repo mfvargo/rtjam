@@ -52,7 +52,7 @@
   void Settings::saveVersionFile() {
     // Open a file and save the Version
     std::ofstream outFile("version.local.txt");
-    outFile << GIT_HASH;
+    outFile << GIT_HASH << std::endl;
   }
 
   void Settings::saveToFile() {
