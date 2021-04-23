@@ -8,10 +8,6 @@
 #include <net/if.h>
 #include <arpa/inet.h>
 
-#ifndef GIT_HASH
-#define GIT_HASH "No Githash in Makefile"
-#endif
-
 
 using namespace std;
 using namespace restincurl;

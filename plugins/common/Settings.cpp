@@ -4,6 +4,12 @@
 #include <unistd.h>
 #include <pwd.h>
 
+#ifndef GIT_HASH
+#define GIT_HASH "No Githash in Makefile"
+#endif
+
+
+
   Settings::Settings() {
     // do some constructing
     defValues = {
@@ -41,6 +47,12 @@
   }
   void Settings::setValue(const char* key, std::string value) {
     defValues[key] = value;
+  }
+
+  void Settings::saveVersionFile() {
+    // Open a file and save the Version
+    std::ofstream outFile("version.local.txt");
+    outFile << GIT_HASH << std::endl;
   }
 
   void Settings::saveToFile() {

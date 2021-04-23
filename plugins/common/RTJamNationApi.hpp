@@ -2,6 +2,11 @@
 
 #define RESTINCURL_ENABLE_ASYNC 0
 
+#ifndef GIT_HASH
+#define GIT_HASH "No Githash in Makefile"
+#endif
+
+
 #include "restincurl.h"
 #include "json.hpp"
 

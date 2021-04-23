@@ -149,6 +149,7 @@ void PluginRTJam::run(const float** inputs, float** outputs, uint32_t frames) {
   m_levels.inputLeft = leftInput.mean;
   m_levels.inputRight = rightInput.mean;
   m_levels.beat = m_jamMixer.getBeat();
+  m_levels.isConnected = m_jamSocket.isActivated;
 
   for ( int i = 0; i < 2; i++ ) {
     memcpy(outputs[i], m_outputs[i], frames * sizeof(float));

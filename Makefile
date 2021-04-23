@@ -6,7 +6,7 @@
 
 include dpf/Makefile.base.mk
 
-all: libs plugins gen
+all: libs plugins gen gitversion
 
 # --------------------------------------------------------------
 
@@ -23,7 +23,10 @@ plugins: libs
 	$(MAKE) all -C plugins/rtjam-broadcast
 	$(MAKE) all -C plugins/rtjam-sound
 	$(MAKE) all -C plugins/rtjam-box
-	
+
+gitversion:
+	git rev-parse HEAD > bin/version.txt
+
 
 ifneq ($(CROSS_COMPILING),true)
 gen: plugins dpf/utils/lv2_ttl_generator
@@ -63,11 +66,12 @@ install-user: all
 
 # --------------------------------------------------------------
 
-deploy-pi:
+deploy-pi: all
 # cp bin/rtjam ~/www/html/pi
 #	cp utils/JamOn.sh ~/www/html/pi
 #	cp utils/Update.sh ~/www/html/pi
 #	scp -i ~/.ssh/rtjam.cer bin/rtjam ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/rtjam.cer bin/version.txt ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-sound ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-box ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
