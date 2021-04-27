@@ -151,6 +151,10 @@ int main ( int argc, char *argv[]) {
     signal ( SIGHUP, signal_handler );
     signal ( SIGINT, signal_handler );
 
+    // let's try to change thre frame size
+    if ( jack_set_buffer_size ( client, 128))
+        fprintf ( stderr, "cannot set buffer size\n" );
+
     /* keep running until the transport stops */
     while (1)
     {
