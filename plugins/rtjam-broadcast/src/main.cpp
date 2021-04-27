@@ -15,7 +15,7 @@ vector<thread> roomThreads;
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 #define FIFO_FRAME_SIZE 960
 
-void packet_thread(short port, json room) {
+void packet_thread(short port) {
   JamNetStuff::JamSocket jamSocket;
   jamSocket.initServer(port);
   jamSocket.isActivated = true;
@@ -35,21 +35,9 @@ int main(int argc, char **argv) {
   settings.saveToFile();
   RTJamNationApi api(urlBase);
   
-  while (token == "") {
-    if (api.broadcastUnitDeviceRegister() && api.m_httpResponseCode == 200) {
-      // get the token
-      token = api.m_resultBody["broadcastUnit"]["token"];
-      broadcastUnitName = api.m_resultBody["broadcastUnit"]["name"];
-    }
-    sleep(5);
-  }
-
   for (short port = 7891; port < 7894; port++) {
-    char roomName[100];
-    sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);
-    api.activateRoom(token, roomName, port);
     // Start up the room thread with their attributes
-    roomThreads.push_back(std::thread(packet_thread, port, api.m_resultBody["room"]));
+    roomThreads.push_back(std::thread(packet_thread, port));
   }
 
   while(1) {
@@ -59,8 +47,13 @@ int main(int argc, char **argv) {
       if (api.broadcastUnitDeviceRegister() && api.m_httpResponseCode == 200) {
         // get the token
         token = api.m_resultBody["broadcastUnit"]["token"];
+        broadcastUnitName = api.m_resultBody["broadcastUnit"]["name"];
         clog << "got a new token: " << token << endl;
-        // TODO: shutdown the rooms?
+        for (short port = 7891; port < 7894; port++) {
+          char roomName[100];
+          sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);
+          api.activateRoom(token, roomName, port);
+        }
       }
     } else {
       if (!api.broadcastUnitPing(token) || api.m_httpResponseCode != 200) {
