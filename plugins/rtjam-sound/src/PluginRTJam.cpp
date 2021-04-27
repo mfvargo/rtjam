@@ -74,7 +74,7 @@ void PluginRTJam::getParams() {
     case paramChanGain12:
     case paramChanGain13:
     case paramChanGain14:
-      if (m_param.fValue < -29.9) {
+      if (m_param.fValue < -59.9) {
           m_param.fValue = -60.0;
       }
       m_jamMixer.gains[m_param.param - paramChanGain1] = dbToFloat(m_param.fValue);
