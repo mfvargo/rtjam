@@ -6,6 +6,7 @@
 #include "ParamData.hpp"
 #include <thread>
 #include <vector>
+#include "MVerb.h"
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -20,6 +21,8 @@ class PluginRTJam {
     void getParams();
     void connect(const char* host, int port, uint32_t id);
     void disconnect();
+
+    MVerb<float>* m_pVerb;
 
   private:
     float dbToFloat(float value);
