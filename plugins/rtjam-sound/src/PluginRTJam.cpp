@@ -35,7 +35,18 @@ PluginRTJam::~PluginRTJam() {
 }
 
 void PluginRTJam::init() {
-  printf("mac: %s", m_jamSocket.getMacAddress().c_str());
+  m_pVerb = new MVerb<float>;
+  m_pVerb->setSampleRate(48000);
+  m_pVerb->setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
+  m_pVerb->setParameter(MVerb<float>::DENSITY, 0.5f);
+  m_pVerb->setParameter(MVerb<float>::BANDWIDTHFREQ, 0.5f);
+  m_pVerb->setParameter(MVerb<float>::DECAY, 0.5f);
+  m_pVerb->setParameter(MVerb<float>::PREDELAY, 0.5f);
+  m_pVerb->setParameter(MVerb<float>::SIZE, 0.75f);
+  m_pVerb->setParameter(MVerb<float>::GAIN, 1.0f);
+  m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
+  m_pVerb->setParameter(MVerb<float>::EARLYMIX, 0.5f);
+
   m_threads.push_back(std::thread(levelPush, this)); 
   m_threads.push_back(std::thread(paramFetch, this)); 
 }
@@ -83,7 +94,7 @@ void PluginRTJam::getParams() {
       m_jamMixer.masterVol = dbToFloat(m_param.fValue);
       break;
     case paramReverbMix:
-      // fVerb.setParameter(MVerb<float>::MIX, value);
+      m_pVerb->setParameter(MVerb<float>::MIX, m_param.fValue);
       break;
     case paramRoomChange:
       connect(m_param.sValue, m_param.iValue, m_param.iValue2);
@@ -101,15 +112,41 @@ void PluginRTJam::connect(const char* host, int port, uint32_t id) {
 }
 
 void PluginRTJam::disconnect() {
+  m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
   m_jamMixer.reset();
   m_jamSocket.isActivated = false;
 }
 
 void PluginRTJam::run(const float** inputs, float** outputs, uint32_t frames) {
   m_framecount += frames;
-  m_jamMixer.addLocalMonitor(inputs, frames);
-  m_jamSocket.sendPacket((const float**)inputs, frames);
+
+  // Apply reverb to inputs
+  float left[frames];
+  float right[frames];
+  float* tempOut[2];
+  tempOut[0] = left;
+  tempOut[1] = right;
+  float inLeft[frames];
+  float inRight[frames];
+  float* tempIn[2];
+  tempIn[0] = inLeft;
+  tempIn[1] = inRight;
+  for (uint32_t i=0; i<frames; i++) {
+      // Only give the left input to the reverb engine
+      inLeft[i] = inputs[0][i];
+      inRight[i] = 0.0f;
+  }
+  m_pVerb->process((const float**) tempIn, tempOut, static_cast<int>(frames));
+  for (uint32_t i=0; i<frames; i++) {
+    tempOut[1][i] = inputs[1][i]; // Copy the right channel back in
+  }
+  m_jamMixer.addLocalMonitor((const float**) tempOut, frames);
+  m_jamSocket.sendPacket((const float**)tempOut, frames);
+
+  // read any data from the network
   m_jamSocket.readPackets(&m_jamMixer);
+
+  // Get the mix
   m_jamMixer.getMix(m_outputs, frames);
 
   uint32_t ids[MAX_JAMMERS];
