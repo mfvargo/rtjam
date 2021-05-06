@@ -94,7 +94,7 @@ void PluginRTJam::getParams() {
       m_jamMixer.masterVol = dbToFloat(m_param.fValue);
       break;
     case paramReverbMix:
-      // m_pVerb->setParameter(MVerb<float>::MIX, value);
+      m_pVerb->setParameter(MVerb<float>::MIX, m_param.fValue);
       break;
     case paramRoomChange:
       connect(m_param.sValue, m_param.iValue, m_param.iValue2);
@@ -102,10 +102,6 @@ void PluginRTJam::getParams() {
     case paramDisconnect:
       disconnect();
       break;
-    case paramReverbMix1:
-      m_pVerb->setParameter(MVerb<float>::MIX, m_param.fValue);
-      break;
-
   }
 }
 
