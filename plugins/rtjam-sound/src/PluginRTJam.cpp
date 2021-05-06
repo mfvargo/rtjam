@@ -112,6 +112,7 @@ void PluginRTJam::connect(const char* host, int port, uint32_t id) {
 }
 
 void PluginRTJam::disconnect() {
+  m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
   m_jamMixer.reset();
   m_jamSocket.isActivated = false;
 }
