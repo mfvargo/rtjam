@@ -6,6 +6,7 @@
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>
 #include <iostream>
+#include <fstream>
 
 using namespace std;
 using json = nlohmann::json;
@@ -53,8 +54,10 @@ private:
         }
         out << result.dump(2);
     }
+
     void setParam() {
         RTJamParam param;
+        memset(&param, 0x00, sizeof(RTJamParam));
         for(const auto& post: environment().posts) {
             if (post.first == "command") {
                 param.param = (RTJamParameters) atoi(post.second.c_str());
@@ -72,12 +75,58 @@ private:
                 param.iValue2 = atoi(post.second.c_str());
             }
         }
-        ParamData paramData;
-        paramData.flush();
-        paramData.send(&param);
-        out << "OK";
-        getParamForm();
+        if(param.param > paramCount) {
+            // This is a command to be handled by rtjam-box, not passed to sound engine
+            cout << "svalue: " <<  param.sValue << endl;
+            switch (param.param) {
+                case paramSetAudioInput: {
+                    std::ofstream outfile("soundin.cfg");
+                    outfile << param.sValue;
+                }
+                break;
+                case paramSetAudioOutput: {
+                    std::ofstream outfile("soundout.cfg");
+                    outfile << param.sValue;
+                }
+                break;
+                case paramListAudioConfig: 
+                    out << execMyCommand("aplay -l");
+                break;
+                case paramCheckForUpdate: 
+                    out << execMyCommand("./update-rtjam.bash");
+                break;
+                case paramRebootDevice: 
+                    out << execMyCommand("reboot 0");
+                break;
+                case paramShutdownDevice: 
+                    out << execMyCommand("shutdown now");
+                break;
+                default:
+                out << "Unknown Command";
+            }
+        } else {
+            // This is a sound engine parameter
+            ParamData paramData;
+            paramData.flush();
+            paramData.send(&param);
+            out << "OK";
+            // getParamForm();
+        }
     }
+
+    string execMyCommand(string cmd) {
+        array<char, 128> buffer;
+        string result;
+        unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+        if (!pipe) {
+            throw std::runtime_error("popen() failed!");
+        }
+        while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+            result += buffer.data();
+        }
+        return result;
+    }
+
     void getParamForm() {
         out <<
         "<h1>Set Param Form</h1>"

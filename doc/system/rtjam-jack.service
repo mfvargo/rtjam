@@ -5,7 +5,7 @@ After=network.target
 [Service]
 LimitRTPRIO=infinity
 LimitMEMLOCK=infinity
-ExecStart=jackd -dalsa -r48000 -n2 -p64 -D -Chw:SigmaI2SCodec,1 -Phw:SigmaI2SCodec,0 -i2 -o2 
+ExecStart=/home/pi/rtjam/jackrun.bash
 WorkingDirectory=/home/pi/rtjam
 StandardOutput=inherit
 StandardError=inherit
@@ -16,3 +16,4 @@ Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/u
 
 [Install]
 WantedBy=multi-user.target
+
