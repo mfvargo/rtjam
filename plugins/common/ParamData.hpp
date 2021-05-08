@@ -29,7 +29,12 @@ enum RTJamParameters
       paramReverbMix,
       paramRoomChange,
       paramDisconnect,
-      paramCount
+      paramCount,
+      paramSetAudioInput = 1000,
+      paramSetAudioOutput,
+      paramListAudioConfig,
+      paramRebootDevice = 9998,
+      paramShutdownDevice = 9999,
 };
 
 struct RTJamParam {
