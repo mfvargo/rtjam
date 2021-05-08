@@ -89,24 +89,14 @@ private:
                     outfile << param.sValue;
                 }
                 break;
-                case paramListAudioConfig: {
-                    array<char, 128> buffer;
-                    string result;
-                    unique_ptr<FILE, decltype(&pclose)> pipe(popen("aplay -l", "r"), pclose);
-                    if (!pipe) {
-                        throw std::runtime_error("popen() failed!");
-                    }
-                    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
-                        result += buffer.data();
-                    }
-                    out << result;
-                }
+                case paramListAudioConfig: 
+                    out << execMyCommand("aplay -l");
                 break;
                 case paramRebootDevice: 
-                    system("sudo reboot 0");
+                    out << execMyCommand("reboot 0");
                 break;
                 case paramShutdownDevice: 
-                    system("sudo shutdown now");
+                    out << execMyCommand("shutdown now");
                 break;
                 default:
                 out << "Unknown Command";
@@ -119,6 +109,19 @@ private:
             out << "OK";
             // getParamForm();
         }
+    }
+
+    string execMyCommand(string cmd) {
+        array<char, 128> buffer;
+        string result;
+        unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+        if (!pipe) {
+            throw std::runtime_error("popen() failed!");
+        }
+        while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+            result += buffer.data();
+        }
+        return result;
     }
 
     void getParamForm() {
