@@ -33,6 +33,7 @@ enum RTJamParameters
       paramSetAudioInput = 1000,
       paramSetAudioOutput,
       paramListAudioConfig,
+      paramCheckForUpdate,
       paramRebootDevice = 9998,
       paramShutdownDevice = 9999,
 };

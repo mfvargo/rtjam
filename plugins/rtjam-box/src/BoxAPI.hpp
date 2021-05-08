@@ -92,6 +92,9 @@ private:
                 case paramListAudioConfig: 
                     out << execMyCommand("aplay -l");
                 break;
+                case paramCheckForUpdate: 
+                    out << execMyCommand("./update-rtjam.bash");
+                break;
                 case paramRebootDevice: 
                     out << execMyCommand("reboot 0");
                 break;
