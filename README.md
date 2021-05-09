@@ -22,7 +22,6 @@ Measuring on my local network I can get best case of 13msec.  Thats with an avg 
 
 So the bulk of the delay is network transit and jitter buffer.  
 
-
 ## Get The code
 ```
 git clone --recurse-submodules https://github.com/mfvargo/rtjam.git
