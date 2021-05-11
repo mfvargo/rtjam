@@ -93,7 +93,7 @@ private:
                     out << execMyCommand("aplay -l");
                 break;
                 case paramCheckForUpdate: 
-                    out << execMyCommand("./update-rtjam.bash");
+                    out << execMyCommand("./checkupdate.bash");
                 break;
                 case paramRebootDevice: 
                     out << execMyCommand("reboot 0");
