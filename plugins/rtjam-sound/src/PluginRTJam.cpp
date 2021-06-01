@@ -55,14 +55,14 @@ void PluginRTJam::init()
   m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
   m_pVerb->setParameter(MVerb<float>::EARLYMIX, 0.5f);
 
-  m_threads.push_back(std::thread(levelPush, this));
+  // m_threads.push_back(std::thread(levelPush, this));
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
 void PluginRTJam::syncLevels()
 {
   memcpy(m_levelData.m_pJamLevels, &m_levels, sizeof(RTJamLevels));
-  m_levelData.unlock();
+  // m_levelData.unlock();
 }
 
 void PluginRTJam::paramFlush()
@@ -218,6 +218,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   m_levels.inputRight = rightInput.mean;
   m_levels.beat = m_jamMixer.getBeat();
   m_levels.isConnected = m_jamSocket.isActivated;
+
+  this->syncLevels();
 
   for (int i = 0; i < 2; i++)
   {
