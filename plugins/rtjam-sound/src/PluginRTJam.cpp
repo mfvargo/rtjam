@@ -122,7 +122,7 @@ void PluginRTJam::getParams()
 
 void PluginRTJam::connect(const char *host, int port, uint32_t id)
 {
-  m_jamMixer.reset();
+  // m_jamMixer.reset();
   m_jamSocket.isActivated = true;
   m_jamSocket.initClient(host, port, id);
   // Need to flush out any residual data in the socket from end of last session
@@ -131,8 +131,8 @@ void PluginRTJam::connect(const char *host, int port, uint32_t id)
 
 void PluginRTJam::disconnect()
 {
-  m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
-  m_jamMixer.reset();
+  // m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
+  // m_jamMixer.reset();
   m_jamSocket.isActivated = false;
 }
 
