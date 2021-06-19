@@ -2,7 +2,6 @@
 #define PLUGIN_RTJAM_HPP
 
 #include "JamNetStuff.hpp"
-#include "HighPassFilter.hpp"
 #include "LevelData.hpp"
 #include "ParamData.hpp"
 #include <thread>

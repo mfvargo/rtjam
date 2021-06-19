@@ -286,6 +286,25 @@ namespace JamNetStuff
     uint64_t lastClickTime;
     int tempo;
   };
+
+  class HighPassFilter
+  {
+  public:
+    HighPassFilter()
+    {
+      byPass = true;
+      in_prev = 0.0;
+      out_prev = 0.0;
+      a1 = 0.996863331833438;
+      b0 = 0.998431665916719;
+      b1 = -0.998431665916719;
+    }
+    bool byPass;
+    void filter(float *output, const float *input, uint32_t framesize);
+
+  private:
+    double in_prev, out_prev, a1, b1, b0;
+  };
 };
 
 #endif // JAM_NET_STUFF_HPP_INCLUDED

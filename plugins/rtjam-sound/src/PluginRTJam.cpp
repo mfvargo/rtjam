@@ -117,6 +117,14 @@ void PluginRTJam::getParams()
   case paramDisconnect:
     disconnect();
     break;
+  case paramHPFOn:
+    filters[0].byPass = false;
+    filters[1].byPass = false;
+    break;
+  case paramHPFOff:
+    filters[0].byPass = true;
+    filters[1].byPass = true;
+    break;
   }
 }
 
