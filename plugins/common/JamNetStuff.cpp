@@ -488,13 +488,14 @@ namespace JamNetStuff
     {
         for (uint32_t i = 0; i < framesize; i++)
         {
-            double sample = input[i];
-            out_prev = b0 * sample + b1 * in_prev - a1 * out_prev;
-            in_prev = sample;
-            output[i] = out_prev;
             if (byPass)
             {
-                output[i] = sample;
+                output[i] = input[i];
+            }
+            else
+            {
+                sampleAvg.addSample(input[i]);
+                output[i] = input[i] - sampleAvg.mean;
             }
         }
     }

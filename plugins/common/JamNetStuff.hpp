@@ -298,8 +298,10 @@ namespace JamNetStuff
       a1 = 0.996863331833438;
       b0 = 0.998431665916719;
       b1 = -0.998431665916719;
+      sampleAvg.windowSize = 20000;
     }
     bool byPass;
+    StreamTimeStats sampleAvg;
     void filter(float *output, const float *input, uint32_t framesize);
 
   private:
