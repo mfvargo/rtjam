@@ -117,6 +117,14 @@ void PluginRTJam::getParams()
   case paramDisconnect:
     disconnect();
     break;
+  case paramHPFOn:
+    filters[0].byPass = false;
+    filters[1].byPass = false;
+    break;
+  case paramHPFOff:
+    filters[0].byPass = true;
+    filters[1].byPass = true;
+    break;
   }
 }
 
@@ -151,17 +159,10 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   float *tempIn[2];
   tempIn[0] = inLeft;
   tempIn[1] = inRight;
-  for (uint32_t i = 0; i < frames; i++)
-  {
-    // Only give the left input to the reverb engine
-    inLeft[i] = inputs[0][i];
-    inRight[i] = 0.0f;
-  }
+  filters[0].filter(inLeft, inputs[0], frames);
+  memset(inRight, 0x0, sizeof(float) * frames); // Zero out right channel for stereo reverb code
   m_pVerb->process((const float **)tempIn, tempOut, static_cast<int>(frames));
-  for (uint32_t i = 0; i < frames; i++)
-  {
-    tempOut[1][i] = inputs[1][i]; // Copy the right channel back in
-  }
+  filters[1].filter(tempOut[1], inputs[1], frames);
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
   m_jamSocket.sendPacket((const float **)tempOut, frames);
 
@@ -179,8 +180,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   float rightPow = 0.0;
   for (uint32_t i = 0; i < frames; i++)
   {
-    leftPow += pow(inputs[0][i], 2);
-    rightPow += pow(inputs[1][i], 2);
+    leftPow += pow(tempOut[0][i], 2);
+    rightPow += pow(tempOut[1][i], 2);
   }
   leftPow /= frames + 1;
   if (leftPow > 1E-6)
