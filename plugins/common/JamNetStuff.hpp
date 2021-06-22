@@ -293,9 +293,9 @@ namespace JamNetStuff
     HighPassFilter()
     {
       byPass = true;
-      in_prev = 0.0;
-      out_prev = 0.0;
-      a1 = 0.996863331833438;
+      tap1 = 0.0;
+      tap2 = 0.0;
+      a1 = -0.996863331833438;
       b0 = 0.998431665916719;
       b1 = -0.998431665916719;
       sampleAvg.windowSize = 20000;
@@ -305,7 +305,7 @@ namespace JamNetStuff
     void filter(float *output, const float *input, uint32_t framesize);
 
   private:
-    double in_prev, out_prev, a1, b1, b0;
+    double tap1, tap2, a1, b1, b0;
   };
 };
 
