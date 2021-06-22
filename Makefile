@@ -81,9 +81,6 @@ deploy-mac:
 	scp bin/rtjam.vst.zip  pi@music.basscleftech.com:/home/pi/www/html/mac
 
 deploy-linux:
-	scp bin/rtjam  pi@music.basscleftech.com:/home/pi/www/html/linux
-	scp bin/rtjam-vst.so  pi@music.basscleftech.com:/home/pi/www/html/linux
-	scp readme.html  pi@music.basscleftech.com:/home/pi/www/html/index.html
 	cp bin/rtjam ~/bin
 	cp bin/rtjam-vst.so  ~/vsts
 

@@ -494,8 +494,11 @@ namespace JamNetStuff
             }
             else
             {
-                sampleAvg.addSample(input[i]);
-                output[i] = input[i] - sampleAvg.mean;
+                output[i] = b0 * input[i] + b1 * tap1 - a1 * tap2;
+                tap1 = input[i];
+                tap2 = output[i];
+                // sampleAvg.addSample(input[i]);
+                // output[i] = input[i] - sampleAvg.mean;
             }
         }
     }
