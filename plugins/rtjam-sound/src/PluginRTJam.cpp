@@ -46,9 +46,9 @@ void PluginRTJam::init()
   m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
   m_pVerb->setParameter(MVerb<float>::EARLYMIX, 0.5f);
 
-  StatusLight::startInit();
-  m_inputOneLight.init(StatusLight::inputOne);
-  m_inputTwoLight.init(StatusLight::inputTwo);
+  // StatusLight::startInit();
+  // m_inputOneLight.init(StatusLight::inputOne);
+  // m_inputTwoLight.init(StatusLight::inputTwo);
 
   m_threads.push_back(std::thread(paramFetch, this));
 }
@@ -198,8 +198,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   leftInput.addSample(leftPow);
   rightInput.addSample(rightPow);
 
-  m_inputOneLight.set(leftInput.mean);
-  m_inputTwoLight.set(rightInput.mean);
+  // m_inputOneLight.set(leftInput.mean);
+  // m_inputTwoLight.set(rightInput.mean);
   // Store organized levels
   for (int i = 0; i < MIX_CHANNELS; i++)
   {

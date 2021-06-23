@@ -20,6 +20,8 @@ void StatusLight::init(StatusLight::StatusFunction func)
   }
   pinMode(m_redPin, OUTPUT);
   pinMode(m_greenPin, OUTPUT);
+  m_flashDuration = 1000000; // 1 second
+  m_bFlash = false;
 }
 
 void StatusLight::set(StatusLight::StatusColor color)
@@ -63,4 +65,9 @@ void StatusLight::set(float power)
   {
     set(red);
   }
+}
+
+void StatusLight::flash(int duration)
+{
+  // TODO:  make the thing flash
 }

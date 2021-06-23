@@ -28,8 +28,13 @@ public:
   void init(StatusFunction func);
   void set(float power);
   void set(StatusColor color);
+  void flash(int duration);
 
 private:
   int m_redPin;
   int m_greenPin;
+  int m_flashDuration;
+  bool m_bFlash;
+
+  void flashThreadFunc();
 };
