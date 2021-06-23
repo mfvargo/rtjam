@@ -7,6 +7,7 @@ CC = gcc
 SRCS = \
 	./src/main.cpp \
 	./src/PluginRTJam.cpp \
+	../common/StatusLight.cpp \
 	../common/JamNetStuff.cpp \
 	../common/TimersAndStats.cpp \
 	../common/JamMixer.cpp \
@@ -22,7 +23,7 @@ DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lcurl
+LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lcurl -lwiringPi
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g
 
