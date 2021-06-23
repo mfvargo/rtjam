@@ -7,6 +7,7 @@
 #include <thread>
 #include <vector>
 #include "MVerb.h"
+#include "StatusLight.hpp"
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -24,6 +25,8 @@ public:
   void disconnect();
 
   MVerb<float> *m_pVerb;
+  StatusLight m_inputOneLight;
+  StatusLight m_inputTwoLight;
 
 private:
   JamNetStuff::HighPassFilter filters[2];
