@@ -172,14 +172,19 @@ void RTJamNationApi::getLanIp()
 
   while (tmp)
   {
-    if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET) // && strcmp(tmp->ifa_name, "eth0") == 0)
+    if ((tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET) && strcmp(tmp->ifa_name, "eth0") == 0)
     {
-      printf("Found interface %s\n", tmp->ifa_name);
+      bool up = (tmp->ifa_flags & IFF_UP) && (tmp->ifa_flags & IFF_RUNNING);
+      printf("Found interface %s and it is %s\n", tmp->ifa_name, up ? "up" : "down");
       struct sockaddr_in *pAddr = (struct sockaddr_in *)tmp->ifa_addr;
       m_lanIp = inet_ntoa(pAddr->sin_addr);
     }
-
     tmp = tmp->ifa_next;
+  }
+
+  if (m_lanIp.size() == 0)
+  {
+    printf("No interface found!\n");
   }
 
   freeifaddrs(addrs);
