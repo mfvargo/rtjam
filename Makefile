@@ -21,6 +21,7 @@ plugins: libs
 	$(MAKE) all -C plugins/server
 	$(MAKE) all -C plugins/nojack
 	$(MAKE) all -C plugins/rtjam-broadcast
+	$(MAKE) all -C plugins/rtjam-status
 	$(MAKE) all -C plugins/rtjam-sound
 	$(MAKE) all -C plugins/rtjam-box
 
@@ -54,6 +55,7 @@ clean:
 	$(MAKE) clean -C plugins/server
 	$(MAKE) clean -C plugins/nojack
 	$(MAKE) clean -C plugins/rtjam-broadcast
+	$(MAKE) clean -C plugins/rtjam-status
 	$(MAKE) clean -C plugins/rtjam-sound
 	$(MAKE) clean -C plugins/rtjam-box
 	rm -rf bin build
