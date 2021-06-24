@@ -198,8 +198,9 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   leftInput.addSample(leftPow);
   rightInput.addSample(rightPow);
 
-  // m_inputOneLight.set(leftInput.mean);
-  // m_inputTwoLight.set(rightInput.mean);
+  // Communicate light values
+  m_lightData.m_pLightSettings->inputOne = dbToColor(leftInput.mean);
+  m_lightData.m_pLightSettings->inputTwo = dbToColor(rightInput.mean);
   // Store organized levels
   for (int i = 0; i < MIX_CHANNELS; i++)
   {
@@ -222,4 +223,21 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   {
     memcpy(outputs[i], m_outputs[i], frames * sizeof(float));
   }
+}
+
+LightColors PluginRTJam::dbToColor(float power)
+{
+  if (power < -45.0)
+  {
+    return (black);
+  }
+  else if (power < -30)
+  {
+    return (green);
+  }
+  else if (power < -20)
+  {
+    return (orange);
+  }
+  return red;
 }

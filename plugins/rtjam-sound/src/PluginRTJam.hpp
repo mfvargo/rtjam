@@ -3,6 +3,7 @@
 
 #include "JamNetStuff.hpp"
 #include "LevelData.hpp"
+#include "LightData.hpp"
 #include "ParamData.hpp"
 #include <thread>
 #include <vector>
@@ -31,6 +32,7 @@ public:
 private:
   JamNetStuff::HighPassFilter filters[2];
   float dbToFloat(float value);
+  LightColors dbToColor(float value);
   JamNetStuff::JamSocket m_jamSocket;
   JamNetStuff::JamMixer m_jamMixer;
   JamNetStuff::StreamTimeStats leftInput;
@@ -39,6 +41,7 @@ private:
   LevelData m_levelData;
   ParamData m_paramData;
   RTJamParam m_param;
+  LightData m_lightData;
   uint64_t m_framecount;
   RTJamLevels m_levels;
   std::vector<std::thread> m_threads;
