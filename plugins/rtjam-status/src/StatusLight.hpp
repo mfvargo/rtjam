@@ -1,18 +1,11 @@
 #pragma once
 
 #include <wiringPi.h>
+#include "LightData.hpp"
 
 class StatusLight
 {
 public:
-  enum StatusColor
-  {
-    black = 0,
-    green,
-    orange,
-    red
-  };
-
   enum StatusFunction
   {
     inputOne = 0,
@@ -27,14 +20,10 @@ public:
 
   void init(StatusFunction func);
   void set(float power);
-  void set(StatusColor color);
-  void flash(int duration);
+  void set(LightColors color);
 
 private:
   int m_redPin;
   int m_greenPin;
-  int m_flashDuration;
   bool m_bFlash;
-
-  void flashThreadFunc();
 };

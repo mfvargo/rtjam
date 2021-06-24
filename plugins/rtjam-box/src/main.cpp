@@ -1,6 +1,7 @@
 #include "BoxAPI.hpp"
 #include "RTJamNationApi.hpp"
 #include "Settings.hpp"
+#include "LightData.hpp"
 #include <iostream>
 
 using namespace std;
@@ -11,7 +12,8 @@ bool isRunning = true;
 
 vector<thread> myThreads;
 
-int fastCGIStuff() {
+int fastCGIStuff()
+{
     Fastcgipp::Manager<BoxAPI> manager;
     manager.setupSignals();
     manager.listen("/tmp/rtjambox.sock", 0666);
@@ -21,7 +23,10 @@ int fastCGIStuff() {
     return 0;
 }
 
-int jamNationStuff() {
+int jamNationStuff()
+{
+    LightData lightData;
+    lightData.m_pLightSettings->status = red;
     Settings settings;
     settings.saveVersionFile();
     settings.loadFromFile();
@@ -31,16 +36,24 @@ int jamNationStuff() {
     settings.saveToFile();
     string token = "";
     RTJamNationApi api(urlBase);
-    while(isRunning) {
-        if (token == "") {
+    while (isRunning)
+    {
+        if (token == "")
+        {
             // We don't have a token.  Register the device.
-            if (api.jamUnitDeviceRegister() && api.m_httpResponseCode == 200) {
+            lightData.m_pLightSettings->status = orange;
+            if (api.jamUnitDeviceRegister() && api.m_httpResponseCode == 200)
+            {
                 // get the token
                 token = api.m_resultBody["jamUnit"]["token"];
                 BoxAPI::s_token = token;
             }
-        } else {
-            if (!api.jamUnitPing(token) || api.m_httpResponseCode != 200) {
+        }
+        else
+        {
+            lightData.m_pLightSettings->status = green;
+            if (!api.jamUnitPing(token) || api.m_httpResponseCode != 200)
+            {
                 // Something is wrong with this token
                 token = "";
             };
@@ -50,14 +63,13 @@ int jamNationStuff() {
     return 0;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char *argv[])
 {
     myThreads.push_back(thread(fastCGIStuff));
     myThreads.push_back(thread(jamNationStuff));
-    for (auto & element : myThreads) {
+    for (auto &element : myThreads)
+    {
         element.join();
     }
     return 0;
-
- 
 }

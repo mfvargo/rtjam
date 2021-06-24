@@ -16,13 +16,15 @@ SRCS = \
 	../common/MessageQueue.cpp \
 	../common/LevelData.cpp \
 	../common/ParamData.cpp \
+	../common/LightData.cpp \
+
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lcurl
+LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g
 
