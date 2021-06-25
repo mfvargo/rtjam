@@ -36,29 +36,49 @@ int jamNationStuff()
     settings.saveToFile();
     string token = "";
     RTJamNationApi api(urlBase);
+    int loopCount = 0;
     while (isRunning)
     {
-        if (token == "")
+        // printf("Light color: %d\n", lightData.m_pLightSettings->status);
+        if (api.checkLinkStatus())
         {
-            // We don't have a token.  Register the device.
-            lightData.m_pLightSettings->status = orange;
-            if (api.jamUnitDeviceRegister() && api.m_httpResponseCode == 200)
+            if (loopCount % 10 == 0)
             {
-                // get the token
-                token = api.m_resultBody["jamUnit"]["token"];
-                BoxAPI::s_token = token;
+                if (token == "")
+                {
+                    // We don't have a token.  Register the device.
+                    lightData.m_pLightSettings->status = orange;
+                    if (api.jamUnitDeviceRegister() && api.m_httpResponseCode == 200)
+                    {
+                        // get the token
+                        token = api.m_resultBody["jamUnit"]["token"];
+                        BoxAPI::s_token = token;
+                    }
+                }
+                if (token != "")
+                {
+                    lightData.m_pLightSettings->status = green;
+                    if (!api.jamUnitPing(token) || api.m_httpResponseCode != 200)
+                    {
+                        lightData.m_pLightSettings->status = orange;
+                        // Something is wrong with this token
+                        token = "";
+                    };
+                }
             }
         }
         else
         {
-            lightData.m_pLightSettings->status = green;
-            if (!api.jamUnitPing(token) || api.m_httpResponseCode != 200)
-            {
-                // Something is wrong with this token
-                token = "";
-            };
+            // Set the loopCount to 10 so if it passes on the next iteration it will immediately try to check in with the nation
+            loopCount = 9;
+            // This code will make the light flash red with 1 second period
+            if (lightData.m_pLightSettings->status != red)
+                lightData.m_pLightSettings->status = red;
+            else
+                lightData.m_pLightSettings->status = black;
         }
-        sleep(10);
+        loopCount++;
+        sleep(1);
     }
     return 0;
 }

@@ -16,8 +16,7 @@ json resultJson;
 RTJamNationApi::RTJamNationApi(string urlbase)
 {
   m_urlBase = urlbase;
-  getLanIp();
-  getMacAddress();
+  checkLinkStatus();
 }
 
 bool RTJamNationApi::status()
@@ -164,42 +163,75 @@ bool RTJamNationApi::post(string url, json body)
   return (curlCode == CURLE_OK);
 }
 
-void RTJamNationApi::getLanIp()
+#define ERROR(fmt, ...)       \
+  do                          \
+  {                           \
+    printf(fmt, __VA_ARGS__); \
+    return -1;                \
+  } while (0)
+
+bool RTJamNationApi::checkLinkStatus()
 {
-  ifaddrs *addrs;
-  getifaddrs(&addrs);
-  ifaddrs *tmp = addrs;
+  bool rval = false;
+  int rv;
+  char mac[32];
 
-  while (tmp)
+  // Create a socket so we can do ioctls on it
+  int socId = socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
+  if (socId < 0)
+    ERROR("Socket failed. Errno = %d\n", errno);
+
+  struct ifreq if_req;
+  (void)strncpy(if_req.ifr_name, "eth0", sizeof(if_req.ifr_name));
+
+  // get the interface up flags
+  if (ioctl(socId, SIOCGIFFLAGS, &if_req) == -1)
   {
-    if (tmp->ifa_addr && tmp->ifa_addr->sa_family == AF_INET) // && strcmp(tmp->ifa_name, "eth0") == 0)
-    {
-      printf("Found interface %s\n", tmp->ifa_name);
-      struct sockaddr_in *pAddr = (struct sockaddr_in *)tmp->ifa_addr;
-      m_lanIp = inet_ntoa(pAddr->sin_addr);
-    }
-
-    tmp = tmp->ifa_next;
+    ERROR("Ioctl failed. Errno = %d\n", errno);
+    close(socId);
+    return false;
   }
 
-  freeifaddrs(addrs);
-}
+  // rval is up if the ethernet is up and running (plugged in)
+  rval = (if_req.ifr_flags & IFF_UP) && (if_req.ifr_flags & IFF_RUNNING);
 
-void RTJamNationApi::getMacAddress()
-{
-  int sock = socket(PF_INET, SOCK_DGRAM, 0);
-  char mac[32];
-  struct ifreq ifr;
-  ifr.ifr_addr.sa_family = AF_INET;
-  strncpy(ifr.ifr_name, "eth0", IFNAMSIZ - 1);
-  ioctl(sock, SIOCGIFHWADDR, &ifr);
-  sprintf(mac, "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x",
-          (unsigned char)ifr.ifr_hwaddr.sa_data[0],
-          (unsigned char)ifr.ifr_hwaddr.sa_data[1],
-          (unsigned char)ifr.ifr_hwaddr.sa_data[2],
-          (unsigned char)ifr.ifr_hwaddr.sa_data[3],
-          (unsigned char)ifr.ifr_hwaddr.sa_data[4],
-          (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
-  m_macAddress = mac;
-  close(sock);
+  if (rval)
+  {
+    // get the Hardware address
+    if (ioctl(socId, SIOCGIFHWADDR, &if_req) == -1)
+    {
+      ERROR("Ioctl failed. Errno = %d\n", errno);
+      close(socId);
+      return false;
+    }
+    sprintf(mac, "%.2x:%.2x:%.2x:%.2x:%.2x:%.2x",
+            (unsigned char)if_req.ifr_hwaddr.sa_data[0],
+            (unsigned char)if_req.ifr_hwaddr.sa_data[1],
+            (unsigned char)if_req.ifr_hwaddr.sa_data[2],
+            (unsigned char)if_req.ifr_hwaddr.sa_data[3],
+            (unsigned char)if_req.ifr_hwaddr.sa_data[4],
+            (unsigned char)if_req.ifr_hwaddr.sa_data[5]);
+    m_macAddress = mac;
+
+    // Get the ip address
+    if (ioctl(socId, SIOCGIFADDR, &if_req) == -1)
+    {
+      ERROR("Ioctl failed. Errno = %d\n", errno);
+      close(socId);
+      return false;
+    }
+    struct sockaddr_in *addr = (struct sockaddr_in *)&(if_req.ifr_addr);
+    m_lanIp = inet_ntoa(addr->sin_addr);
+
+    // The link might be up and have a hardware address, but we might not have a DHCP address yet
+    if (m_lanIp.size() == 0)
+    {
+      ERROR("No DHCP address yet: %d\n", m_lanIp.size());
+      close(socId);
+      return false;
+    }
+  }
+
+  close(socId);
+  return rval;
 }
