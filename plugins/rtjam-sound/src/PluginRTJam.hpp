@@ -7,8 +7,7 @@
 #include "ParamData.hpp"
 #include <thread>
 #include <vector>
-#include "MVerb.h"
-// #include "StatusLight.hpp"
+#include "MonoVerb.hpp"
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -25,11 +24,8 @@ public:
   void connect(const char *host, int port, uint32_t id);
   void disconnect();
 
-  MVerb<float> *m_pVerb;
-  // StatusLight m_inputOneLight;
-  // StatusLight m_inputTwoLight;
-
 private:
+  MonoVerb m_reverbs[2];
   JamNetStuff::HighPassFilter filters[2];
   float dbToFloat(float value);
   LightColors dbToColor(float value);

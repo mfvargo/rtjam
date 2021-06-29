@@ -484,7 +484,7 @@ namespace JamNetStuff
                 (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
         return mac;
     }
-    void HighPassFilter::filter(float *output, const float *input, uint32_t framesize)
+    void HighPassFilter::filter(const float *input, float *output, uint32_t framesize)
     {
         for (uint32_t i = 0; i < framesize; i++)
         {

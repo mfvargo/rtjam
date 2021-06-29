@@ -31,6 +31,8 @@ enum RTJamParameters
   paramDisconnect,
   paramHPFOn,
   paramHPFOff,
+  paramReverbOne,
+  paramReverbTwo,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,

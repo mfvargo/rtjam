@@ -34,22 +34,8 @@ PluginRTJam::~PluginRTJam()
 
 void PluginRTJam::init()
 {
-  m_pVerb = new MVerb<float>;
-  m_pVerb->setSampleRate(48000);
-  m_pVerb->setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
-  m_pVerb->setParameter(MVerb<float>::DENSITY, 0.5f);
-  m_pVerb->setParameter(MVerb<float>::BANDWIDTHFREQ, 0.5f);
-  m_pVerb->setParameter(MVerb<float>::DECAY, 0.5f);
-  m_pVerb->setParameter(MVerb<float>::PREDELAY, 0.5f);
-  m_pVerb->setParameter(MVerb<float>::SIZE, 0.75f);
-  m_pVerb->setParameter(MVerb<float>::GAIN, 1.0f);
-  m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
-  m_pVerb->setParameter(MVerb<float>::EARLYMIX, 0.5f);
-
-  // StatusLight::startInit();
-  // m_inputOneLight.init(StatusLight::inputOne);
-  // m_inputTwoLight.init(StatusLight::inputTwo);
-
+  m_reverbs[0].init();
+  m_reverbs[1].init();
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
@@ -103,7 +89,7 @@ void PluginRTJam::getParams()
     m_jamMixer.masterVol = dbToFloat(m_param.fValue);
     break;
   case paramReverbMix:
-    m_pVerb->setParameter(MVerb<float>::MIX, m_param.fValue);
+    // Legacy param when we just had one reverb
     break;
   case paramRoomChange:
     connect(m_param.sValue, m_param.iValue, m_param.iValue2);
@@ -119,6 +105,12 @@ void PluginRTJam::getParams()
     filters[0].byPass = true;
     filters[1].byPass = true;
     break;
+  case paramReverbOne:
+    m_reverbs[0].setMix(m_param.fValue);
+    break;
+  case paramReverbTwo:
+    m_reverbs[1].setMix(m_param.fValue);
+    break;
   }
 }
 
@@ -133,8 +125,6 @@ void PluginRTJam::connect(const char *host, int port, uint32_t id)
 
 void PluginRTJam::disconnect()
 {
-  // m_pVerb->setParameter(MVerb<float>::MIX, 0.0f);
-  // m_jamMixer.reset();
   m_jamSocket.isActivated = false;
 }
 
@@ -142,21 +132,21 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
 {
   m_framecount += frames;
 
-  // Apply reverb to inputs
-  float left[frames];
-  float right[frames];
+  float oneBuffEven[frames];
+  float twoBuffEven[frames];
+  float oneBuffOdd[frames];
+  float twoBuffOdd[frames];
+
+  filters[0].filter(inputs[0], oneBuffEven, frames);
+  filters[1].filter(inputs[1], twoBuffEven, frames);
+
+  m_reverbs[0].process(oneBuffEven, oneBuffOdd, frames);
+  m_reverbs[1].process(twoBuffEven, twoBuffOdd, frames);
+
   float *tempOut[2];
-  tempOut[0] = left;
-  tempOut[1] = right;
-  float inLeft[frames];
-  float inRight[frames];
-  float *tempIn[2];
-  tempIn[0] = inLeft;
-  tempIn[1] = inRight;
-  filters[0].filter(inLeft, inputs[0], frames);
-  memset(inRight, 0x0, sizeof(float) * frames); // Zero out right channel for stereo reverb code
-  m_pVerb->process((const float **)tempIn, tempOut, static_cast<int>(frames));
-  filters[1].filter(tempOut[1], inputs[1], frames);
+  tempOut[0] = oneBuffOdd;
+  tempOut[1] = twoBuffOdd;
+
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
   m_jamSocket.sendPacket((const float **)tempOut, frames);
 

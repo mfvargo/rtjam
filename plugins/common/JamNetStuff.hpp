@@ -302,7 +302,7 @@ namespace JamNetStuff
     }
     bool byPass;
     StreamTimeStats sampleAvg;
-    void filter(float *output, const float *input, uint32_t framesize);
+    void filter(const float *input, float *output, uint32_t framesize);
 
   private:
     double tap1, tap2, a1, b1, b0;
