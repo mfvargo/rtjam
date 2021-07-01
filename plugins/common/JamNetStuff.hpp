@@ -116,19 +116,19 @@ namespace JamNetStuff
   {
   public:
     PlayerList();
-    void setAllowedClientIds(std::vector<unsigned> &ids);
+    void setAllowedClientIds(::std::vector<unsigned> &ids);
     bool isAllowed(unsigned clientId);
     int updateChannel(unsigned clientId, sockaddr_in *addr);
     int numPlayers();
     Player get(int i);
     void Prune();
-    void dump(std::string msg);
+    void dump(::std::string msg);
 
   private:
-    std::vector<unsigned> m_allowedClientIds;
-    std::vector<Player> m_players;
+    ::std::vector<unsigned> m_allowedClientIds;
+    ::std::vector<Player> m_players;
     int m_roomSize;
-    std::mutex m_mutex;
+    ::std::mutex m_mutex;
   };
 
 #define JITTER_SAMPLES 96000
@@ -255,7 +255,7 @@ namespace JamNetStuff
     float cBuf0[MAX_FRAME_SIZE];
     float cBuf1[MAX_FRAME_SIZE];
     float *conversionBuf[2];
-    std::mutex mMutex;
+    ::std::mutex mMutex;
   };
 
   class JamSocket
@@ -271,7 +271,7 @@ namespace JamNetStuff
     void initClient(const char *servername, int port, uint32_t clientId);
     void setTempo(int newTempo) { tempo = newTempo; };
     void getClientIds(uint32_t *ids) { packet.getClientIds(ids); };
-    std::string getMacAddress();
+    ::std::string getMacAddress();
 
   private:
     PlayerList m_playerList;
@@ -285,27 +285,6 @@ namespace JamNetStuff
     uint64_t beatCount;
     uint64_t lastClickTime;
     int tempo;
-  };
-
-  class HighPassFilter
-  {
-  public:
-    HighPassFilter()
-    {
-      byPass = true;
-      tap1 = 0.0;
-      tap2 = 0.0;
-      a1 = -0.996863331833438;
-      b0 = 0.998431665916719;
-      b1 = -0.998431665916719;
-      sampleAvg.windowSize = 20000;
-    }
-    bool byPass;
-    StreamTimeStats sampleAvg;
-    void filter(const float *input, float *output, uint32_t framesize);
-
-  private:
-    double tap1, tap2, a1, b1, b0;
   };
 };
 

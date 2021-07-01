@@ -1,11 +1,12 @@
 #pragma once
 
+#include "Effect.hpp"
 #include "MVerb.h"
 
-class MonoVerb
+class MonoVerb : public Effect
 {
 public:
-  void init()
+  void init() override
   {
     m_pReverb = new MVerb<float>;
     m_pReverb->setSampleRate(48000);
@@ -16,7 +17,7 @@ public:
     m_pReverb->setParameter(MVerb<float>::PREDELAY, 0.5f);
     m_pReverb->setParameter(MVerb<float>::SIZE, 0.75f);
     m_pReverb->setParameter(MVerb<float>::GAIN, 1.0f);
-    m_pReverb->setParameter(MVerb<float>::MIX, 0.0f);
+    m_pReverb->setParameter(MVerb<float>::MIX, 0.3f);
     m_pReverb->setParameter(MVerb<float>::EARLYMIX, 0.5f);
   };
 
@@ -25,7 +26,7 @@ public:
     m_pReverb->setParameter(MVerb<float>::MIX, value);
   }
 
-  void process(const float *input, float *output, int frames)
+  void process(const float *input, float *output, int frames) override
   {
     // This will do a mono reverb usins the stereo plugin...
     float left[frames];

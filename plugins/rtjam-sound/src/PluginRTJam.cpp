@@ -34,6 +34,14 @@ PluginRTJam::~PluginRTJam()
 
 void PluginRTJam::init()
 {
+  m_channelOneEffects.push_back(&filters[0]);
+  m_channelOneEffects.push_back(&m_reverbs[0]);
+  m_channelOneEffects.push_back(&m_delays[0]);
+  m_channelTwoEffects.push_back(&filters[1]);
+  m_channelTwoEffects.push_back(&m_reverbs[1]);
+  m_channelTwoEffects.push_back(&m_delays[1]);
+  filters[0].init();
+  filters[1].init();
   m_reverbs[0].init();
   m_reverbs[1].init();
   m_threads.push_back(std::thread(paramFetch, this));
@@ -98,12 +106,12 @@ void PluginRTJam::getParams()
     disconnect();
     break;
   case paramHPFOn:
-    filters[0].byPass = false;
-    filters[1].byPass = false;
+    filters[0].setByPass(false);
+    filters[1].setByPass(false);
     break;
   case paramHPFOff:
-    filters[0].byPass = true;
-    filters[1].byPass = true;
+    filters[0].setByPass(true);
+    filters[1].setByPass(true);
     break;
   case paramReverbOne:
     m_reverbs[0].setMix(m_param.fValue);
@@ -137,15 +145,44 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   float oneBuffOdd[frames];
   float twoBuffOdd[frames];
 
-  filters[0].filter(inputs[0], oneBuffEven, frames);
-  filters[1].filter(inputs[1], twoBuffEven, frames);
-
-  m_reverbs[0].process(oneBuffEven, oneBuffOdd, frames);
-  m_reverbs[1].process(twoBuffEven, twoBuffOdd, frames);
+  float *inBuff = oneBuffEven;
+  float *outBuff = oneBuffOdd;
 
   float *tempOut[2];
-  tempOut[0] = oneBuffOdd;
-  tempOut[1] = twoBuffOdd;
+
+  // Copy channel 1 into local buffer
+  memcpy(inBuff, inputs[0], frames * sizeof(float));
+
+  // Loop through all the effects for channel 1 and process them
+  for (int i = 0; i < m_channelOneEffects.size(); i++)
+  {
+    m_channelOneEffects[i]->process(inBuff, outBuff, frames);
+    // Now swap the pointers
+    float *temp = inBuff;
+    inBuff = outBuff;
+    outBuff = temp;
+  }
+  tempOut[0] = inBuff; // This is the last processed buffer for channel 1
+
+  inBuff = twoBuffEven;
+  outBuff = twoBuffOdd;
+
+  // Copy channel 2 into local buffer
+  memcpy(inBuff, inputs[1], frames * sizeof(float));
+
+  // Now loop through channel two effects and process them
+  for (int i = 0; i < m_channelTwoEffects.size(); i++)
+  {
+    m_channelTwoEffects[i]->process(inBuff, outBuff, frames);
+    // Now swap the pointers
+    float *temp = inBuff;
+    inBuff = outBuff;
+    outBuff = temp;
+  }
+  tempOut[1] = inBuff; // This is the last processed buffer
+
+  // At this point tempOut has the two input channels after processing. This
+  // Is what will send to the others
 
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
   m_jamSocket.sendPacket((const float **)tempOut, frames);
@@ -159,7 +196,7 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   uint32_t ids[MAX_JAMMERS];
   m_jamSocket.getClientIds(ids);
 
-  // Get input levels
+  // Get input levels  (from tempOut which is what we sent to the room.)
   float leftPow = 0.0;
   float rightPow = 0.0;
   for (uint32_t i = 0; i < frames; i++)
@@ -191,6 +228,7 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   // Communicate light values
   m_lightData.m_pLightSettings->inputOne = dbToColor(leftInput.mean);
   m_lightData.m_pLightSettings->inputTwo = dbToColor(rightInput.mean);
+
   // Store organized levels
   for (int i = 0; i < MIX_CHANNELS; i++)
   {

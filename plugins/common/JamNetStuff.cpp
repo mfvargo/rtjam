@@ -484,23 +484,4 @@ namespace JamNetStuff
                 (unsigned char)ifr.ifr_hwaddr.sa_data[5]);
         return mac;
     }
-    void HighPassFilter::filter(const float *input, float *output, uint32_t framesize)
-    {
-        for (uint32_t i = 0; i < framesize; i++)
-        {
-            if (byPass)
-            {
-                output[i] = input[i];
-            }
-            else
-            {
-                output[i] = b0 * input[i] + b1 * tap1 - a1 * tap2;
-                tap1 = input[i];
-                tap2 = output[i];
-                // sampleAvg.addSample(input[i]);
-                // output[i] = input[i] - sampleAvg.mean;
-            }
-        }
-    }
-
 }
