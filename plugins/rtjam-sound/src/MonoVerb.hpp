@@ -17,7 +17,7 @@ public:
     m_pReverb->setParameter(MVerb<float>::PREDELAY, 0.5f);
     m_pReverb->setParameter(MVerb<float>::SIZE, 0.75f);
     m_pReverb->setParameter(MVerb<float>::GAIN, 1.0f);
-    m_pReverb->setParameter(MVerb<float>::MIX, 0.3f);
+    m_pReverb->setParameter(MVerb<float>::MIX, 0.0f);
     m_pReverb->setParameter(MVerb<float>::EARLYMIX, 0.5f);
   };
 

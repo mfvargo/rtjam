@@ -69,6 +69,7 @@ namespace JamNetStuff
 
     float mean;
     float sigma;
+    float peak;
     bool started;
     float windowSize;
 
@@ -238,8 +239,10 @@ namespace JamNetStuff
     float masterVol;
     float gains[MIX_CHANNELS];
     float channelLevels[MIX_CHANNELS];
+    float peakLevels[MIX_CHANNELS];
     float bufferDepths[MIX_CHANNELS];
     float masterLevel;
+    float masterPeak;
 
     void setBufferSmoothness(int channel, float smooth);
     char getBeat() { return beat; };

@@ -36,10 +36,10 @@ void PluginRTJam::init()
 {
   m_channelOneEffects.push_back(&filters[0]);
   m_channelOneEffects.push_back(&m_reverbs[0]);
-  m_channelOneEffects.push_back(&m_delays[0]);
+  // m_channelOneEffects.push_back(&m_delays[0]);
   m_channelTwoEffects.push_back(&filters[1]);
   m_channelTwoEffects.push_back(&m_reverbs[1]);
-  m_channelTwoEffects.push_back(&m_delays[1]);
+  // m_channelTwoEffects.push_back(&m_delays[1]);
   filters[0].init();
   filters[1].init();
   m_reverbs[0].init();
@@ -236,14 +236,18 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   {
     m_levels.channelLevels[i] = m_jamMixer.channelLevels[i];
     m_levels.bufferDepths[i] = m_jamMixer.bufferDepths[i];
+    m_levels.peakLevels[i] = m_jamMixer.peakLevels[i];
   }
   for (int i = 0; i < MAX_JAMMERS; i++)
   {
     m_levels.clientIds[i] = ids[i];
   }
   m_levels.masterLevel = m_jamMixer.masterLevel;
+  m_levels.peakMaster = m_jamMixer.masterPeak;
   m_levels.inputLeft = leftInput.mean;
   m_levels.inputRight = rightInput.mean;
+  m_levels.peakLeft = leftInput.peak;
+  m_levels.peakRight = rightInput.peak;
   m_levels.beat = m_jamMixer.getBeat();
   m_levels.isConnected = m_jamSocket.isActivated;
 

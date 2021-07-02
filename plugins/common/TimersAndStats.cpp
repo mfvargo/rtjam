@@ -17,7 +17,8 @@
 namespace JamNetStuff
 {
 
-    uint64_t getMicroTime(){
+    uint64_t getMicroTime()
+    {
         uint64_t rval;
         struct timeval currentTime;
         gettimeofday(&currentTime, NULL);
@@ -27,12 +28,15 @@ namespace JamNetStuff
     }
 
     // Class to get microsecond time Stamps
-    MicroTimer::MicroTimer() {
+    MicroTimer::MicroTimer()
+    {
         lastTime = 0;
     }
-    uint64_t MicroTimer::getExpiredTime() {
+    uint64_t MicroTimer::getExpiredTime()
+    {
         uint64_t now = getMicroTime();
-        if (lastTime == 0) {
+        if (lastTime == 0)
+        {
             startTime = now;
             lastTime = now;
         }
@@ -41,26 +45,38 @@ namespace JamNetStuff
         return rval;
     }
 
-    uint64_t MicroTimer::getTimeFromStart() {
+    uint64_t MicroTimer::getTimeFromStart()
+    {
         return getMicroTime() - startTime;
     }
 
-
     // Class to calculate statistics on Stuff using cheap and easy avg func
-    StreamTimeStats::StreamTimeStats() {
+    StreamTimeStats::StreamTimeStats()
+    {
         clear();
     }
 
-    void StreamTimeStats::clear() {
+    void StreamTimeStats::clear()
+    {
+        peak = 0.0;
         mean = 0.0;
         sigma = 0.0;
         windowSize = 100.0;
     }
-        
-    void StreamTimeStats::addSample(float sample) {
-        mean += sample/windowSize;
+
+    void StreamTimeStats::addSample(float sample)
+    {
+        if (sample > peak)
+        {
+            peak = sample;
+        }
+        else
+        {
+            peak -= 0.05;
+        }
+        mean += sample / windowSize;
         mean *= (windowSize - 1) / windowSize;
-        sigma += std::abs(mean - sample)/windowSize;
+        sigma += std::abs(mean - sample) / windowSize;
         sigma *= (windowSize - 1) / windowSize;
     }
 

@@ -41,8 +41,11 @@ private:
         json result = {
             {"jamUnitToken", s_token},
             {"masterLevel", m_jamLevels.masterLevel},
+            {"peakMaster", m_jamLevels.peakMaster},
             {"inputLeft", m_jamLevels.inputLeft},
             {"inputRight", m_jamLevels.inputRight},
+            {"peakLeft", m_jamLevels.peakLeft},
+            {"peakRight", m_jamLevels.peakRight},
             {"beat", m_jamLevels.beat},
             {"connected", m_jamLevels.isConnected},
             {"players", json::array()},
@@ -54,6 +57,8 @@ private:
                 {"depth", m_jamLevels.bufferDepths[i * 2] * 40},
                 {"level0", m_jamLevels.channelLevels[i * 2]},
                 {"level1", m_jamLevels.channelLevels[(i * 2) + 1]},
+                {"peak0", m_jamLevels.peakLevels[i * 2]},
+                {"peak1", m_jamLevels.peakLevels[(i * 2) + 1]},
             });
         }
         out << result.dump(2);
