@@ -24,4 +24,5 @@ public:
 
 private:
   bool m_byPass = false;
+  // std::vector<SignalBlocks> m_blocks;
 };

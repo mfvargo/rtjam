@@ -44,6 +44,8 @@ void PluginRTJam::init()
   filters[1].init();
   m_reverbs[0].init();
   m_reverbs[1].init();
+  m_delays[0].init();
+  m_delays[1].init();
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
