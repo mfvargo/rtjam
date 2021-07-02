@@ -4,8 +4,8 @@
 #include "JamNetStuff.hpp"
 #include "SharedMemory.hpp"
 
-
-struct RTJamLevels {
+struct RTJamLevels
+{
   float channelLevels[MIX_CHANNELS];
   float bufferDepths[MIX_CHANNELS];
   uint32_t clientIds[MAX_JAMMERS];
@@ -14,20 +14,25 @@ struct RTJamLevels {
   float inputRight;
   char beat;
   bool isConnected;
+  float peakLevels[MIX_CHANNELS];
+  float peakLeft;
+  float peakRight;
+  float peakMaster;
 };
 
-class LevelData {
-  public:
-     LevelData();
-    ~LevelData();
+class LevelData
+{
+public:
+  LevelData();
+  ~LevelData();
 
-    void lock();
-    void unlock();
+  void lock();
+  void unlock();
 
-    RTJamLevels* m_pJamLevels;
+  RTJamLevels *m_pJamLevels;
 
-  private:
-    CSharedMemory m_sharedMemory;
+private:
+  CSharedMemory m_sharedMemory;
 };
 
 #endif

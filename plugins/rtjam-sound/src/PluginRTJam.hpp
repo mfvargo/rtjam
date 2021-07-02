@@ -8,7 +8,8 @@
 #include <thread>
 #include <vector>
 #include "MonoVerb.hpp"
-
+#include "HighPassFilter.hpp"
+#include "Delay.hpp"
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
 class PluginRTJam
@@ -25,8 +26,11 @@ public:
   void disconnect();
 
 private:
+  std::vector<Effect *> m_channelOneEffects;
+  std::vector<Effect *> m_channelTwoEffects;
   MonoVerb m_reverbs[2];
-  JamNetStuff::HighPassFilter filters[2];
+  HighPassFilter filters[2];
+  SigmaDelay m_delays[2];
   float dbToFloat(float value);
   LightColors dbToColor(float value);
   JamNetStuff::JamSocket m_jamSocket;

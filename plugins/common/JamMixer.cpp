@@ -16,7 +16,8 @@
 
 namespace JamNetStuff
 {
-    JamMixer::JamMixer() {
+    JamMixer::JamMixer()
+    {
         // Initialize stuff here
         conversionBuf[0] = cBuf0;
         conversionBuf[1] = cBuf1;
@@ -24,9 +25,11 @@ namespace JamNetStuff
     }
 
     // reset to default values
-    void JamMixer::reset() {
+    void JamMixer::reset()
+    {
         mMutex.lock();
-        for (int i=0; i<MIX_CHANNELS; i++) {
+        for (int i = 0; i < MIX_CHANNELS; i++)
+        {
             gains[i] = 1.0;
             channelLevels[i] = 0;
             bufferDepths[i] = 0.0;
@@ -35,34 +38,41 @@ namespace JamNetStuff
         }
         masterVol = 1.0;
         masterLevel = 0.0f;
+        masterPeak = 0.0f;
         masterStats.windowSize = 30.0;
         mMutex.unlock();
     }
 
     /* print out some stats */
-    void JamMixer::dumpOut() {
-        for (int i=0; i<MIX_CHANNELS; i++) {
+    void JamMixer::dumpOut()
+    {
+        for (int i = 0; i < MIX_CHANNELS; i++)
+        {
             printf("Chan: %d\t", i);
             jitterBuffers[i].dumpOut();
         }
         printf("\n");
     }
     /* get some data for the output */
-    void JamMixer::getMix(float** outputs, uint32_t frames) {
+    void JamMixer::getMix(float **outputs, uint32_t frames)
+    {
         mMutex.lock();
         float levelSums[MIX_CHANNELS];
 
         // get a frame out of each mix buffer
-        for (uint32_t i=0; i<MIX_CHANNELS; i++) {
+        for (uint32_t i = 0; i < MIX_CHANNELS; i++)
+        {
             jitterBuffers[i].getOut(mixBuffers[i], frames);
             levelSums[i] = 0.0f;
         }
         masterLevel = 0.0f;
         // sum all the buffers.
-        for (uint32_t i=0; i<frames; i++) {
+        for (uint32_t i = 0; i < frames; i++)
+        {
             float sum = 0.0;
-            for (int j=0; j<MIX_CHANNELS; j++) {
-                outputs[2+j][i] = mixBuffers[j][i];
+            for (int j = 0; j < MIX_CHANNELS; j++)
+            {
+                outputs[2 + j][i] = mixBuffers[j][i];
                 levelSums[j] += pow(gains[j] * mixBuffers[j][i], 2);
                 sum += masterVol * gains[j] * mixBuffers[j][i];
             }
@@ -74,52 +84,65 @@ namespace JamNetStuff
             outputs[0][i] = sum;
             outputs[1][i] = sum;
         }
-        for (int i=0; i<MIX_CHANNELS; i++) {
+        for (int i = 0; i < MIX_CHANNELS; i++)
+        {
             levelSums[i] /= frames + 1;
-            if (levelSums[i] > 1E-6) {
+            if (levelSums[i] > 1E-6)
+            {
                 levelSums[i] = 10 * log10(levelSums[i]);
-            } else {
+            }
+            else
+            {
                 levelSums[i] = -60.0f;
             }
             levelStats[i].addSample(levelSums[i]);
             channelLevels[i] = levelStats[i].mean;
+            peakLevels[i] = levelStats[i].peak;
             bufferDepths[i] = jitterBuffers[i].getAvgDepth();
         }
         masterLevel /= frames + 1;
-        if (masterLevel > 1E-6) {
+        if (masterLevel > 1E-6)
+        {
             masterLevel = 10 * log10(masterLevel);
-        } else {
+        }
+        else
+        {
             masterLevel = -60.0;
         }
         masterStats.addSample(masterLevel);
         masterLevel = masterStats.mean;
+        masterPeak = masterStats.peak;
         mMutex.unlock();
     }
 
     /* give the mixer a packet to chew on */
-    void JamMixer::addData(JamPacket* packet) {
+    void JamMixer::addData(JamPacket *packet)
+    {
         mMutex.lock();
         int samples = packet->decodeJamBuffer(conversionBuf);
         int locChan = packet->getChannel() * 2;
         beat = packet->getBeatCount();
-        if (locChan >= 0 && samples > 0) {
+        if (locChan >= 0 && samples > 0)
+        {
             jitterBuffers[locChan].putIn(conversionBuf[0], samples, packet->getSequenceNo());
-            jitterBuffers[locChan+1].putIn(conversionBuf[1], samples, packet->getSequenceNo());
+            jitterBuffers[locChan + 1].putIn(conversionBuf[1], samples, packet->getSequenceNo());
         }
         mMutex.unlock();
     }
 
-    void JamMixer::addLocalMonitor(const float** input, uint32_t frames) {
+    void JamMixer::addLocalMonitor(const float **input, uint32_t frames)
+    {
         mMutex.lock();
         jitterBuffers[0].putIn(input[0], frames, 1);
         jitterBuffers[1].putIn(input[1], frames, 1);
         mMutex.unlock();
     }
 
-    void JamMixer::setBufferSmoothness(int channel, float smooth) {
+    void JamMixer::setBufferSmoothness(int channel, float smooth)
+    {
         mMutex.lock();
-        jitterBuffers[2*channel].setSmoothness(smooth);
-        jitterBuffers[2*channel + 1].setSmoothness(smooth);
+        jitterBuffers[2 * channel].setSmoothness(smooth);
+        jitterBuffers[2 * channel + 1].setSmoothness(smooth);
         mMutex.unlock();
     }
 }
