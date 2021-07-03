@@ -12,6 +12,7 @@
 #include <vector>
 #include "EffectChain.hpp"
 #include "Delay.hpp"
+#include "HighPassFilter.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -59,6 +60,11 @@ int main(int argc, char *argv[])
     EffectChain effectChain;
     SigmaDelay delay;
     delay.init();
+    delay.setByPass(true);
+    HighPassFilter filter;
+    filter.init();
+    filter.setByPass(false);
+    effectChain.push(&filter);
     effectChain.push(&delay);
 
     int i;

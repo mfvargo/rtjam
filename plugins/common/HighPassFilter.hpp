@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Effect.hpp"
+#include "BiQuad.hpp"
 
+#include <iostream>
 class HighPassFilter : public Effect
 {
 public:
@@ -15,6 +17,8 @@ public:
   void init() override
   {
     setByPass(true);
+    m_filter.init(BiQuadFilter::FilterType::EQ_HIGH_PASS_FILTER, 2.0, 1.0, 1.0);
+    std::cout << m_filter.getConfig().dump(2) << std::endl;
     tap1 = 0.0;
     tap2 = 0.0;
     a1 = -0.996863331833438;
@@ -37,4 +41,5 @@ public:
 
 private:
   double tap1, tap2, a1, b1, b0;
+  BiQuadFilter m_filter;
 };
