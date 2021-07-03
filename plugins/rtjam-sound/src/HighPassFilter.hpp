@@ -5,6 +5,13 @@
 class HighPassFilter : public Effect
 {
 public:
+  json getConfig() override
+  {
+    // Return the json for this block
+    json config = {};
+    return config;
+  };
+
   void init() override
   {
     setByPass(true);

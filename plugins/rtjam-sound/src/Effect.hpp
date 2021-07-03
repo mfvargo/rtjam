@@ -1,9 +1,15 @@
 #pragma once
 
+#include "json.hpp"
+
+using json = nlohmann::json;
+
 class Effect
 {
 public:
   virtual void init() = 0;
+  virtual json getConfig() = 0;
+
   // void setParam();
   virtual void process(const float *input, float *output, int framesize) = 0;
   void byPass(const float *input, float *output, int framesize)

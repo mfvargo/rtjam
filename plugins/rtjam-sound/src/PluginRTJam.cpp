@@ -36,7 +36,7 @@ void PluginRTJam::init()
 {
   m_channelOneEffects.push_back(&filters[0]);
   m_channelOneEffects.push_back(&m_reverbs[0]);
-  // m_channelOneEffects.push_back(&m_delays[0]);
+  m_channelOneEffects.push_back(&m_delays[0]);
   m_channelTwoEffects.push_back(&filters[1]);
   m_channelTwoEffects.push_back(&m_reverbs[1]);
   // m_channelTwoEffects.push_back(&m_delays[1]);

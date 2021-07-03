@@ -6,8 +6,18 @@
 class MonoVerb : public Effect
 {
 public:
+  json getConfig() override
+  {
+    // Return the json for this block
+    json config = {
+        {"mix", m_mix},
+    };
+    return config;
+  };
+
   void init() override
   {
+    m_mix = 0.0;
     m_pReverb = new MVerb<float>;
     m_pReverb->setSampleRate(48000);
     m_pReverb->setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
@@ -23,6 +33,7 @@ public:
 
   void setMix(float value)
   {
+    m_mix = value;
     m_pReverb->setParameter(MVerb<float>::MIX, value);
   }
 
@@ -52,5 +63,6 @@ public:
   };
 
 private:
+  float m_mix;
   MVerb<float> *m_pReverb;
 };
