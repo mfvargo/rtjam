@@ -32,7 +32,7 @@ public:
     return config;
   };
 
-  float getSample() override
+  float getSample(float input) override
   {
     float value = 0.0;
     // Right now this is the only wave form...

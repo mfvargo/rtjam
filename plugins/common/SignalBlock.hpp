@@ -8,13 +8,13 @@ using json = nlohmann::json;
 class SignalBlock
 {
 public:
-  virtual float getSample() = 0;
+  virtual float getSample(float input) = 0;
   virtual json getConfig() = 0;
-  void getBlock(float *output, int framesize)
+  void getBlock(const float *input, float *output, int framesize)
   {
     for (int i = 0; i < framesize; i++)
     {
-      output[i] = getSample();
+      output[i] = getSample(input[i]);
     }
   }
   float dbToFloat(float valueInDB)

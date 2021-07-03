@@ -31,6 +31,10 @@ public:
     m_cutoffFreq = cutoffFreq;
     m_cutBoost = cutBoost;
     m_q = q;
+    x1 = 0;
+    x2 = 0;
+    y1 = 0;
+    y2 = 0;
 
     switch (filterType)
     {
@@ -71,19 +75,18 @@ public:
         {"cutoffFreq", m_cutoffFreq},
         {"cutBoost", m_cutBoost},
         {"q", m_q},
-        {"a0", a0},
-        {"a1", a1},
-        {"a2", a2},
-        {"b0", b0},
-        {"b1", b1},
-        {"b2", b2},
     };
     return config;
   }
 
-  float getSample() override
+  float getSample(float input) override
   {
-    return 0.0;
+    float value = b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+    x2 = x1;
+    x1 = input;
+    y2 = y1;
+    y1 = value;
+    return value;
   };
 
 private:
@@ -91,6 +94,7 @@ private:
   float a0, a1, a2, b0, b1, b2;
   float flt_A, flt_wo, flt_cos_wo, flt_sin_wo, flt_alpha;
   FilterType m_type;
+  float x1, x2, y1, y2;
 
   void calcHighPassFilterCoefficients()
   {

@@ -43,7 +43,7 @@ public:
 
       // Use the low freq osc to modulate the delay
       int writeIndex = m_readPointerIndex +
-                       ((1 + m_osc.getSample()) * m_currentDelayTime * m_sampleRate / 1000);
+                       ((1 + m_osc.getSample(input[sample])) * m_currentDelayTime * m_sampleRate / 1000);
 
       // pointer arithmetic for buffer wrap
       writeIndex %= m_delayBufferLength;
