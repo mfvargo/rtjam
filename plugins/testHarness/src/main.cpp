@@ -10,6 +10,7 @@
 #include <jack/jack.h>
 
 #include <vector>
+#include "EffectChain.hpp"
 #include "Delay.hpp"
 
 jack_port_t **input_ports;
@@ -30,7 +31,7 @@ static void signal_handler(int sig)
 
 int process(jack_nframes_t nframes, void *arg)
 {
-    std::vector<Effect *> *chain = (std::vector<Effect *> *)arg;
+    EffectChain *chain = (EffectChain *)arg;
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
@@ -38,27 +39,7 @@ int process(jack_nframes_t nframes, void *arg)
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
     // Do stuff here
-
-    float oneBuffEven[nframes];
-    float oneBuffOdd[nframes];
-
-    float *inBuff = oneBuffEven;
-    float *outBuff = oneBuffOdd;
-
-    // Copy channel 1 into local buffer
-    memcpy(inBuff, inputs[0], nframes * sizeof(float));
-
-    // Loop through all the effects for channel 1 and process them
-    for (int i = 0; i < (*chain).size(); i++)
-    {
-        (*chain)[i]->process(inBuff, outBuff, nframes);
-        // Now swap the pointers
-        float *temp = inBuff;
-        inBuff = outBuff;
-        outBuff = temp;
-    }
-    memcpy(outputs[0], inBuff, sizeof(float) * nframes);
-    memcpy(outputs[1], inBuff, sizeof(float) * nframes);
+    chain->process(inputs[0], outputs[0], nframes);
     return 0;
 }
 
@@ -75,10 +56,10 @@ void jack_shutdown(void *arg)
 
 int main(int argc, char *argv[])
 {
-    std::vector<Effect *> effectChain;
+    EffectChain effectChain;
     SigmaDelay delay;
     delay.init();
-    effectChain.push_back(&delay);
+    effectChain.push(&delay);
 
     int i;
     const char **ports;
