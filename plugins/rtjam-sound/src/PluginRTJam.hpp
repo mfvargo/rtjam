@@ -10,6 +10,7 @@
 #include "MonoVerb.hpp"
 #include "HighPassFilter.hpp"
 #include "Delay.hpp"
+#include "EffectChain.hpp"
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
 class PluginRTJam
@@ -26,8 +27,8 @@ public:
   void disconnect();
 
 private:
-  std::vector<Effect *> m_channelOneEffects;
-  std::vector<Effect *> m_channelTwoEffects;
+  EffectChain m_channelOneEffectChain;
+  EffectChain m_channelTwoEffectChain;
   MonoVerb m_reverbs[2];
   HighPassFilter filters[2];
   SigmaDelay m_delays[2];

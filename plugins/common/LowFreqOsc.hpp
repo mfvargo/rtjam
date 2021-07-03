@@ -32,6 +32,11 @@ public:
     return config;
   };
 
+  void setConfig(json config)
+  {
+    init(config["shape"], config["freq"], config["amplitude"], 48000);
+  };
+
   float getSample(float input) override
   {
     float value = 0.0;

@@ -34,18 +34,22 @@ PluginRTJam::~PluginRTJam()
 
 void PluginRTJam::init()
 {
-  m_channelOneEffects.push_back(&filters[0]);
-  m_channelOneEffects.push_back(&m_reverbs[0]);
-  m_channelOneEffects.push_back(&m_delays[0]);
-  m_channelTwoEffects.push_back(&filters[1]);
-  m_channelTwoEffects.push_back(&m_reverbs[1]);
-  // m_channelTwoEffects.push_back(&m_delays[1]);
+  m_channelOneEffectChain.push(&filters[0]);
+  m_channelOneEffectChain.push(&m_reverbs[0]);
+  m_channelOneEffectChain.push(&m_delays[0]);
+  m_channelTwoEffectChain.push(&filters[1]);
+  m_channelTwoEffectChain.push(&m_reverbs[1]);
+  m_channelTwoEffectChain.push(&m_delays[1]);
   filters[0].init();
   filters[1].init();
   m_reverbs[0].init();
+  // m_reverbs[0].setMix(0.25);
   m_reverbs[1].init();
+  // m_reverbs[1].setMix(0.25);
   m_delays[0].init();
+  m_delays[0].setByPass(true);
   m_delays[1].init();
+  m_delays[1].setByPass(true);
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
@@ -142,51 +146,21 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
 {
   m_framecount += frames;
 
-  float oneBuffEven[frames];
-  float twoBuffEven[frames];
-  float oneBuffOdd[frames];
-  float twoBuffOdd[frames];
-
-  float *inBuff = oneBuffEven;
-  float *outBuff = oneBuffOdd;
-
+  // Setup itermediate buffer for processed inputs
   float *tempOut[2];
+  float oneBuffOut[frames];
+  float twoBuffOut[frames];
+  tempOut[0] = oneBuffOut;
+  tempOut[1] = twoBuffOut;
 
-  // Copy channel 1 into local buffer
-  memcpy(inBuff, inputs[0], frames * sizeof(float));
+  // run the effect chains
+  m_channelOneEffectChain.process(inputs[0], oneBuffOut, frames);
+  m_channelTwoEffectChain.process(inputs[1], twoBuffOut, frames);
 
-  // Loop through all the effects for channel 1 and process them
-  for (int i = 0; i < m_channelOneEffects.size(); i++)
-  {
-    m_channelOneEffects[i]->process(inBuff, outBuff, frames);
-    // Now swap the pointers
-    float *temp = inBuff;
-    inBuff = outBuff;
-    outBuff = temp;
-  }
-  tempOut[0] = inBuff; // This is the last processed buffer for channel 1
-
-  inBuff = twoBuffEven;
-  outBuff = twoBuffOdd;
-
-  // Copy channel 2 into local buffer
-  memcpy(inBuff, inputs[1], frames * sizeof(float));
-
-  // Now loop through channel two effects and process them
-  for (int i = 0; i < m_channelTwoEffects.size(); i++)
-  {
-    m_channelTwoEffects[i]->process(inBuff, outBuff, frames);
-    // Now swap the pointers
-    float *temp = inBuff;
-    inBuff = outBuff;
-    outBuff = temp;
-  }
-  tempOut[1] = inBuff; // This is the last processed buffer
-
-  // At this point tempOut has the two input channels after processing. This
-  // Is what will send to the others
-
+  // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
+
+  // Send to the room
   m_jamSocket.sendPacket((const float **)tempOut, frames);
 
   // read any data from the network

@@ -10,9 +10,16 @@ public:
   json getConfig() override
   {
     // Return the json for this block
-    json config = {};
+    json config = {
+        {"bypass", getByPass()},
+    };
     return config;
   };
+
+  void setConfig(json config)
+  {
+    setByPass(config["bypass"]);
+  }
 
   void init() override
   {

@@ -10,10 +10,17 @@ public:
   {
     // Return the json for this block
     json config = {
+        {"bypass", getByPass()},
         {"mix", m_mix},
     };
     return config;
   };
+
+  void setConfig(json config)
+  {
+    setByPass(config["bypass"]);
+    m_mix = config["mix"];
+  }
 
   void init() override
   {

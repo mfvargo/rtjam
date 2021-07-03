@@ -13,6 +13,7 @@
 #include "EffectChain.hpp"
 #include "Delay.hpp"
 #include "HighPassFilter.hpp"
+#include "MonoVerb.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -57,15 +58,27 @@ void jack_shutdown(void *arg)
 
 int main(int argc, char *argv[])
 {
+    json config;
     EffectChain effectChain;
     SigmaDelay delay;
     delay.init();
-    delay.setByPass(true);
+    delay.setByPass(false);
+    config = delay.getConfig();
+    config["duration"] = 120;
+    config["feedback"] = 0.25;
+    config["level"] = 0.8;
+    delay.setConfig(config);
     HighPassFilter filter;
     filter.init();
     filter.setByPass(false);
+    MonoVerb reverb;
+    reverb.init();
+    config = reverb.getConfig();
+    config["mix"] = 0.0;
+    reverb.setConfig(config);
     effectChain.push(&filter);
     effectChain.push(&delay);
+    effectChain.push(&reverb);
 
     int i;
     const char **ports;
