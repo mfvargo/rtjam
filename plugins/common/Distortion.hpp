@@ -19,7 +19,10 @@ public:
     json config = {
         {"bypass", getByPass()},
         {"gain", m_gain},
-        {"clipType", m_clipType}};
+        {"clipType", m_clipType},
+        {"lowPassFreq", m_lpfFreq},
+        {"hiPassFreq", m_hpfFreq},
+    };
     return config;
   };
 
@@ -28,6 +31,9 @@ public:
     setByPass(config["bypass"]);
     m_gain = config["gain"];
     m_clipType = config["clipType"];
+    m_lpfFreq = config["lowPassFreq"];
+    m_hpfFreq = config["hiPassFreq"];
+    setupFilters();
   };
 
   void init() override
