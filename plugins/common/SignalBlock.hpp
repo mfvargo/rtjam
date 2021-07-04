@@ -17,7 +17,7 @@ public:
       output[i] = getSample(input[i]);
     }
   }
-  float dbToFloat(float valueInDB)
+  static float dbToFloat(float valueInDB)
   {
     if (valueInDB < -59.5)
     {

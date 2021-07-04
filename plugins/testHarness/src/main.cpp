@@ -64,8 +64,8 @@ int main(int argc, char *argv[])
     delay.init();
     delay.setByPass(false);
     config = delay.getConfig();
-    config["duration"] = 120;
-    config["feedback"] = 0.25;
+    config["duration"] = 110;
+    config["feedback"] = 0.5;
     config["level"] = 0.8;
     delay.setConfig(config);
     HighPassFilter filter;
