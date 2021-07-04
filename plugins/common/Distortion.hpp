@@ -54,35 +54,23 @@ public:
     for (int i = 0; i < framesize; i++)
     {
       float value = m_hpf.getSample(input[i]);
-      switch (m_clipType)
-      {
-      case hard:
-        value = hardClipSample(value);
-        break;
-      case soft:
-        value = softClipSample(value);
-        break;
-      case asymetric:
-        value = asymmetricClipSample(value);
-        break;
-      case even:
-        value = evenClipSample(value);
-        break;
-      };
+      value = clipSample(value);
       // value = distortionAlgorithm(value);
       output[i] = m_lpf.getSample(value);
     }
   };
 
 private:
-  BiQuadFilter m_hpf;
-  BiQuadFilter m_lpf;
-  BiQuadFilter m_upsample;
-  BiQuadFilter m_downsample;
-  float m_gain;
-  ClipType m_clipType;
-  float m_lpfFreq;
-  float m_hpfFreq;
+  BiQuadFilter m_hpf;        // runs at 48k on input signal
+  BiQuadFilter m_lpf;        // runs at 48k on output signal
+  BiQuadFilter m_upsample;   // runs at 8 * 48k after upsample
+  BiQuadFilter m_downsample; // runs at 8 * 48k after downsample
+
+  // Parameters
+  float m_gain;        // gain before clip function
+  ClipType m_clipType; // what kind of clipping funciton
+  float m_lpfFreq;     // frequency of the final lpf  (tone knob)
+  float m_hpfFreq;     // frequency of the hpf before effect (is this a knob?)
 
   void setupFilters()
   {
@@ -109,6 +97,8 @@ private:
         upsampleBuffer[k] = 0;
       }
     }
+    // TODO: All three of these for loops could be combined into one...
+
     /* filter the vector */
     for (i = 0; i < 8; i++)
     {
@@ -120,22 +110,7 @@ private:
     for (i = 0; i < 8; i++)
     {
       filterOut[i] = 8 * m_gain * filterOut[i];
-      // TODO add selector button for this....
-      switch (m_clipType)
-      {
-      case hard:
-        clipOut[i] = hardClipSample(filterOut[i]);
-        break;
-      case soft:
-        clipOut[i] = softClipSample(filterOut[i]);
-        break;
-      case asymetric:
-        clipOut[i] = asymmetricClipSample(filterOut[i]);
-        break;
-      case even:
-        clipOut[i] = evenClipSample(filterOut[i]);
-        break;
-      };
+      clipOut[i] = clipSample(filterOut[i]);
     }
     // filter again
     for (i = 0; i < 8; i++)
@@ -145,6 +120,26 @@ private:
     // down-sample the vector to back native sample rate
     return clipOut[0];
   };
+
+  float clipSample(float input)
+  {
+    switch (m_clipType)
+    {
+    case hard:
+      return hardClipSample(input);
+      break;
+    case soft:
+      return softClipSample(input);
+      break;
+    case asymetric:
+      return asymmetricClipSample(input);
+      break;
+    case even:
+      return evenClipSample(input);
+      break;
+    };
+    return 0.0;
+  }
 
   float hardClipSample(float sampleIn)
   {
