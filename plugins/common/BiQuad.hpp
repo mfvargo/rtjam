@@ -25,8 +25,9 @@ public:
     MAX_FILTER_TYPES
   };
 
-  void init(FilterType filterType, float cutoffFreq, float cutBoost, float q)
+  void init(FilterType filterType, float cutoffFreq, float cutBoost, float q, int sampleRate)
   {
+    m_sampleRate = sampleRate;
     m_type = filterType;
     m_cutoffFreq = cutoffFreq;
     m_cutBoost = cutBoost;
@@ -90,7 +91,7 @@ public:
   };
 
 private:
-  float m_cutoffFreq, m_cutBoost, m_q;
+  float m_cutoffFreq, m_cutBoost, m_q, m_sampleRate;
   float a0, a1, a2, b0, b1, b2;
   float flt_A, flt_wo, flt_cos_wo, flt_sin_wo, flt_alpha;
   FilterType m_type;
@@ -136,7 +137,7 @@ private:
   void calcIntermediateVariables(float fltCutBoost, float fltQ)
   {
     flt_A = pow(10.0, (fltCutBoost / 40.0));
-    flt_wo = 2.0 * M_PI * (m_cutoffFreq / 48000);
+    flt_wo = 2.0 * M_PI * (m_cutoffFreq / m_sampleRate);
     flt_cos_wo = cos(flt_wo);
     flt_sin_wo = sin(flt_wo);
     flt_alpha = flt_sin_wo / (2.0 * fltQ);

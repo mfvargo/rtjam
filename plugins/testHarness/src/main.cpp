@@ -14,6 +14,7 @@
 #include "Delay.hpp"
 #include "HighPassFilter.hpp"
 #include "MonoVerb.hpp"
+#include "Distortion.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -62,7 +63,6 @@ int main(int argc, char *argv[])
     EffectChain effectChain;
     SigmaDelay delay;
     delay.init();
-    delay.setByPass(false);
     config = delay.getConfig();
     config["duration"] = 110;
     config["feedback"] = 0.5;
@@ -76,9 +76,22 @@ int main(int argc, char *argv[])
     config = reverb.getConfig();
     config["mix"] = 0.0;
     reverb.setConfig(config);
+    Distortion distortion;
+    distortion.init();
+    config = distortion.getConfig();
+    config["clipType"] = Distortion::ClipType::soft;
+    config["gain"] = 4.0;
+    distortion.setConfig(config);
     effectChain.push(&filter);
+    effectChain.push(&distortion);
     effectChain.push(&delay);
     effectChain.push(&reverb);
+
+    // Turn on/off effects
+    filter.setByPass(true);
+    delay.setByPass(true);
+    reverb.setByPass(true);
+    distortion.setByPass(false);
 
     int i;
     const char **ports;
