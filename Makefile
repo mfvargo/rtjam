@@ -24,6 +24,7 @@ plugins: libs
 	$(MAKE) all -C plugins/rtjam-status
 	$(MAKE) all -C plugins/rtjam-sound
 	$(MAKE) all -C plugins/rtjam-box
+	$(MAKE) all -C plugins/testHarness
 
 gitversion:
 	git rev-parse HEAD > bin/version.txt
@@ -58,6 +59,7 @@ clean:
 	$(MAKE) clean -C plugins/rtjam-status
 	$(MAKE) clean -C plugins/rtjam-sound
 	$(MAKE) clean -C plugins/rtjam-box
+	$(MAKE) clean -C plugins/testHarness
 	rm -rf bin build
 
 install: all

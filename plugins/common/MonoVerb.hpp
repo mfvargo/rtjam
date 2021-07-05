@@ -17,8 +17,8 @@ public:
 
   void setConfig(json config)
   {
-    setByPass(config["bypass"]);
-    m_mix = config["mix"];
+    setByPass(config["bypass"]["value"]);
+    setMix(config["mix"]["value"]);
   }
 
   void init() override

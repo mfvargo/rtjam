@@ -18,7 +18,7 @@ public:
 
   void setConfig(json config)
   {
-    setByPass(config["bypass"]);
+    setByPass(config["bypass"]["value"]);
   }
 
   void init() override

@@ -25,7 +25,7 @@ public:
     json config;
     config["name"] = "Distortion";
     config["settings"] = Effect::getConfig();
-    config["settings"]["gain"] = {{"type", "float"}, {"min", 0.0}, {"max", 20.0}, {"units", "db"}, {"value", m_gain}};
+    config["settings"]["gain"] = {{"type", "float"}, {"min", 0.0}, {"max", 60.0}, {"units", "linear"}, {"value", m_gain}};
     config["settings"]["clipType"] = {{"type", "integer"}, {"min", ClipType::hard}, {"max", ClipType::even}, {"units", "selector"}, {"labels", cliptypes}, {"value", m_clipType}};
     config["settings"]["lowPassFreq"] = {{"type", "float"}, {"min", 5.0}, {"max", 5000}, {"units", "Hz"}, {"value", m_lpfFreq}};
     config["settings"]["hiPassFreq"] = {{"type", "float"}, {"min", 200.0}, {"max", 12000}, {"units", "Hz"}, {"value", m_hpfFreq}};
@@ -34,18 +34,18 @@ public:
 
   void setConfig(json config)
   {
-    setByPass(config["bypass"]);
-    m_gain = config["gain"];
-    m_clipType = config["clipType"];
-    m_lpfFreq = config["lowPassFreq"];
-    m_hpfFreq = config["hiPassFreq"];
+    setByPass(config["bypass"]["value"]);
+    m_gain = config["gain"]["value"];
+    m_clipType = config["clipType"]["value"];
+    m_lpfFreq = config["lowPassFreq"]["value"];
+    m_hpfFreq = config["hiPassFreq"]["value"];
     setupFilters();
   };
 
   void init() override
   {
     m_lpfFreq = 150;
-    m_hpfFreq = 2000;
+    m_hpfFreq = 5000;
     m_gain = 1.0;
     m_clipType = soft;
     setupFilters();
@@ -56,7 +56,7 @@ public:
     for (int i = 0; i < framesize; i++)
     {
       float value = m_hpf.getSample(input[i]);
-      value = clipSample(value);
+      value = clipSample(value * m_gain);
       // value = distortionAlgorithm(value);
       output[i] = m_lpf.getSample(value);
     }
@@ -145,12 +145,11 @@ private:
 
   float hardClipSample(float sampleIn)
   {
-    float sampleOut;
     if (sampleIn > 0.5)
-      sampleOut = 0.5;
-    else if (sampleIn < 0.5)
-      sampleOut = -0.5;
-    return sampleOut;
+      return 0.5;
+    if (sampleIn < -0.5)
+      return -0.5;
+    return sampleIn;
   };
 
   float softClipSample(float sampleIn)

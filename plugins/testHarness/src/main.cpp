@@ -43,6 +43,7 @@ int process(jack_nframes_t nframes, void *arg)
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
     // Do stuff here
     chain->process(inputs[0], outputs[0], nframes);
+    memcpy(outputs[1], outputs[0], sizeof(float) * nframes);
     return 0;
 }
 
@@ -64,9 +65,9 @@ int main(int argc, char *argv[])
     SigmaDelay delay;
     delay.init();
     config = delay.getConfig()["settings"];
-    config["duration"] = 110;
-    config["feedback"] = 0.5;
-    config["level"] = 0.8;
+    config["duration"]["value"] = 220;
+    config["feedback"]["value"] = 0.0;
+    config["level"]["value"] = 0.05;
     delay.setConfig(config);
     HighPassFilter filter;
     filter.init();
@@ -74,13 +75,13 @@ int main(int argc, char *argv[])
     MonoVerb reverb;
     reverb.init();
     config = reverb.getConfig()["settings"];
-    config["mix"] = 0.0;
+    config["mix"]["value"] = 0.01;
     reverb.setConfig(config);
     Distortion distortion;
     distortion.init();
     config = distortion.getConfig()["settings"];
-    config["clipType"] = Distortion::ClipType::soft;
-    config["gain"] = 4.0;
+    config["clipType"]["value"] = Distortion::ClipType::soft;
+    config["gain"]["value"] = 5.0;
     distortion.setConfig(config);
     effectChain.push(&filter);
     effectChain.push(&distortion);
@@ -88,10 +89,12 @@ int main(int argc, char *argv[])
     effectChain.push(&reverb);
 
     // Turn on/off effects
-    filter.setByPass(true);
-    delay.setByPass(true);
-    reverb.setByPass(true);
+    filter.setByPass(false);
+    delay.setByPass(false);
+    reverb.setByPass(false);
     distortion.setByPass(false);
+
+    // std::cout << effectChain.getChainConfig("yank_it").dump(2);
 
     int i;
     const char **ports;
