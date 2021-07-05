@@ -27,7 +27,7 @@ public:
     // Loop through all the effects for channel 1 and process them
     for (int i = 0; i < m_chain.size(); i++)
     {
-      m_chain[i]->process(inBuff, outBuff, framesize);
+      m_chain[i]->doProcess(inBuff, outBuff, framesize);
       // Now swap the pointers
       float *temp = inBuff;
       inBuff = outBuff;
@@ -35,6 +35,19 @@ public:
     }
     memcpy(output, inBuff, framesize * sizeof(float));
   };
+
+  json getChainConfig(std::string name)
+  {
+    json effects = json::array();
+    for (int i = 0; i < m_chain.size(); i++)
+    {
+      effects.push_back(m_chain[i]->getConfig());
+    }
+    json rval = {
+        {"name", name},
+        {"effects", effects}};
+    return rval;
+  }
 
 private:
   std::vector<Effect *> m_chain;

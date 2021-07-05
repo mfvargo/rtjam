@@ -35,7 +35,7 @@ public:
   void unlock();
 
   RTJamLevels *m_pJamLevels;
-  JsonInfo *m_pJsonInfo;
+  char *m_pJsonInfo;
 
 private:
   CSharedMemory m_sharedMemory;

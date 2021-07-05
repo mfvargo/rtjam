@@ -30,10 +30,18 @@ private:
         {
             getParamForm();
         }
+        else if (environment().requestUri.find("config") != string::npos)
+        {
+            getConfig();
+        }
         else
         {
             getLevels();
         }
+    }
+    void getConfig()
+    {
+        out << s_levelData.m_pJsonInfo;
     }
     void getLevels()
     {

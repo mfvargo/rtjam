@@ -6,7 +6,7 @@ LevelData::LevelData() : m_sharedMemory("rtjamValues")
     m_sharedMemory.Create(sizeof(RTJamLevels) + sizeof(JsonInfo));
     m_sharedMemory.Attach();
     m_pJamLevels = (RTJamLevels *)m_sharedMemory.GetData();
-    m_pJsonInfo = (JsonInfo *)m_sharedMemory.GetData() + sizeof(RTJamLevels);
+    m_pJsonInfo = (char *)m_sharedMemory.GetData() + sizeof(RTJamLevels);
 }
 
 LevelData::~LevelData()

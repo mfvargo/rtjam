@@ -21,6 +21,7 @@ public:
   ~PluginRTJam();
   void init();
   void syncLevels();
+  void syncConfigData();
   void run(const float **inputs, float **outputs, uint32_t frames);
   void paramFlush();
   void getParams();
@@ -33,7 +34,6 @@ private:
   HighPassFilter m_filters[2];
   SigmaDelay m_delays[2];
   Distortion m_distortions[2];
-  float dbToFloat(float value);
   LightColors dbToColor(float value);
   JamNetStuff::JamSocket m_jamSocket;
   JamNetStuff::JamMixer m_jamMixer;

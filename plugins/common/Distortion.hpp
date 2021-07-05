@@ -14,15 +14,21 @@ public:
     even,
   };
 
-  json getConfig() override
+  json getConfig()
   {
-    json config = {
-        {"bypass", getByPass()},
-        {"gain", m_gain},
-        {"clipType", m_clipType},
-        {"lowPassFreq", m_lpfFreq},
-        {"hiPassFreq", m_hpfFreq},
+    json cliptypes = {
+        {"hard", 0},
+        {"soft", 1},
+        {"asymetric", 2},
+        {"even", 3},
     };
+    json config;
+    config["name"] = "Distortion";
+    config["settings"] = Effect::getConfig();
+    config["settings"]["gain"] = {{"type", "float"}, {"min", 0.0}, {"max", 20.0}, {"units", "db"}, {"value", m_gain}};
+    config["settings"]["clipType"] = {{"type", "integer"}, {"min", ClipType::hard}, {"max", ClipType::even}, {"units", "selector"}, {"labels", cliptypes}, {"value", m_clipType}};
+    config["settings"]["lowPassFreq"] = {{"type", "float"}, {"min", 5.0}, {"max", 5000}, {"units", "Hz"}, {"value", m_lpfFreq}};
+    config["settings"]["hiPassFreq"] = {{"type", "float"}, {"min", 200.0}, {"max", 12000}, {"units", "Hz"}, {"value", m_hpfFreq}};
     return config;
   };
 
@@ -47,10 +53,6 @@ public:
 
   void process(const float *input, float *output, int framesize) override
   {
-    if (getByPass())
-    {
-      return byPass(input, output, framesize);
-    }
     for (int i = 0; i < framesize; i++)
     {
       float value = m_hpf.getSample(input[i]);

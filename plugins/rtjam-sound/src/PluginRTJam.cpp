@@ -45,6 +45,8 @@ void PluginRTJam::init()
     m_reverbs[i].init();
     m_effectChains[i].push(&m_reverbs[i]);
   }
+  // write the effect chain json data
+  syncConfigData();
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
@@ -54,18 +56,21 @@ void PluginRTJam::syncLevels()
   // m_levelData.unlock();
 }
 
+void PluginRTJam::syncConfigData()
+{
+  json config = json::array();
+  for (int i = 0; i < 2; i++)
+  {
+    char name[64];
+    sprintf(name, "channel_%d", i);
+    config.push_back(m_effectChains[0].getChainConfig(name));
+  }
+  sprintf(m_levelData.m_pJsonInfo, "%s", config.dump().c_str());
+}
+
 void PluginRTJam::paramFlush()
 {
   m_paramData.flush();
-}
-
-float PluginRTJam::dbToFloat(float value)
-{
-  if (value < -59.5)
-  {
-    return 0.0f;
-  }
-  return std::exp((value / 72.0f) * 72.0f / kAMP_DB);
 }
 
 void PluginRTJam::getParams()
@@ -92,10 +97,10 @@ void PluginRTJam::getParams()
     {
       m_param.fValue = -60.0;
     }
-    m_jamMixer.gains[m_param.param - paramChanGain1] = dbToFloat(m_param.fValue);
+    m_jamMixer.gains[m_param.param - paramChanGain1] = SignalBlock::dbToFloat(m_param.fValue);
     break;
   case paramMasterVol:
-    m_jamMixer.masterVol = dbToFloat(m_param.fValue);
+    m_jamMixer.masterVol = SignalBlock::dbToFloat(m_param.fValue);
     break;
   case paramReverbMix:
     // Legacy param when we just had one reverb
@@ -119,6 +124,9 @@ void PluginRTJam::getParams()
     break;
   case paramReverbTwo:
     m_reverbs[1].setMix(m_param.fValue);
+    break;
+  case paramGetConfigJson:
+    syncConfigData();
     break;
   }
 }

@@ -6,13 +6,12 @@
 class MonoVerb : public Effect
 {
 public:
-  json getConfig() override
+  json getConfig()
   {
-    // Return the json for this block
-    json config = {
-        {"bypass", getByPass()},
-        {"mix", m_mix},
-    };
+    json config;
+    config["name"] = "Reverb";
+    config["settings"] = Effect::getConfig();
+    config["settings"]["mix"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_mix}};
     return config;
   };
 

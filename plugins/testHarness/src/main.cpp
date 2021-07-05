@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     EffectChain effectChain;
     SigmaDelay delay;
     delay.init();
-    config = delay.getConfig();
+    config = delay.getConfig()["settings"];
     config["duration"] = 110;
     config["feedback"] = 0.5;
     config["level"] = 0.8;
@@ -73,12 +73,12 @@ int main(int argc, char *argv[])
     filter.setByPass(false);
     MonoVerb reverb;
     reverb.init();
-    config = reverb.getConfig();
+    config = reverb.getConfig()["settings"];
     config["mix"] = 0.0;
     reverb.setConfig(config);
     Distortion distortion;
     distortion.init();
-    config = distortion.getConfig();
+    config = distortion.getConfig()["settings"];
     config["clipType"] = Distortion::ClipType::soft;
     config["gain"] = 4.0;
     distortion.setConfig(config);

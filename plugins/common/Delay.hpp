@@ -9,15 +9,16 @@
 class SigmaDelay : public Effect
 {
 public:
-  json getConfig() override
+  json getConfig()
   {
     // Return the json for this block
-    json config = {
-        {"bypass", getByPass()},
-        {"duration", m_currentDelayTime},
-        {"feedback", m_feedback},
-        {"level", m_level},
-    };
+
+    json config;
+    config["name"] = "Delay";
+    config["settings"] = Effect::getConfig();
+    config["settings"]["duration"] = {{"type", "float"}, {"min", 0.0}, {"max", 1000.0}, {"units", "msec"}, {"value", m_currentDelayTime}};
+    config["settings"]["feedback"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_feedback}};
+    config["settings"]["level"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_level}};
     return config;
   };
 
@@ -49,11 +50,6 @@ public:
   };
   void process(const float *input, float *output, int framesize) override
   {
-    // See if effect is bypassed
-    if (getByPass())
-    {
-      return byPass(input, output, framesize);
-    }
     // Implement the delay
     for (int sample = 0; sample < framesize; sample++)
     {

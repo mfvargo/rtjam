@@ -7,12 +7,12 @@
 class HighPassFilter : public Effect
 {
 public:
-  json getConfig() override
+  json getConfig()
   {
     // Return the json for this block
-    json config = {
-        {"bypass", getByPass()},
-    };
+    json config;
+    config["name"] = "DC Offset HighPass";
+    config["settings"] = Effect::getConfig();
     return config;
   };
 
@@ -28,10 +28,6 @@ public:
   }
   void process(const float *input, float *output, int framesize) override
   {
-    if (getByPass())
-    {
-      return byPass(input, output, framesize);
-    }
     m_filter.getBlock(input, output, framesize);
   };
 
