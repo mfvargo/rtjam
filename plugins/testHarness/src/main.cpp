@@ -15,6 +15,7 @@
 #include "HighPassFilter.hpp"
 #include "MonoVerb.hpp"
 #include "Distortion.hpp"
+#include "Tremelo.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -83,16 +84,24 @@ int main(int argc, char *argv[])
     config["clipType"]["value"] = Distortion::ClipType::soft;
     config["gain"]["value"] = 5.0;
     distortion.setConfig(config);
+    Tremelo tremelo;
+    tremelo.init();
+    config = tremelo.getConfig()["settings"];
+    config["rate"]["value"] = 2.5;
+    config["depth"]["value"] = -10.0;
+    tremelo.setConfig(config);
     effectChain.push(&filter);
     effectChain.push(&distortion);
     effectChain.push(&delay);
     effectChain.push(&reverb);
+    effectChain.push(&tremelo);
 
     // Turn on/off effects
     filter.setByPass(false);
     delay.setByPass(false);
     reverb.setByPass(false);
     distortion.setByPass(false);
+    tremelo.setByPass(false);
 
     // std::cout << effectChain.getChainConfig("yank_it").dump(2);
 
