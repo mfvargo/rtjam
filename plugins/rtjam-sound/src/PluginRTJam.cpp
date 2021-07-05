@@ -34,22 +34,17 @@ PluginRTJam::~PluginRTJam()
 
 void PluginRTJam::init()
 {
-  m_channelOneEffectChain.push(&filters[0]);
-  m_channelOneEffectChain.push(&m_reverbs[0]);
-  m_channelOneEffectChain.push(&m_delays[0]);
-  m_channelTwoEffectChain.push(&filters[1]);
-  m_channelTwoEffectChain.push(&m_reverbs[1]);
-  m_channelTwoEffectChain.push(&m_delays[1]);
-  filters[0].init();
-  filters[1].init();
-  m_reverbs[0].init();
-  // m_reverbs[0].setMix(0.25);
-  m_reverbs[1].init();
-  // m_reverbs[1].setMix(0.25);
-  m_delays[0].init();
-  m_delays[0].setByPass(true);
-  m_delays[1].init();
-  m_delays[1].setByPass(true);
+  for (int i = 0; i < 2; i++)
+  {
+    m_filters[i].init();
+    m_effectChains[i].push(&m_filters[i]);
+    m_distortions[i].init();
+    m_effectChains[i].push(&m_distortions[i]);
+    m_delays[i].init();
+    m_effectChains[i].push(&m_delays[i]);
+    m_reverbs[i].init();
+    m_effectChains[i].push(&m_reverbs[i]);
+  }
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
@@ -112,12 +107,12 @@ void PluginRTJam::getParams()
     disconnect();
     break;
   case paramHPFOn:
-    filters[0].setByPass(false);
-    filters[1].setByPass(false);
+    m_filters[0].setByPass(false);
+    m_filters[1].setByPass(false);
     break;
   case paramHPFOff:
-    filters[0].setByPass(true);
-    filters[1].setByPass(true);
+    m_filters[0].setByPass(true);
+    m_filters[1].setByPass(true);
     break;
   case paramReverbOne:
     m_reverbs[0].setMix(m_param.fValue);
@@ -154,8 +149,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   tempOut[1] = twoBuffOut;
 
   // run the effect chains
-  m_channelOneEffectChain.process(inputs[0], oneBuffOut, frames);
-  m_channelTwoEffectChain.process(inputs[1], twoBuffOut, frames);
+  m_effectChains[0].process(inputs[0], oneBuffOut, frames);
+  m_effectChains[1].process(inputs[1], twoBuffOut, frames);
 
   // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);

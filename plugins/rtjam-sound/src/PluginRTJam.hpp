@@ -10,6 +10,7 @@
 #include "MonoVerb.hpp"
 #include "HighPassFilter.hpp"
 #include "Delay.hpp"
+#include "Distortion.hpp"
 #include "EffectChain.hpp"
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -27,11 +28,11 @@ public:
   void disconnect();
 
 private:
-  EffectChain m_channelOneEffectChain;
-  EffectChain m_channelTwoEffectChain;
+  EffectChain m_effectChains[2];
   MonoVerb m_reverbs[2];
-  HighPassFilter filters[2];
+  HighPassFilter m_filters[2];
   SigmaDelay m_delays[2];
+  Distortion m_distortions[2];
   float dbToFloat(float value);
   LightColors dbToColor(float value);
   JamNetStuff::JamSocket m_jamSocket;

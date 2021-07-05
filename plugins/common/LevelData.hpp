@@ -20,6 +20,11 @@ struct RTJamLevels
   float peakMaster;
 };
 
+struct JsonInfo
+{
+  char buffer[64 * 1024];
+};
+
 class LevelData
 {
 public:
@@ -30,6 +35,7 @@ public:
   void unlock();
 
   RTJamLevels *m_pJamLevels;
+  JsonInfo *m_pJsonInfo;
 
 private:
   CSharedMemory m_sharedMemory;
