@@ -48,6 +48,13 @@ public:
         {"effects", effects}};
     return rval;
   }
+  void toggleEffect(int i)
+  {
+    if (i < m_chain.size())
+    {
+      m_chain[i]->setByPass(!m_chain[i]->getByPass());
+    }
+  }
 
 private:
   std::vector<Effect *> m_chain;
