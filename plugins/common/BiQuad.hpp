@@ -7,21 +7,13 @@ class BiQuadFilter : public SignalBlock
 public:
   enum FilterType
   {
-    EQ_HIGH_PASS_FILTER,
-    EQ_BASS_FILTER,
-    EQ_LOW_MIDRANGE_FILTER,
-    EQ_MIDRANGE_FILTER,
-    EQ_HIGH_MIDRANGE_FILTER,
-    EQ_TREBLE_FILTER,
-    EQ_LOW_PASS_FILTER,
-    REVERB_LOW_PASS_FILTER,
-    COMP_EQ_BAND1_FILTER,
-    COMP_EQ_BAND2_FILTER,
-    COMP_EQ_BAND3_FILTER,
-    DELAY_TONE_LOW_PASS_FILTER,
-    CHORUS_TONE_FILTER1,
-    CHORUS_TONE_FILTER2,
-    CHORUS_TONE_FILTER3,
+    LowPass,
+    HighPass,
+    Peaking,
+    LowShelf,
+    HighShelf,
+    AllPass,
+    Notch,
     MAX_FILTER_TYPES
   };
 
@@ -39,29 +31,32 @@ public:
 
     switch (filterType)
     {
-    case EQ_HIGH_PASS_FILTER:
-      calcHighPassFilterCoefficients();
+    case LowPass:
+      calcLowPassCoefficients();
       break;
 
-    case EQ_BASS_FILTER:
-    case EQ_LOW_MIDRANGE_FILTER:
-    case EQ_MIDRANGE_FILTER:
-    case EQ_HIGH_MIDRANGE_FILTER:
-    case EQ_TREBLE_FILTER:
-    case COMP_EQ_BAND1_FILTER:
-    case COMP_EQ_BAND2_FILTER:
-    case COMP_EQ_BAND3_FILTER:
-      calcPeakingFilterCoefficients();
+    case HighPass:
+      calcHighPassCoefficients();
       break;
 
-    case EQ_LOW_PASS_FILTER:
-    case REVERB_LOW_PASS_FILTER:
-    case DELAY_TONE_LOW_PASS_FILTER:
-      calcLowPassFilterCoefficients();
+    case Peaking:
+      calcPeakingCoefficients();
       break;
 
-    case CHORUS_TONE_FILTER1:
-      calcPeakingFilterCoefficients();
+    case LowShelf:
+      calcLowShelfCoefficients();
+      break;
+
+    case HighShelf:
+      calcHighShelfCoefficients();
+      break;
+
+    case AllPass:
+      calcAllPassCoefficients();
+      break;
+
+    case Notch:
+      calcNotchFilterCoefficients();
       break;
 
     default:
@@ -97,7 +92,7 @@ private:
   FilterType m_type;
   float x1, x2, y1, y2;
 
-  void calcHighPassFilterCoefficients()
+  void calcHighPassCoefficients()
   {
     calcIntermediateVariables(1.0, M_SQRT1_2);
     b0 = (1.0 + flt_cos_wo) / 2.0;
@@ -109,7 +104,7 @@ private:
     normalizeCoefficients();
   };
 
-  void calcPeakingFilterCoefficients()
+  void calcPeakingCoefficients()
   {
     calcIntermediateVariables(m_cutBoost, m_q);
     flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
@@ -122,7 +117,7 @@ private:
     normalizeCoefficients();
   };
 
-  void calcLowPassFilterCoefficients()
+  void calcLowPassCoefficients()
   {
     calcIntermediateVariables(1.0, M_SQRT1_2);
     b0 = (1.0 - flt_cos_wo) / 2.0;
@@ -131,6 +126,62 @@ private:
     a0 = 1.0 + flt_alpha;
     a1 = -2.0 * flt_cos_wo;
     a2 = 1.0 - flt_alpha;
+    normalizeCoefficients();
+  };
+
+  void calcLowShelfCoefficients()
+  {
+    // TODO: need to code this
+    calcIntermediateVariables(m_cutBoost, m_q);
+    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    a0 = 1.0 + (flt_alpha / flt_A);
+    a1 = -2.0 * flt_cos_wo;
+    a2 = 1.0 - (flt_alpha / flt_A);
+    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
+    b1 = -2.0 * flt_cos_wo;           // * gainlinear
+    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    normalizeCoefficients();
+  };
+
+  void calcHighShelfCoefficients()
+  {
+    // TODO: need to code this
+    calcIntermediateVariables(m_cutBoost, m_q);
+    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    a0 = 1.0 + (flt_alpha / flt_A);
+    a1 = -2.0 * flt_cos_wo;
+    a2 = 1.0 - (flt_alpha / flt_A);
+    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
+    b1 = -2.0 * flt_cos_wo;           // * gainlinear
+    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    normalizeCoefficients();
+  };
+
+  void calcAllPassCoefficients()
+  {
+    // TODO: need to code this
+    calcIntermediateVariables(m_cutBoost, m_q);
+    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    a0 = 1.0 + (flt_alpha / flt_A);
+    a1 = -2.0 * flt_cos_wo;
+    a2 = 1.0 - (flt_alpha / flt_A);
+    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
+    b1 = -2.0 * flt_cos_wo;           // * gainlinear
+    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    normalizeCoefficients();
+  };
+
+  void calcNotchFilterCoefficients()
+  {
+    // TODO: need to code this
+    calcIntermediateVariables(m_cutBoost, m_q);
+    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    a0 = 1.0 + (flt_alpha / flt_A);
+    a1 = -2.0 * flt_cos_wo;
+    a2 = 1.0 - (flt_alpha / flt_A);
+    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
+    b1 = -2.0 * flt_cos_wo;           // * gainlinear
+    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
     normalizeCoefficients();
   };
 

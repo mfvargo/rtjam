@@ -24,7 +24,7 @@ public:
   void init() override
   {
     setByPass(true);
-    m_filter.init(BiQuadFilter::FilterType::EQ_HIGH_PASS_FILTER, 2.0, 1.0, 1.0, 48000);
+    m_filter.init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
   }
   void process(const float *input, float *output, int framesize) override
   {

@@ -77,10 +77,10 @@ private:
   void setupFilters()
   {
     // Setup the biquad filter for the upsampled data
-    m_hpf.init(BiQuadFilter::FilterType::EQ_HIGH_PASS_FILTER, m_lpfFreq, 1.0, 1.0, 48000);
-    m_lpf.init(BiQuadFilter::FilterType::EQ_LOW_PASS_FILTER, m_hpfFreq, 1.0, 1.0, 48000);
-    m_upsample.init(BiQuadFilter::FilterType::EQ_LOW_PASS_FILTER, 48000, 1.0, 1.0, 8 * 48000);
-    m_downsample.init(BiQuadFilter::FilterType::EQ_LOW_PASS_FILTER, 48000, 1.0, 1.0, 8 * 48000);
+    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_lpfFreq, 1.0, 1.0, 48000);
+    m_lpf.init(BiQuadFilter::FilterType::LowPass, m_hpfFreq, 1.0, 1.0, 48000);
+    m_upsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 48000);
+    m_downsample.init(BiQuadFilter::FilterType::HighPass, 48000, 1.0, 1.0, 8 * 48000);
   };
 
   float distortionAlgorithm(float inputSample)

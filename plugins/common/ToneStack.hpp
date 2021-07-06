@@ -54,8 +54,8 @@ private:
   void setParams()
   {
     // TODO: figure out how to chain some BiQuads to do this.
-    m_fBass.init(BiQuadFilter::FilterType::EQ_BASS_FILTER, 200, 1.0, 1.0, 48000);
-    m_fMid.init(BiQuadFilter::FilterType::EQ_MIDRANGE_FILTER, 700, 1.0, 1.0, 48000);
-    m_fHigh.init(BiQuadFilter::FilterType::EQ_TREBLE_FILTER, 2000, 1.0, 1.0, 48000);
+    m_fBass.init(BiQuadFilter::FilterType::LowShelf, 200, 1.0, 1.0, 48000);
+    m_fMid.init(BiQuadFilter::FilterType::Peaking, 700, 1.0, 2.0, 48000);
+    m_fHigh.init(BiQuadFilter::FilterType::HighShelf, 2000, 1.0, 1.0, 48000);
   };
 };
