@@ -4,7 +4,7 @@
 #include "LowFreqOsc.hpp"
 
 #define DELAY_BUFFER_SIZE 48000
-#define LFO_GAIN -22.0
+#define LFO_GAIN -42.0
 
 class SigmaDelay : public Effect
 {
@@ -24,10 +24,10 @@ public:
 
   void setConfig(json config)
   {
-    setByPass(config["bypass"]);
-    m_currentDelayTime = config["duration"];
-    m_feedback = config["feedback"];
-    m_level = config["level"];
+    setByPass(config["bypass"]["value"]);
+    m_currentDelayTime = config["duration"]["value"];
+    m_feedback = config["feedback"]["value"];
+    m_level = config["level"]["value"];
     m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate / 1000;
   }
 
@@ -70,10 +70,10 @@ public:
       readIndex %= m_bufferDepth;
 
       // return original plus delay
-      output[sample] = input[sample] + m_level * m_delayBuffer[readIndex];
+      output[sample] = input[sample] + m_delayBuffer[readIndex];
 
       // add feedback to the buffer
-      m_delayBuffer[m_writePointerIndex] = input[sample] + (output[sample] * m_feedback);
+      m_delayBuffer[m_writePointerIndex] = m_level * input[sample] + (output[sample] * m_feedback);
     }
   };
 
