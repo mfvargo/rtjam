@@ -159,7 +159,7 @@ private:
 
   void calcAllPassCoefficients()
   {
-    // TODO: need to code this
+    // DFM TODO: need to code this
     calcIntermediateVariables(m_cutBoost, m_q);
     flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
     a0 = 1.0 + (flt_alpha / flt_A);
