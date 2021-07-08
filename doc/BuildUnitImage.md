@@ -18,6 +18,13 @@ So a build box that will run the software needs the basic stuff for an rtjam-uni
 - change the password on pi account (suggest rtjamnation)
 - change the hostname to something nice so you can tell see what unit you are ssh'ed into (optional)
 
+### Change the governor to run in performance
+see [/etc/rc.local](piRoot/etc/rc.local) The line
+```
+echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
+```
+is required otherwise the sound engine will generate xruns
+
 
 ### Install Jack (takes a few minutes)
 
