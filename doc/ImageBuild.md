@@ -4,7 +4,8 @@
 
 - burn Raspberry Pi OS Lite (32-bit) onto sd card (using imager from Raspberry Pi)
 - boot unit with a monitor and keyboard (note the ip address in the boot up)
-- run raspi-config (sudo) and enable ssh
+- login to console (login: pi, password: raspberry)
+- run raspi-config (sudo) and enable ssh (under the Interface Options Menu)
 - ssh into the unit
 - sudo apt update
 - sudo apt upgrade
