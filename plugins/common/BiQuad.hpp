@@ -2,6 +2,7 @@
 
 #include "SignalBlock.hpp"
 
+
 class BiQuadFilter : public SignalBlock
 {
 public:
@@ -85,113 +86,114 @@ public:
     return value;
   };
 
-private:
+public:
   float m_cutoffFreq, m_cutBoost, m_q, m_sampleRate;
-  float a0, a1, a2, b0, b1, b2;
-  float flt_A, flt_wo, flt_cos_wo, flt_sin_wo, flt_alpha;
   FilterType m_type;
+  
+
+private:
+  float a0, a1, a2, b0, b1, b2;
+  float A, omega, cos_omega, sin_omega, alpha;
   float x1, x2, y1, y2;
 
   void calcHighPassCoefficients()
   {
     calcIntermediateVariables(1.0, M_SQRT1_2);
-    b0 = (1.0 + flt_cos_wo) / 2.0;
-    b1 = -1.0 * (1.0 + flt_cos_wo);
-    b2 = (1.0 + flt_cos_wo) / 2.0;
-    a0 = 1.0 + flt_alpha;
-    a1 = -2.0 * flt_cos_wo;
-    a2 = 1.0 - flt_alpha;
+    b0 = (1.0 + cos_omega) / 2.0;
+    b1 = -1.0 * (1.0 + cos_omega);
+    b2 = (1.0 + cos_omega) / 2.0;
+    a0 = 1.0 + alpha;
+    a1 = -2.0 * cos_omega;
+    a2 = 1.0 - alpha;
     normalizeCoefficients();
   };
 
   void calcPeakingCoefficients()
   {
     calcIntermediateVariables(m_cutBoost, m_q);
-    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    a0 = 1.0 + (flt_alpha / flt_A);
-    a1 = -2.0 * flt_cos_wo;
-    a2 = 1.0 - (flt_alpha / flt_A);
-    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
-    b1 = -2.0 * flt_cos_wo;           // * gainlinear
-    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    a0 = 1.0 + (alpha / A);
+    a1 = -2.0 * cos_omega;
+    a2 = 1.0 - (alpha / A);
+    b0 = (1.0 + (alpha * A)); // * gainlinear
+    b1 = -2.0 * cos_omega;           // * gainlinear
+    b2 = 1.0 - (alpha * A);   // * gainlinear
     normalizeCoefficients();
   };
 
   void calcLowPassCoefficients()
   {
     calcIntermediateVariables(1.0, M_SQRT1_2);
-    b0 = (1.0 - flt_cos_wo) / 2.0;
-    b1 = 1.0 - flt_cos_wo;
-    b2 = (1.0 - flt_cos_wo) / 2.0;
-    a0 = 1.0 + flt_alpha;
-    a1 = -2.0 * flt_cos_wo;
-    a2 = 1.0 - flt_alpha;
+    b0 = (1.0 - cos_omega) / 2.0;
+    b1 = 1.0 - cos_omega;
+    b2 = (1.0 - cos_omega) / 2.0;
+    a0 = 1.0 + alpha;
+    a1 = -2.0 * cos_omega;
+    a2 = 1.0 - alpha;
     normalizeCoefficients();
   };
 
   void calcLowShelfCoefficients()
   {
-    // TODO: need to code this
     calcIntermediateVariables(m_cutBoost, m_q);
-    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    a0 = 1.0 + (flt_alpha / flt_A);
-    a1 = -2.0 * flt_cos_wo;
-    a2 = 1.0 - (flt_alpha / flt_A);
-    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
-    b1 = -2.0 * flt_cos_wo;           // * gainlinear
-    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    b0 = A*((A + 1.0) - (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha)); 
+    b1 = 2.0*A*((A - 1.0) - (A +1.0)*cos_omega);           
+    b2 = A*((A + 1.0) - (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
+    a0 = (A + 1.0) + (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha);
+    a1 = -2.0*((A -1.0) + (A + 1.0)*cos_omega);
+    a2 = (A + 1.0) + (A - 1.0)*cos_omega - (2.0*sqrt(A) * alpha);
     normalizeCoefficients();
   };
 
   void calcHighShelfCoefficients()
   {
-    // TODO: need to code this
     calcIntermediateVariables(m_cutBoost, m_q);
-    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    a0 = 1.0 + (flt_alpha / flt_A);
-    a1 = -2.0 * flt_cos_wo;
-    a2 = 1.0 - (flt_alpha / flt_A);
-    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
-    b1 = -2.0 * flt_cos_wo;           // * gainlinear
-    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    b0 = A*((A + 1.0) + (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha)); 
+    b1 = -2.0*A*((A - 1.0) + (A +1.0)*cos_omega);           
+    b2 = A*((A + 1.0) - (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
+    a0 = (A + 1.0) - (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha);
+    a1 = 2.0*((A -1.0) - (A + 1.0)*cos_omega);
+    a2 = (A + 1.0) - (A - 1.0)*cos_omega - (2.0*sqrt(A) * alpha);
     normalizeCoefficients();
   };
 
+
   void calcAllPassCoefficients()
   {
-    // DFM TODO: need to code this
+
     calcIntermediateVariables(m_cutBoost, m_q);
-    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    a0 = 1.0 + (flt_alpha / flt_A);
-    a1 = -2.0 * flt_cos_wo;
-    a2 = 1.0 - (flt_alpha / flt_A);
-    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
-    b1 = -2.0 * flt_cos_wo;           // * gainlinear
-    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    b0 = 1.0 - alpha; 
+    b1 = -2.0 * cos_omega;      
+    b2 = 1.0 + alpha;
+    a0 = 1.0 + alpha;
+    a1 = -2.0 * cos_omega;
+    a2 = 1.0 - alpha;
     normalizeCoefficients();
   };
 
   void calcNotchFilterCoefficients()
   {
-    // TODO: need to code this
     calcIntermediateVariables(m_cutBoost, m_q);
-    flt_alpha = flt_sin_wo / (2.0 * m_q * flt_A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    a0 = 1.0 + (flt_alpha / flt_A);
-    a1 = -2.0 * flt_cos_wo;
-    a2 = 1.0 - (flt_alpha / flt_A);
-    b0 = (1.0 + (flt_alpha * flt_A)); // * gainlinear
-    b1 = -2.0 * flt_cos_wo;           // * gainlinear
-    b2 = 1.0 - (flt_alpha * flt_A);   // * gainlinear
+    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    b0 = 1.0; 
+    b1 = -2.0 * cos_omega;      
+    b2 = 1.0;
+    a0 = 1.0 + alpha;
+    a1 = -2.0 * cos_omega;
+    a2 = 1.0 - alpha;
     normalizeCoefficients();
   };
 
   void calcIntermediateVariables(float fltCutBoost, float fltQ)
   {
-    flt_A = pow(10.0, (fltCutBoost / 40.0));
-    flt_wo = 2.0 * M_PI * (m_cutoffFreq / m_sampleRate);
-    flt_cos_wo = cos(flt_wo);
-    flt_sin_wo = sin(flt_wo);
-    flt_alpha = flt_sin_wo / (2.0 * fltQ);
+    A = pow(10.0, (fltCutBoost / 40.0));
+    omega = 2.0 * M_PI * (m_cutoffFreq / m_sampleRate);
+    cos_omega = cos(omega);
+    sin_omega = sin(omega);
+    alpha = sin_omega / (2.0 * fltQ);
   }
 
   void normalizeCoefficients()

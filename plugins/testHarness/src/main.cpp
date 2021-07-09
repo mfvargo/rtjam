@@ -17,6 +17,8 @@
 #include "Distortion.hpp"
 #include "Tremelo.hpp"
 #include "ToneStack.hpp"
+#include "GeneralFilter.hpp"
+#include "BiQuad.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -64,6 +66,8 @@ int main(int argc, char *argv[])
 {
     json config;
     EffectChain effectChain;
+ 
+ #if 0 
     SigmaDelay delay;
     delay.init();
     config = delay.getConfig()["settings"];
@@ -112,6 +116,62 @@ int main(int argc, char *argv[])
     reverb.setByPass(true);
     distortion.setByPass(true);
     tremelo.setByPass(true);
+#else
+    GeneralFilter filter1, filter2, filter3, filter4;
+    
+    // LPF
+    filter1.init();
+    filter1.setByPass(false);
+    config = filter1.getConfig()["settings"];
+    config["filterType"]["value"] = BiQuadFilter::LowPass;
+    config["filterFreq"]["value"] = 1000;
+    config["filterQ"]["value"] = 0.707;
+    config["filterCutBoost"]["value"] = -20;
+    filter1.setConfig(config);
+
+
+    // Low Shelf
+    filter2.init();
+    filter2.setByPass(false);
+    config = filter2.getConfig()["settings"];
+    config["filterType"]["value"] = BiQuadFilter::LowShelf;
+    config["filterFreq"]["value"] = 200;
+    config["filterQ"]["value"] = 0.707;
+    config["filterCutBoost"]["value"] = -20;
+    filter2.setConfig(config);
+
+
+    // High Shelf
+    filter3.init();
+    filter3.setByPass(false);
+    config = filter3.getConfig()["settings"];
+    config["filterType"]["value"] = BiQuadFilter::HighShelf;
+    config["filterFreq"]["value"] = 2000;
+    config["filterQ"]["value"] = 0.707;
+    config["filterCutBoost"]["value"] = -20;
+    filter3.setConfig(config);
+
+    // Notch
+    filter4.init();
+    filter4.setByPass(false);
+    config = filter4.getConfig()["settings"];
+    config["filterType"]["value"] = BiQuadFilter::Notch;
+    config["filterFreq"]["value"] = 60;
+    config["filterQ"]["value"] = 0.707;
+    config["filterCutBoost"]["value"] = -40;
+    filter4.setConfig(config);
+
+
+
+
+    effectChain.push(&filter1);
+    effectChain.push(&filter2);
+    effectChain.push(&filter3);
+    effectChain.push(&filter4);
+    
+ 
+#endif
+
 
     std::cout << effectChain.getChainConfig("yank_it").dump(2);
 
