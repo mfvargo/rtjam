@@ -6,7 +6,7 @@
 
 include dpf/Makefile.base.mk
 
-all: libs plugins gen gitversion
+all: libs plugins gen gitversion pi-embed
 
 # --------------------------------------------------------------
 
@@ -20,6 +20,8 @@ plugins: libs
 	$(MAKE) all -C plugins/RTJam
 	$(MAKE) all -C plugins/server
 	$(MAKE) all -C plugins/nojack
+
+pi-embed: libs
 	$(MAKE) all -C plugins/rtjam-broadcast
 	$(MAKE) all -C plugins/rtjam-status
 	$(MAKE) all -C plugins/rtjam-sound
@@ -67,6 +69,31 @@ install: all
 
 install-user: all
 	$(MAKE) install-user -C plugins/RTJam
+
+# this will install code on the local raspberry pi this build is on
+install-pi: pi-embed
+	cp doc/piRoot/etc/systemd/system/* /etc/systemd/system
+	cp doc/piRoot/home/pi/rtjam/* /home/pi/rtjam
+	chmod +x /home/pi/rtjam/*.bash
+	cp bin/rtjam-sound /home/pi/rtjam
+	cp bin/rtjam-box /home/pi/rtjam
+	cp bin/rtjam-status /home/pi/rtjam
+	systemctl daemon-reload
+	systemctl restart rtjam-jack
+	systemctl restart rtjam-sound
+	systemctl restart rtjam-box
+	systemctl restart rtjam-status
+
+stop-pi:
+	systemctl stop rtjam-jack
+	systemctl stop rtjam-sound
+	systemctl stop rtjam-box
+	systemctl stop rtjam-status
+
+uninstall-pi: stop-pi
+	rm -f /home/pi/rtjam/*
+	rm -f /etc/systemd/system/rtjam-*
+	systemctl daemon-reload
 
 # --------------------------------------------------------------
 
