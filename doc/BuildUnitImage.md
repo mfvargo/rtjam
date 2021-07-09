@@ -25,34 +25,93 @@ echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
 ```
 is required otherwise the sound engine will generate xruns
 
+### Get more dev libs you will need
+This is stuff you will need to be able to compile the softare on the pi
 
+
+- sudo apt install git
+- sudo apt install libgl-dev
+- sudo apt install libcurl4-openssl-dev
+- sudo apt-get install libasound2-dev
+- sudo apt install cmake
+```
+sudo apt install libgl-dev libcurl4-openssl-dev libasound2-dev cmake
+```
+
+### Install the source code so you can copy some files!
+```
+cd
+mkdir projects
+cd ~/projects
+git clone --recurse-submodules https://github.com/mfvargo/rtjam.git
+```
+
+### Install the i2s driver for the embedded sound system
+This driver is used on the customer hardware.  if you are building for a USB audio you can skip this step. 
+you have the driver without the hardware it's harmless.
+
+- copy the [driver](doc/RPI_Sigma_I2S_Codec_Files/sigma-i2s-codec.dtbo) to /boot/overlays
+- copy the config.txt
+```
+sudo cp ~/projects/rtjam/doc/RPi_Sigma_I2S_Codec_Files/sigma-i2s-codec.dtbo /boot/overlays/
+sudo cp ~/projects/rtjam/doc/piRoot/boot/config.txt /boot
+```
 ### Install Jack (takes a few minutes)
 
 - sudo apt install jackd2  (be sure to say yes to enable realtime audio)
 - make sure the pi user is in the "audio" group so it can do realtime (groups command)
-
+```
+sudo apt install jackd2
+sudo apt install libjack-dev
+```
 ### Install nginx
 nginx is used to proxy to the rtjam-nation site and to enable the fastCGI to talk to the software.
 
-- sudo apt install nginx
-- copy [default](piRoot/etc/nginx/sites-enabled/default) to /etc/nginx/sites-enabled/default
-- sudo systemctl restart nginx
+```
+sudo apt install nginx
+sudo cp ~/projects/rtjam/doc/piRoot/etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
+sudo systemctl restart nginx
 - sudo systemctl enable nginx
+```
 
-### Install fastcgi++ library
-this is kind of a hack so you don't have to build it on the system.  To build requires a ton of stuff. you have to get the so from the site, mv it to /usr/lib/arm.... then make a symlink to it  (this enables rtjam-box to run)
-- cd /usr/lib/arm-linux-gnueabihf
-- sudo wget localhost/pi/libfastcgipp.so
-- sudo ln -s libfastcgipp.so libfastcgipp.so.3
+## wiring Pi
+You have to build WiringPi to get the header files to build
+```
+cd ~/projects
+git clone https://github.com/WiringPi/WiringPi.git
+cd WiringPi
+./build
+```
 
-### install wiring pi
-this is also kind of a hack to prevent from building on the local system.  rtjam-status required libwiringPi
-- cd /usr/lib/arm-linux-gnueabihf
-- sudo wget localhost/pi/libwiringPi.so.2.60
-- sudo ln -s libwiringPi.so.2.60 libwiringPi.so
+## FastCGI stuff
+The FastCGI library provides bindings to the fastCGI api to nginx.  This library allows rtjam-box to 
+get http requests from nginx to do local ops (like connect to room, change volumes, etc)
+- directons to build it are on the git repo.  Here is the synopsis...
+```
+cd ~/projects
+git clone https://github.com/eddic/fastcgipp.git fastcgi++
+mkdir fastcgi++.build
+cd fastcgi++.build
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_BUILD_TYPE=RELEASE ../fastcgi++
+make
+sudo make install
+```
+## Good time to reboot to have everything take effect
+```
+sudo reboot
+```
 
-## Now install the app software
-the next part will install the executables and the scripts needed to make them start
+## Build the RTJam software
+to build the rtjam code
+```
+cd ~/projects/rtjam
+make
+```
+
+# TODO: This install needs to get tweaked.  Make make install or something...
+
+## Now install the app software 
+the next part will install the executables and the scripts needed to make them start.  ssh back into the box.
 
 ### system control files
 systemctl is used to start/stop the rtjam pieces.  there are 4 parts.
@@ -83,38 +142,6 @@ and add this line
 */5 * * * * cd /home/pi/rtjam && /home/pi/rtjam/update-rtjam.bash
 ```
 
-
-# build/dev stuff 
-This is stuff you will need to be able to compile the softare on the pi
-
-- sudo apt install git
-- sudo apt install libgl-dev
-- sudo apt install libcurl4-openssl-dev
-- sudo apt-get install libasound2-dev
-- sudo apt install libjack-dev
-
-## wiring Pi
-You have to build WiringPi to get the header files to build
-- cd
-- mkdir projects
-- cd projects
-- git clone https://github.com/WiringPi/WiringPi.git
-- cd WiringPi
-- ./build
-
-## FastCGI stuff
-FastCGI code requires cmake
-- sudo apt install cmake
-- directons to build it are on the git repo
-```
-cd ~/projects
-git clone https://github.com/eddic/fastcgipp.git fastcgi++
-mkdir fastcgi++.build
-cd fastcgi++.build
-cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_BUILD_TYPE=RELEASE ../fastcgi++
-make
-sudo make install
-```
 
 # to build the rtjam code
 ```

@@ -18,33 +18,32 @@
 ### Install nginx
 - sudo apt install nginx
 
+
+### Install fastcgi++ library
+this is kind of a hack so you don't have to build it on the system.  To build requires a ton of stuff. you have to get the so from the site, mv it to /usr/lib/arm.... then make a symlink to it  (this enables rtjam-box to run)
+- cd /usr/lib/arm-linux-gnueabihf
+- sudo wget localhost/pi/libfastcgipp.so
+- sudo ln -s libfastcgipp.so libfastcgipp.so.3
+
+### install wiring pi
+this is also kind of a hack to prevent from building on the local system.  rtjam-status required libwiringPi
+- cd /usr/lib/arm-linux-gnueabihf
+- sudo wget localhost/pi/libwiringPi.so.2.60
+- sudo ln -s libwiringPi.so.2.60 libwiringPi.so
+
+
 ### TODO: Document crontab that updates
 
 
 ## Script to run stuff
 
-runme.bash
-```
-sudo sh -c "echo performance > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor"
-jackd -dalsa -r48000 -n 2 -p64 -Chw:USB -Phw:USB &
-./rtjam-sound &
-./rtjam-box &
-```
+# TODO figure out how to install the stuff 
 
-service file for /etc/systemd/system (sudo systemctl restart rtjam.service)
-```
-[Unit]
-Description=rtjam service
-After=network.target
+Thinking maybe something like
 
-[Service]
-ExecStart=/usr/bin/bash runme.bash
-WorkingDirectory=/home/pi/rtjam
-StandardOutput=inherit
-StandardError=inherit
-Restart=always
-User=pi
-
-[Install]
-WantedBy=multi-user.target
 ```
+wget localhost/pi/installer.bash
+chmod +x installer.bash
+sudo ./installer.bash
+```
+I need to write installer.bash and put it on the server.  
