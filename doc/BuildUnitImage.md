@@ -108,10 +108,8 @@ cd ~/projects/rtjam
 make
 ```
 
-# TODO: This install needs to get tweaked.  Make make install or something...
-
-## Now install the app software 
-the next part will install the executables and the scripts needed to make them start.  ssh back into the box.
+## Now install the app software with make
+the next part will install the executables and the scripts needed to make them start. ssh back into the box. The scripts rely on the existence of /home/pi/rtjam.  Don't confuse this with /home/pi/projects/rtjam (location of the source code).  So logged in as pi, make sure you mkdir rtjam so there is a place for stuff to go.
 
 ### system control files
 systemctl is used to start/stop the rtjam pieces.  there are 4 parts.
@@ -120,19 +118,24 @@ systemctl is used to start/stop the rtjam pieces.  there are 4 parts.
 - rtjam-sound (processes the audio from jack and does the network stuff)
 - rtjam-status (controls the lights on the custom hardware)
 
-the four system service files are found [here](piRoot/etc/systemd/system) and need to be copied to /etc/systemd on the pi
+the four system service files are found [here](piRoot/etc/systemd/system) the make install-pi will copy those to the local system (/etc/systemd/system)
 
 ### update scripts and executables
-These files go into a directory called /home/pi/rtjam the directory name is important as it is referred to in the system service files above so if you don't put the files in the right spot, those service won't start!
-- cd (should put you into /home/pi)
-- mkdir rtjam
-- cd rtjam
-- copy the 3 scripts from [here](piRoot/hom/pi/rtjam) to the directory.  Chmod +x on them all so they are executable
-- chmod +x *.sh
+These files go into a directory called /home/pi/rtjam the directory name is important as it is referred to in the system service files above so if you don't put the files in the right spot, those service won't start!  The make install-pi will put files here.
+
+## make commands to install software
+Since the install has to run systemctl it needs to run as root (hence the sudo on the make commands)
+```
+# this will install the pi software on the local build machine
+sudo make install-pi
+
+# this will uninstall the pi software locally
+sudo make uninstall-pi
+```
 
 ### crontab entry to get new code
 
-there is a cron job that runs every 5 minutes (as root) to see if a software update has been asked for.  Add this line to the crontab of root by doing
+This step is only required if you want the unit to check for software updates from rtjam-nation.com/pi. There is a cron job that runs every 5 minutes (as root) to see if a software update has been asked for.  Add this line to the crontab of root by doing
 
 ```
 sudo crontab -e
@@ -142,11 +145,3 @@ and add this line
 */5 * * * * cd /home/pi/rtjam && /home/pi/rtjam/update-rtjam.bash
 ```
 
-
-# to build the rtjam code
-```
-cd ~/projects
-git clone --recurse-submodules https://github.com/mfvargo/rtjam.git
-cd rtjam
-make
-```
