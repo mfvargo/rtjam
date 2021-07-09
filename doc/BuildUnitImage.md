@@ -81,7 +81,12 @@ sudo cp ~/projects/rtjam/doc/piRoot/boot/config.txt /boot
 - make sure the pi user is in the "audio" group so it can do realtime (groups command)
 
 ```
-sudo apt install jackd2
+sudo apt install jackd2 libjack-dev
+```
+
+Now install the jack build library
+
+```
 sudo apt install libjack-dev
 ```
 
@@ -93,7 +98,7 @@ nginx is used to proxy to the rtjam-nation site and to enable the fastCGI to tal
 sudo apt install nginx
 sudo cp ~/projects/rtjam/doc/piRoot/etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/default
 sudo systemctl restart nginx
-- sudo systemctl enable nginx
+sudo systemctl enable nginx
 ```
 
 ## wiring Pi
