@@ -107,7 +107,7 @@ You have to build WiringPi to get the header files to build
 
 ```
 cd ~/projects
-git clone https://github.com/WiringPi/WiringPi.git
+git clone https://github.com/wbeebe/WiringPi.git
 cd WiringPi
 ./build
 ```
