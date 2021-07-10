@@ -37,10 +37,13 @@ void PluginRTJam::init()
   for (int i = 0; i < 2; i++)
   {
     m_filters[i].init();
+    m_filters[i].setByPass(true);
     m_effectChains[i].push(&m_filters[i]);
     m_distortions[i].init();
+    m_distortions[i].setByPass(true);
     m_effectChains[i].push(&m_distortions[i]);
     m_delays[i].init();
+    m_delays[i].setByPass(true);
     m_effectChains[i].push(&m_delays[i]);
     m_reverbs[i].init();
     m_effectChains[i].push(&m_reverbs[i]);
