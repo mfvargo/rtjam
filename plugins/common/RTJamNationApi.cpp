@@ -226,7 +226,7 @@ bool RTJamNationApi::checkLinkStatus()
     // The link might be up and have a hardware address, but we might not have a DHCP address yet
     if (m_lanIp.size() == 0)
     {
-      ERROR("No DHCP address yet: %d\n", m_lanIp.size());
+      ERROR("No DHCP address yet: %ld\n", m_lanIp.size());
       close(socId);
       return false;
     }

@@ -27,7 +27,7 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 LDLIBS := -lm -lstdc++ -lpthread -lcurl
 
-CPPFLAGS ?= $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP
+CPPFLAGS ?= $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP -Wno-psabi
 
 all:	$(TARGET)
 

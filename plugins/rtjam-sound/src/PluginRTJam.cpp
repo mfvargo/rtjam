@@ -34,18 +34,22 @@ PluginRTJam::~PluginRTJam()
 
 void PluginRTJam::init()
 {
-  m_channelOneEffects.push_back(&filters[0]);
-  m_channelOneEffects.push_back(&m_reverbs[0]);
-  // m_channelOneEffects.push_back(&m_delays[0]);
-  m_channelTwoEffects.push_back(&filters[1]);
-  m_channelTwoEffects.push_back(&m_reverbs[1]);
-  // m_channelTwoEffects.push_back(&m_delays[1]);
-  filters[0].init();
-  filters[1].init();
-  m_reverbs[0].init();
-  m_reverbs[1].init();
-  m_delays[0].init();
-  m_delays[1].init();
+  for (int i = 0; i < 2; i++)
+  {
+    m_filters[i].init();
+    m_filters[i].setByPass(true);
+    m_effectChains[i].push(&m_filters[i]);
+    m_distortions[i].init();
+    m_distortions[i].setByPass(true);
+    m_effectChains[i].push(&m_distortions[i]);
+    m_delays[i].init();
+    m_delays[i].setByPass(true);
+    m_effectChains[i].push(&m_delays[i]);
+    m_reverbs[i].init();
+    m_effectChains[i].push(&m_reverbs[i]);
+  }
+  // write the effect chain json data
+  syncConfigData();
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
@@ -55,18 +59,21 @@ void PluginRTJam::syncLevels()
   // m_levelData.unlock();
 }
 
+void PluginRTJam::syncConfigData()
+{
+  json config = json::array();
+  for (int i = 0; i < 2; i++)
+  {
+    char name[64];
+    sprintf(name, "channel_%d", i);
+    config.push_back(m_effectChains[0].getChainConfig(name));
+  }
+  sprintf(m_levelData.m_pJsonInfo, "%s", config.dump().c_str());
+}
+
 void PluginRTJam::paramFlush()
 {
   m_paramData.flush();
-}
-
-float PluginRTJam::dbToFloat(float value)
-{
-  if (value < -59.5)
-  {
-    return 0.0f;
-  }
-  return std::exp((value / 72.0f) * 72.0f / kAMP_DB);
 }
 
 void PluginRTJam::getParams()
@@ -93,10 +100,10 @@ void PluginRTJam::getParams()
     {
       m_param.fValue = -60.0;
     }
-    m_jamMixer.gains[m_param.param - paramChanGain1] = dbToFloat(m_param.fValue);
+    m_jamMixer.gains[m_param.param - paramChanGain1] = SignalBlock::dbToFloat(m_param.fValue);
     break;
   case paramMasterVol:
-    m_jamMixer.masterVol = dbToFloat(m_param.fValue);
+    m_jamMixer.masterVol = SignalBlock::dbToFloat(m_param.fValue);
     break;
   case paramReverbMix:
     // Legacy param when we just had one reverb
@@ -108,18 +115,21 @@ void PluginRTJam::getParams()
     disconnect();
     break;
   case paramHPFOn:
-    filters[0].setByPass(false);
-    filters[1].setByPass(false);
+    m_filters[0].setByPass(false);
+    m_filters[1].setByPass(false);
     break;
   case paramHPFOff:
-    filters[0].setByPass(true);
-    filters[1].setByPass(true);
+    m_filters[0].setByPass(true);
+    m_filters[1].setByPass(true);
     break;
   case paramReverbOne:
     m_reverbs[0].setMix(m_param.fValue);
     break;
   case paramReverbTwo:
     m_reverbs[1].setMix(m_param.fValue);
+    break;
+  case paramGetConfigJson:
+    syncConfigData();
     break;
   }
 }
@@ -142,51 +152,21 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
 {
   m_framecount += frames;
 
-  float oneBuffEven[frames];
-  float twoBuffEven[frames];
-  float oneBuffOdd[frames];
-  float twoBuffOdd[frames];
-
-  float *inBuff = oneBuffEven;
-  float *outBuff = oneBuffOdd;
-
+  // Setup itermediate buffer for processed inputs
   float *tempOut[2];
+  float oneBuffOut[frames];
+  float twoBuffOut[frames];
+  tempOut[0] = oneBuffOut;
+  tempOut[1] = twoBuffOut;
 
-  // Copy channel 1 into local buffer
-  memcpy(inBuff, inputs[0], frames * sizeof(float));
+  // run the effect chains
+  m_effectChains[0].process(inputs[0], oneBuffOut, frames);
+  m_effectChains[1].process(inputs[1], twoBuffOut, frames);
 
-  // Loop through all the effects for channel 1 and process them
-  for (int i = 0; i < m_channelOneEffects.size(); i++)
-  {
-    m_channelOneEffects[i]->process(inBuff, outBuff, frames);
-    // Now swap the pointers
-    float *temp = inBuff;
-    inBuff = outBuff;
-    outBuff = temp;
-  }
-  tempOut[0] = inBuff; // This is the last processed buffer for channel 1
-
-  inBuff = twoBuffEven;
-  outBuff = twoBuffOdd;
-
-  // Copy channel 2 into local buffer
-  memcpy(inBuff, inputs[1], frames * sizeof(float));
-
-  // Now loop through channel two effects and process them
-  for (int i = 0; i < m_channelTwoEffects.size(); i++)
-  {
-    m_channelTwoEffects[i]->process(inBuff, outBuff, frames);
-    // Now swap the pointers
-    float *temp = inBuff;
-    inBuff = outBuff;
-    outBuff = temp;
-  }
-  tempOut[1] = inBuff; // This is the last processed buffer
-
-  // At this point tempOut has the two input channels after processing. This
-  // Is what will send to the others
-
+  // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
+
+  // Send to the room
   m_jamSocket.sendPacket((const float **)tempOut, frames);
 
   // read any data from the network
