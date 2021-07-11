@@ -36,17 +36,7 @@ void PluginRTJam::init()
 {
   for (int i = 0; i < 2; i++)
   {
-    m_filters[i].init();
-    m_filters[i].setByPass(true);
-    m_effectChains[i].push(&m_filters[i]);
-    m_distortions[i].init();
-    m_distortions[i].setByPass(true);
-    m_effectChains[i].push(&m_distortions[i]);
-    m_delays[i].init();
-    m_delays[i].setByPass(true);
-    m_effectChains[i].push(&m_delays[i]);
-    m_reverbs[i].init();
-    m_effectChains[i].push(&m_reverbs[i]);
+    m_pedalBoards[i].init();
   }
   // write the effect chain json data
   syncConfigData();
@@ -66,7 +56,7 @@ void PluginRTJam::syncConfigData()
   {
     char name[64];
     sprintf(name, "channel_%d", i);
-    config.push_back(m_effectChains[0].getChainConfig(name));
+    config.push_back(m_pedalBoards[i].m_effectChain.getChainConfig(name, i));
   }
   sprintf(m_levelData.m_pJsonInfo, "%s", config.dump().c_str());
 }
@@ -115,22 +105,37 @@ void PluginRTJam::getParams()
     disconnect();
     break;
   case paramHPFOn:
-    m_filters[0].setByPass(false);
-    m_filters[1].setByPass(false);
+    // TODO, this is because the first effect is the LPF
+    m_pedalBoards[0].m_effectChain.getEffect(0)->setByPass(false);
+    m_pedalBoards[1].m_effectChain.getEffect(0)->setByPass(false);
     break;
   case paramHPFOff:
-    m_filters[0].setByPass(true);
-    m_filters[1].setByPass(true);
+    m_pedalBoards[0].m_effectChain.getEffect(0)->setByPass(true);
+    m_pedalBoards[1].m_effectChain.getEffect(0)->setByPass(true);
     break;
   case paramReverbOne:
-    m_reverbs[0].setMix(m_param.fValue);
     break;
   case paramReverbTwo:
-    m_reverbs[1].setMix(m_param.fValue);
     break;
   case paramGetConfigJson:
     syncConfigData();
     break;
+  case paramSetEffectConfig:
+    if ((m_param.iValue >= 0 && m_param.iValue < 2) &&
+        (m_param.iValue2 >= 0 && m_param.iValue2 < m_pedalBoards[m_param.iValue].m_effectChain.size()))
+    {
+      try
+      {
+        Effect *pEffect = m_pedalBoards[m_param.iValue].m_effectChain.getEffect(m_param.iValue2);
+        json config = pEffect->getConfig()["settings"];
+        config.merge_patch(json::parse(m_param.sValue));
+        pEffect->setConfig(config);
+      }
+      catch (...)
+      {
+        cerr << "failed to parse json!" << endl;
+      }
+    }
   }
 }
 
@@ -160,8 +165,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   tempOut[1] = twoBuffOut;
 
   // run the effect chains
-  m_effectChains[0].process(inputs[0], oneBuffOut, frames);
-  m_effectChains[1].process(inputs[1], twoBuffOut, frames);
+  m_pedalBoards[0].m_effectChain.process(inputs[0], oneBuffOut, frames);
+  m_pedalBoards[1].m_effectChain.process(inputs[1], twoBuffOut, frames);
 
   // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);

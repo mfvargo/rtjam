@@ -36,25 +36,39 @@ public:
     memcpy(output, inBuff, framesize * sizeof(float));
   };
 
-  json getChainConfig(std::string name)
+  json getChainConfig(std::string name, int channel)
   {
     json effects = json::array();
     for (int i = 0; i < m_chain.size(); i++)
     {
-      effects.push_back(m_chain[i]->getConfig());
+      json config = m_chain[i]->getConfig();
+      config["index"] = i;
+      effects.push_back(config);
     }
     json rval = {
         {"name", name},
+        {"channel", channel},
         {"effects", effects}};
     return rval;
-  }
+  };
+
+  int size()
+  {
+    return m_chain.size();
+  };
+
   void toggleEffect(int i)
   {
     if (i < m_chain.size())
     {
       m_chain[i]->setByPass(!m_chain[i]->getByPass());
     }
-  }
+  };
+
+  Effect *getEffect(int i)
+  {
+    return m_chain[i];
+  };
 
 private:
   std::vector<Effect *> m_chain;

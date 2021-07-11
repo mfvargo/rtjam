@@ -17,6 +17,8 @@ public:
     return config;
   };
 
+  virtual void setConfig(json config) = 0;
+
   void doProcess(const float *input, float *output, int framesize)
   {
     // check for bypass

@@ -34,6 +34,7 @@ enum RTJamParameters
   paramReverbOne,
   paramReverbTwo,
   paramGetConfigJson,
+  paramSetEffectConfig,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,
