@@ -13,16 +13,13 @@ class PedalBoard
 public:
   void init()
   {
+    m_hpfilter.init();
     m_distortion.init();
-    m_distortion.setByPass(true);
     m_delay.init();
-    m_delay.setByPass(true);
     m_reverb.init();
-    m_reverb.setByPass(true);
     m_tremelo.init();
-    m_tremelo.setByPass(true);
     m_toneStack.init();
-    m_toneStack.setByPass(true);
+    m_effectChain.push(&m_hpfilter);
     m_effectChain.push(&m_distortion);
     m_effectChain.push(&m_delay);
     m_effectChain.push(&m_reverb);
@@ -36,6 +33,7 @@ public:
   EffectChain m_effectChain;
 
 private:
+  HighPassFilter m_hpfilter;
   Distortion m_distortion;
   SigmaDelay m_delay;
   MonoVerb m_reverb;

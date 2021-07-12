@@ -25,4 +25,8 @@ public:
     }
     return std::exp((valueInDB / 72.0f) * 72.0f / 8.656170245f);
   }
+  static float FloatToDb(float value)
+  {
+    return (20 * std::log10(value));
+  }
 };

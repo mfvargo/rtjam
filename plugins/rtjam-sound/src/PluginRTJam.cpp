@@ -105,17 +105,16 @@ void PluginRTJam::getParams()
     disconnect();
     break;
   case paramHPFOn:
-    // TODO, this is because the first effect is the LPF
-    m_pedalBoards[0].m_effectChain.getEffect(0)->setByPass(false);
-    m_pedalBoards[1].m_effectChain.getEffect(0)->setByPass(false);
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramHPFOff:
-    m_pedalBoards[0].m_effectChain.getEffect(0)->setByPass(true);
-    m_pedalBoards[1].m_effectChain.getEffect(0)->setByPass(true);
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramReverbOne:
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramReverbTwo:
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramGetConfigJson:
     syncConfigData();
@@ -127,9 +126,12 @@ void PluginRTJam::getParams()
       try
       {
         Effect *pEffect = m_pedalBoards[m_param.iValue].m_effectChain.getEffect(m_param.iValue2);
-        json config = pEffect->getConfig()["settings"];
-        config.merge_patch(json::parse(m_param.sValue));
-        pEffect->setConfig(config);
+        cerr << json::parse(m_param.sValue).dump(2) << endl;
+        pEffect->setSettingValue(json::parse(m_param.sValue));
+      }
+      catch (json::exception &e)
+      {
+        cerr << e.what() << endl;
       }
       catch (...)
       {

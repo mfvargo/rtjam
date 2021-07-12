@@ -6,24 +6,24 @@
 class MonoVerb : public Effect
 {
 public:
-  json getConfig()
-  {
-    json config;
-    config["name"] = "Reverb";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["mix"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_mix}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    setMix(config["mix"]["value"]);
-  }
-
   void init() override
   {
-    m_mix = 0.0;
+    // Setup bass class stuff
+    Effect::init();
+    // What is this effects name?
+    m_name = "Reverb";
+
+    // Now setup the settings this effect can receive.
+    EffectSetting setting;
+    setting.init(
+        "mix",                    // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        1.0,                      // Max value
+        0.1,                      // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(0.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
     m_pReverb = new MVerb<float>;
     m_pReverb->setSampleRate(48000);
     m_pReverb->setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
@@ -35,12 +35,20 @@ public:
     m_pReverb->setParameter(MVerb<float>::GAIN, 1.0f);
     m_pReverb->setParameter(MVerb<float>::MIX, 0.0f);
     m_pReverb->setParameter(MVerb<float>::EARLYMIX, 0.5f);
+
+    loadFromConfig();
   };
 
-  void setMix(float value)
+  void loadFromConfig() override
   {
-    m_mix = value;
-    m_pReverb->setParameter(MVerb<float>::MIX, value);
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+    it = m_settingMap.find("depth");
+    if (it != m_settingMap.end())
+    {
+      m_mix = it->second.getFloatValue();
+    }
+    m_pReverb->setParameter(MVerb<float>::MIX, m_mix);
   }
 
   void process(const float *input, float *output, int frames) override

@@ -21,7 +21,7 @@ plugins: libs
 	$(MAKE) all -C plugins/server
 	$(MAKE) all -C plugins/nojack
 
-pi-embed: libs
+pi-embed:
 	$(MAKE) all -C plugins/rtjam-broadcast
 	$(MAKE) all -C plugins/rtjam-status
 	$(MAKE) all -C plugins/rtjam-sound

@@ -14,43 +14,60 @@ public:
     even,
   };
 
-  json getConfig()
-  {
-    json cliptypes = {
-        {"hard", 0},
-        {"soft", 1},
-        {"asymetric", 2},
-        {"even", 3},
-    };
-    json config;
-    config["name"] = "Distortion";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["gain"] = {{"type", "float"}, {"min", 0.0}, {"max", 60.0}, {"units", "linear"}, {"value", m_gain}};
-    config["settings"]["clipType"] = {{"type", "integer"}, {"min", ClipType::hard}, {"max", ClipType::even}, {"units", "selector"}, {"labels", cliptypes}, {"value", m_clipType}};
-    config["settings"]["lowPassFreq"] = {{"type", "float"}, {"min", 5.0}, {"max", 5000}, {"units", "Hz"}, {"value", m_lpfFreq}};
-    config["settings"]["hiPassFreq"] = {{"type", "float"}, {"min", 200.0}, {"max", 12000}, {"units", "Hz"}, {"value", m_hpfFreq}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    m_gain = config["gain"]["value"];
-    m_clipType = config["clipType"]["value"];
-    m_lpfFreq = config["lowPassFreq"]["value"];
-    m_hpfFreq = config["hiPassFreq"]["value"];
-    setupFilters();
-  };
-
   void init() override
   {
-    m_lpfFreq = 150;
-    m_hpfFreq = 5000;
-    m_gain = 1.0;
-    m_clipType = soft;
-    setupFilters();
+    // Setup base class stuff
+    Effect::init();
+    // What is this effects name?
+    m_name = "Distortion";
+
+    // Now setup the settings this effect can receive.
+    EffectSetting setting;
+    setting.init(
+        "gain",                   // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        60.0,                     // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(6.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    setting.init(
+        "clipType",             // Name
+        EffectSetting::intType, // Type of setting
+        ClipType::hard,         // Min value
+        ClipType::even,         // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setIntValue(ClipType::soft);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    // TODO: figure out how to make these programmable (tone knob?)
+    m_lpfFreq = 5000;
+    m_hpfFreq = 200;
+
+    loadFromConfig();
   };
 
+  void loadFromConfig() override
+  {
+    // Read the settings from the map and apply them to our copy of the data.
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+
+    it = m_settingMap.find("gain");
+    if (it != m_settingMap.end())
+    {
+      m_gain = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("clipType");
+    if (it != m_settingMap.end())
+    {
+      m_clipType = (ClipType)it->second.getIntValue();
+    }
+    setupFilters();
+  }
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)

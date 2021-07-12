@@ -41,7 +41,7 @@ public:
     json effects = json::array();
     for (int i = 0; i < m_chain.size(); i++)
     {
-      json config = m_chain[i]->getConfig();
+      json config = m_chain[i]->getSettings();
       config["index"] = i;
       effects.push_back(config);
     }
@@ -61,7 +61,10 @@ public:
   {
     if (i < m_chain.size())
     {
-      m_chain[i]->setByPass(!m_chain[i]->getByPass());
+      json setting;
+      setting["name"] = "bypass";
+      setting["value"] = !m_chain[i]->getByPass();
+      m_chain[i]->setSettingValue(setting);
     }
   };
 

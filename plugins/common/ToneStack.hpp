@@ -7,43 +7,72 @@
 class ToneStack : public Effect
 {
 public:
-  json getConfig()
-  {
-    // Return the json for this block
-    json config;
-    config["name"] = "Tone Stack";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["treble"] = {{"type", "float"}, {"min", -10.0}, {"max", 10.0}, {"units", "linear"}, {"value", m_treble}};
-    config["settings"]["mid"] = {{"type", "float"}, {"min", -10.0}, {"max", 10.0}, {"units", "linear"}, {"value", m_mid}};
-    config["settings"]["bass"] = {{"type", "float"}, {"min", -10.0}, {"max", 10.0}, {"units", "linear"}, {"value", m_bass}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    m_treble = config["treble"]["value"];
-    m_mid = config["mid"]["value"];
-    m_bass = config["bass"]["value"];
-    setParams();
-  }
-
   void init() override
   {
-    m_treble = 0.0;
-    m_mid = 0.0;
-    m_bass = 0.0;
-    setParams();
+    Effect::init();
+    m_name = "Tone Stack";
+    EffectSetting setting;
+    setting.init(
+        "treble",                 // Name
+        EffectSetting::floatType, // Type of setting
+        -10.0,                    // Min value
+        10.0,                     // Max value
+        0.25,                     // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    setting.init(
+        "mid",                    // Name
+        EffectSetting::floatType, // Type of setting
+        -10.0,                    // Min value
+        10.0,                     // Max value
+        0.25,                     // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    setting.init(
+        "bass",                   // Name
+        EffectSetting::floatType, // Type of setting
+        -10.0,                    // Min value
+        10.0,                     // Max value
+        0.25,                     // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    loadFromConfig();
   };
+
+  void loadFromConfig() override
+  {
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+
+    it = m_settingMap.find("treble");
+    if (it != m_settingMap.end())
+    {
+      m_treble = it->second.getFloatValue();
+    }
+    it = m_settingMap.find("mid");
+    if (it != m_settingMap.end())
+    {
+      m_mid = it->second.getFloatValue();
+    }
+    it = m_settingMap.find("bass");
+    if (it != m_settingMap.end())
+    {
+      m_bass = it->second.getFloatValue();
+    }
+    setParams();
+  }
 
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)
     {
-      output[i] = 0.3333 * input[i];
-      output[i] += m_bass / 10 * m_fBass.getSample(input[i]);
-      output[i] += m_mid / 10 * m_fMid.getSample(input[i]);
-      output[i] += m_treble / 10 * m_fHigh.getSample(input[i]);
+      output[i] += m_bass * m_fBass.getSample(input[i]);
+      output[i] += m_mid * m_fMid.getSample(input[i]);
+      output[i] += m_treble * m_fHigh.getSample(input[i]);
     }
   };
 

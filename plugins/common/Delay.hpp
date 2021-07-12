@@ -9,32 +9,47 @@
 class SigmaDelay : public Effect
 {
 public:
-  json getConfig()
-  {
-    // Return the json for this block
-
-    json config;
-    config["name"] = "Delay";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["duration"] = {{"type", "float"}, {"min", 0.0}, {"max", 1000.0}, {"units", "msec"}, {"value", m_currentDelayTime}};
-    config["settings"]["feedback"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_feedback}};
-    config["settings"]["level"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_level}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    m_currentDelayTime = config["duration"]["value"];
-    m_feedback = config["feedback"]["value"];
-    m_level = config["level"]["value"];
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate / 1000;
-  }
-
   void init() override
   {
+    // Setup base class stuff (bypass etc)
+    Effect::init();
+    // What are we?
+    m_name = "Delay";
+
+    // What settings can we receive?
+    EffectSetting setting;
+    setting.init(
+        "duration",               // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        800.0,                    // Max value
+        0.1,                      // Step Size
+        EffectSetting::msec);
+    setting.setFloatValue(250.0); // 1/8 note at 120BPM = 250msec.
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "feedback",               // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        1.0,                      // Max value
+        0.1,                      // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(0.1);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "level",                  // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        1.0,                      // Max value
+        0.1,                      // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(0.5);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    // TODO: Refactor signal blocks init
     // Do some init stuff
-    // setByPass(true);
     json config = {
         {"shape", LowFreqOsc::WaveShape::sineWave},
         {"freq", 1.40},
@@ -42,12 +57,39 @@ public:
     };
     m_osc.setConfig(config);
     // m_osc.init(LowFreqOsc::WaveShape::sineWave, 1.406, -62, 48000);
-    m_currentDelayTime = 500.0;                                                                          // msec
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate / 1000; // max delay based on depth
     m_writePointerIndex = 0;
     m_feedback = 0.25;
-    m_level = 1.0;
+
+    loadFromConfig();
   };
+
+  void loadFromConfig() override
+  {
+    // Read the settings from the map and apply them to our copy of the data.
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+
+    it = m_settingMap.find("duration");
+    if (it != m_settingMap.end())
+    {
+      m_currentDelayTime = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("feedback");
+    if (it != m_settingMap.end())
+    {
+      m_feedback = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("level");
+    if (it != m_settingMap.end())
+    {
+      m_level = it->second.getFloatValue();
+    }
+
+    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
+  }
+
   void process(const float *input, float *output, int framesize) override
   {
     // Implement the delay

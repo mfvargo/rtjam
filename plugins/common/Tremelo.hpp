@@ -7,31 +7,54 @@
 class Tremelo : public Effect
 {
 public:
-  json getConfig()
-  {
-    // Return the json for this block
-    json config;
-    config["name"] = "Tremelo";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["depth"] = {{"type", "float"}, {"min", -40.0}, {"max", -3.0}, {"units", "dB"}, {"value", m_depth}};
-    config["settings"]["rate"] = {{"type", "float"}, {"min", 0.0}, {"max", 10.0}, {"units", "linear"}, {"value", m_rate}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    m_depth = config["depth"]["value"];
-    m_rate = config["rate"]["value"];
-    setParams();
-  }
-
   void init() override
   {
-    m_depth = 0.4;
-    m_rate = 1.2;
-    setParams();
+    // Setup base class stuff
+    Effect::init();
+    // What is this effects name?
+    m_name = "Tremelo";
+
+    // Now setup the settings this effect can receive.
+    EffectSetting setting;
+    setting.init(
+        "depth",                  // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        1.0,                      // Max value
+        0.1,                      // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(0.4);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    setting.init(
+        "rate",                   // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        100.0,                    // Max value
+        0.1,                      // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(1.2);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
   };
+
+  void loadFromConfig() override
+  {
+    // Read the settings from the map and apply them to our copy of the data.
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+
+    it = m_settingMap.find("depth");
+    if (it != m_settingMap.end())
+    {
+      m_depth = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("rate");
+    if (it != m_settingMap.end())
+    {
+      m_rate = it->second.getFloatValue();
+    }
+    setParams();
+  }
 
   void process(const float *input, float *output, int framesize) override
   {
