@@ -64,7 +64,7 @@ public:
       fValue = setting["value"];
       if (fValue < m_min || fValue > m_max)
         return false;
-      // m_setting["value"] = fValue;
+      m_setting["value"] = fValue;
       break;
     case intType:
       iValue = setting["value"];
