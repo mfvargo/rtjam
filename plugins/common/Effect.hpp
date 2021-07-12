@@ -13,6 +13,7 @@ public:
   // own settings that they can receive.
   virtual void init()
   {
+    // all effects have a bypass setting they can receive.
     EffectSetting bypass;
     bypass.init(
         "bypass",                   // Name
@@ -24,6 +25,7 @@ public:
     bypass.setBoolValue(true);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(bypass.name(), bypass));
   };
+  // This function will return all the settings this effect has as json.
   json getSettings()
   {
     json rval = {{"name", m_name}, {"settings", json::object()}};
@@ -33,20 +35,24 @@ public:
     }
     return rval;
   }
+  // This function will set the value of a specific setting given some json
+  // Json must be in the form {"name":"settingName", "value": xxx }
   bool setSettingValue(json setting)
   {
+    // find the setting with this name.
     std::map<std::string, EffectSetting>::iterator it = m_settingMap.find(setting["name"]);
     if (it == m_settingMap.end())
     {
       // No setting found with that name!
       return false;
     }
-    // set the setting
+    // set the value on the found EffectSetting.  This will check min/max values etc.
     if (!it->second.setFromJson(setting))
     {
-      // This means the setting was out of range
+      // This means the setting was invalid
       return false;
     }
+    // Now reload the parameters for the effect from the settings.
     loadFromConfig();
     return true;
   }
@@ -54,6 +60,7 @@ public:
   // Effects must implement.  They should load their variables from the setting map
   virtual void loadFromConfig()
   {
+    // load my bypass setting
     std::map<std::string, EffectSetting>::iterator it = m_settingMap.find("bypass");
     if (it != m_settingMap.end())
     {
