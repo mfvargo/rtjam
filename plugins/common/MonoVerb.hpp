@@ -43,7 +43,7 @@ public:
   {
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
-    it = m_settingMap.find("depth");
+    it = m_settingMap.find("mix");
     if (it != m_settingMap.end())
     {
       m_mix = it->second.getFloatValue();

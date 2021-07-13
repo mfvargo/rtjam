@@ -21,9 +21,9 @@ public:
     setting.init(
         "duration",               // Name
         EffectSetting::floatType, // Type of setting
-        0.0,                      // Min value
-        800.0,                    // Max value
-        0.1,                      // Step Size
+        5,                        // Min value
+        500.0,                    // Max value
+        5,                        // Step Size
         EffectSetting::msec);
     setting.setFloatValue(250.0); // 1/8 note at 120BPM = 250msec.
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
@@ -48,10 +48,28 @@ public:
     setting.setFloatValue(0.5);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
+    setting.init(
+        "color",                  // Name
+        EffectSetting::floatType, // Type of setting
+        -60.0,                    // Min value
+        -25,                      // Max value
+        1,                        // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(-42);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "rate",                   // Name
+        EffectSetting::floatType, // Type of setting
+        0.1,                      // Min value
+        5.0,                      // Max value
+        0.1,                      // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(1.4);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
     // Do some init stuff
-    m_osc.init(LowFreqOsc::WaveShape::sineWave, 1.40, SignalBlock::dbToFloat(LFO_GAIN), 48000);
     m_writePointerIndex = 0;
-    m_feedback = 0.25;
 
     loadFromConfig();
   };
@@ -80,6 +98,19 @@ public:
       m_level = it->second.getFloatValue();
     }
 
+    it = m_settingMap.find("color");
+    if (it != m_settingMap.end())
+    {
+      m_color = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("rate");
+    if (it != m_settingMap.end())
+    {
+      m_rate = it->second.getFloatValue();
+    }
+
+    m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_color, 48000);
     m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
   }
 
@@ -94,7 +125,7 @@ public:
 
       // Use the low freq osc to modulate the delay
       int readIndex = m_writePointerIndex -
-                      ((1 + m_osc.getSample(input[sample])) * m_currentDelayTime * m_sampleRate / 1000);
+                      ((1 + m_osc.getSample(input[sample])) * m_currentDelayTime * m_sampleRate);
 
       if (readIndex < 0)
       {
@@ -120,4 +151,6 @@ private:
   int m_writePointerIndex;
   float m_feedback;
   float m_level;
+  float m_color;
+  float m_rate;
 };

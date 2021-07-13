@@ -24,10 +24,10 @@ public:
     // Now setup the settings this effect can receive.
     EffectSetting setting;
     setting.init(
-        "gain",                   // Name
+        "drive",                  // Name
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
-        60.0,                     // Max value
+        40.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(6.0);
@@ -40,6 +40,15 @@ public:
         1,                      // Step Size
         EffectSetting::selector);
     setting.setIntValue(ClipType::soft);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    setting.init(
+        "level",                  // Name
+        EffectSetting::floatType, // Type of setting
+        -30.0,                    // Min value
+        10.0,                     // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
     // TODO: figure out how to make these programmable (tone knob?)
@@ -55,7 +64,7 @@ public:
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("gain");
+    it = m_settingMap.find("drive");
     if (it != m_settingMap.end())
     {
       m_gain = it->second.getFloatValue();
@@ -66,16 +75,24 @@ public:
     {
       m_clipType = (ClipType)it->second.getIntValue();
     }
+
+    it = m_settingMap.find("level");
+    if (it != m_settingMap.end())
+    {
+      m_level = it->second.getFloatValue();
+    }
+
     setupFilters();
   }
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)
     {
-      float value = m_hpf.getSample(input[i]);
-      value = clipSample(value * m_gain);
+      float value = clipSample(input[i] * m_gain) * m_level;
+      value = m_lpf.getSample(value);
+      value = m_hpf.getSample(value);
       // value = distortionAlgorithm(value);
-      output[i] = m_lpf.getSample(value);
+      output[i] = value;
     }
   };
 
@@ -87,6 +104,7 @@ private:
 
   // Parameters
   float m_gain;        // gain before clip function
+  float m_level;       // Overall level
   ClipType m_clipType; // what kind of clipping funciton
   float m_lpfFreq;     // frequency of the final lpf  (tone knob)
   float m_hpfFreq;     // frequency of the hpf before effect (is this a knob?)
@@ -94,8 +112,8 @@ private:
   void setupFilters()
   {
     // Setup the biquad filter for the upsampled data
-    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_lpfFreq, 1.0, 1.0, 48000);
-    m_lpf.init(BiQuadFilter::FilterType::LowPass, m_hpfFreq, 1.0, 1.0, 48000);
+    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_hpfFreq, 1.0, 1.0, 48000);
+    m_lpf.init(BiQuadFilter::FilterType::LowPass, m_lpfFreq, 1.0, 1.0, 48000);
     m_upsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 48000);
     m_downsample.init(BiQuadFilter::FilterType::HighPass, 48000, 1.0, 1.0, 8 * 48000);
   };

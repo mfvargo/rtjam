@@ -31,7 +31,7 @@ public:
     setting.setFloatValue(0.0);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
     setting.init(
-        "bass",                   // Name
+        "low",                    // Name
         EffectSetting::floatType, // Type of setting
         -10.0,                    // Min value
         10.0,                     // Max value
@@ -58,7 +58,7 @@ public:
     {
       m_mid = it->second.getFloatValue();
     }
-    it = m_settingMap.find("bass");
+    it = m_settingMap.find("low");
     if (it != m_settingMap.end())
     {
       m_bass = it->second.getFloatValue();
@@ -70,7 +70,7 @@ public:
   {
     for (int i = 0; i < framesize; i++)
     {
-      output[i] += m_bass * m_fBass.getSample(input[i]);
+      output[i] = m_bass * m_fBass.getSample(input[i]);
       output[i] += m_mid * m_fMid.getSample(input[i]);
       output[i] += m_treble * m_fHigh.getSample(input[i]);
     }
