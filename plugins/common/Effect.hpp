@@ -3,8 +3,11 @@
 #include "json.hpp"
 #include <map>
 #include "EffectSetting.hpp"
+#include <iostream>
 
 using json = nlohmann::json;
+
+using namespace std;
 
 class Effect
 {
@@ -28,10 +31,10 @@ public:
   // This function will return all the settings this effect has as json.
   json getSettings()
   {
-    json rval = {{"name", m_name}, {"settings", json::object()}};
+    json rval = {{"name", m_name}, {"settings", json::array()}};
     for (std::map<std::string, EffectSetting>::iterator it = m_settingMap.begin(); it != m_settingMap.end(); ++it)
     {
-      rval["settings"][it->first] = it->second.toJson();
+      rval["settings"].push_back(it->second.toJson());
     }
     return rval;
   }
@@ -44,12 +47,13 @@ public:
     if (it == m_settingMap.end())
     {
       // No setting found with that name!
+      cerr << setting["name"] << " Setting not found" << endl;
       return false;
     }
     // set the value on the found EffectSetting.  This will check min/max values etc.
     if (!it->second.setFromJson(setting))
     {
-      // This means the setting was invalid
+      cerr << setting["value"] << " Value out of range" << endl;
       return false;
     }
     // Now reload the parameters for the effect from the settings.

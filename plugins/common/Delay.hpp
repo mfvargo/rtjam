@@ -48,15 +48,8 @@ public:
     setting.setFloatValue(0.5);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
-    // TODO: Refactor signal blocks init
     // Do some init stuff
-    json config = {
-        {"shape", LowFreqOsc::WaveShape::sineWave},
-        {"freq", 1.40},
-        {"amplitude", LFO_GAIN},
-    };
-    m_osc.setConfig(config);
-    // m_osc.init(LowFreqOsc::WaveShape::sineWave, 1.406, -62, 48000);
+    m_osc.init(LowFreqOsc::WaveShape::sineWave, 1.40, SignalBlock::dbToFloat(LFO_GAIN), 48000);
     m_writePointerIndex = 0;
     m_feedback = 0.25;
 
@@ -95,7 +88,6 @@ public:
     // Implement the delay
     for (int sample = 0; sample < framesize; sample++)
     {
-      // output[sample] = m_osc.getSample(input[sample]);
       // pointer arithmetic for buffer wrap
       m_writePointerIndex++;
       m_writePointerIndex %= m_bufferDepth;

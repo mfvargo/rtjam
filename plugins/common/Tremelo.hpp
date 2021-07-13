@@ -29,7 +29,7 @@ public:
         "rate",                   // Name
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
-        100.0,                    // Max value
+        8.0,                      // Max value
         0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(1.2);

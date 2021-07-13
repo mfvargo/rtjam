@@ -44,6 +44,7 @@ public:
   json toJson()
   {
     return {
+        {"name", m_name},
         {"value", m_setting["value"]},
         {"min", m_min},
         {"max", m_max},
@@ -73,7 +74,7 @@ public:
       m_setting["value"] = iValue;
       break;
     case booleanType:
-      m_setting["value"] = (setting["value"] != 0);
+      m_setting["value"] = setting["value"];
       break;
     }
     return true;
