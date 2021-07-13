@@ -111,7 +111,7 @@ public:
     }
 
     m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_color, 48000);
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
+    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_color)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
   }
 
   void process(const float *input, float *output, int framesize) override
