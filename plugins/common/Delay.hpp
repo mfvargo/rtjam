@@ -49,7 +49,7 @@ public:
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
     setting.init(
-        "color",                  // Name
+        "drift",                  // Name
         EffectSetting::floatType, // Type of setting
         -60.0,                    // Min value
         -25,                      // Max value
@@ -98,7 +98,7 @@ public:
       m_level = it->second.getFloatValue();
     }
 
-    it = m_settingMap.find("color");
+    it = m_settingMap.find("drift");
     if (it != m_settingMap.end())
     {
       m_color = it->second.getFloatValue();
