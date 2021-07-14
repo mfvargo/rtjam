@@ -12,6 +12,7 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
+	./src/CodecControl.cpp\
 	./src/StatusLight.cpp \
 	../common/LightData.cpp \
 	../common/SharedMemory.cpp \

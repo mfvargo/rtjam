@@ -18,15 +18,14 @@ void updateVolumes(void);
   
 private:
 
-// TLV320AIC3101 Codec IC register setting for RPIJamIO hardware 
-#define TLV320AIC3101_ADDRESS   0x18  
+    // TLV320AIC3101 Codec IC register setting for RPIJamIO hardware 
+    static const char s_TLV320AIC3101_ADD = 0x18;  
 
-// ADS7994 4 channel ADC Address
-#define ADS7991_ADDRESS 0x28
+    // ADS7994 4 channel ADC Address
+    static const char s_ADS7991_ADD = 0x28;
 
-// pot filter coefficient 
-#define ALPHA 0.3
-    static const int s_alpha = 0.3;
+    // pot filter coefficient 
+    float s_alpha = 0.3;
 
     int fd;     // I2C device address handle
     // DFM TODO int m_fd;     // I2C device address handle
