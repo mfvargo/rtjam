@@ -27,11 +27,14 @@ public:
     // Loop through all the effects for channel 1 and process them
     for (int i = 0; i < m_chain.size(); i++)
     {
-      m_chain[i]->doProcess(inBuff, outBuff, framesize);
-      // Now swap the pointers
-      float *temp = inBuff;
-      inBuff = outBuff;
-      outBuff = temp;
+      if (!m_chain[i]->getByPass())
+      {
+        m_chain[i]->doProcess(inBuff, outBuff, framesize);
+        // Now swap the pointers
+        float *temp = inBuff;
+        inBuff = outBuff;
+        outBuff = temp;
+      }
     }
     memcpy(output, inBuff, framesize * sizeof(float));
   };
