@@ -3,7 +3,7 @@
 #include "Effect.hpp"
 #include "LowFreqOsc.hpp"
 
-#define DELAY_BUFFER_SIZE 48000
+#define DELAY_BUFFER_SIZE 96000
 #define LFO_GAIN -42.0
 
 class SigmaDelay : public Effect
