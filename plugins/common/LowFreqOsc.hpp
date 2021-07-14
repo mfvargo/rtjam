@@ -17,7 +17,7 @@ public:
     m_waveShape = shape;
     m_frequency = freq;
     m_phaseIncrement = 2 * M_PI * freq / sampleRate;
-    m_amplitude = dbToFloat(amplitude);
+    m_amplitude = amplitude;
     m_sampleRate = sampleRate;
     m_currentPhase = 0;
   };

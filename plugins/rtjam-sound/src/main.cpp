@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
     PluginRTJam pluginRTJam;
 
     // This hack is to give jack a chance to come up first.
-    sleep(3);
+    sleep(2);
 
     /* open a client connection to the JACK server */
 
