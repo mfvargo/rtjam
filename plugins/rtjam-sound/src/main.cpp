@@ -12,7 +12,7 @@
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
-jack_client_t *client;
+jack_client_t *client = NULL;
 
 static void signal_handler(int sig)
 {
@@ -57,30 +57,24 @@ int main(int argc, char *argv[])
     int i;
     const char **ports;
     const char *client_name = "rtjam";
-    const char *server_name = NULL;
-    jack_options_t options = JackNullOption;
+    jack_options_t options = JackNoStartServer;
     jack_status_t status;
 
     PluginRTJam pluginRTJam;
+    /* init shared memory threads */
+    pluginRTJam.init();
 
-    // This hack is to give jack a chance to come up first.
-    sleep(3);
-
-    /* open a client connection to the JACK server */
-
-    client = jack_client_open(client_name, options, &status, server_name);
-    if (client == NULL)
+    // loop while trying to connect to jack.  If jack is not running this will just keep looping
+    // until it starts.
+    while (client == NULL)
     {
-        fprintf(stderr, "jack_client_open() failed, status = 0x%2.0x\n", status);
-        if (status & JackServerFailed)
+        /* open a client connection to the JACK server */
+        client = jack_client_open(client_name, options, &status);
+        if (client == NULL)
         {
-            fprintf(stderr, "Unable to connect to JACK server\n");
+            fprintf(stderr, "jack_client_open() failed, status = 0x%2.0x\n", status);
         }
-        exit(1);
-    }
-    if (status & JackServerStarted)
-    {
-        fprintf(stderr, "JACK server started\n");
+        sleep(1);
     }
     if (status & JackNameNotUnique)
     {
@@ -110,15 +104,8 @@ int main(int argc, char *argv[])
         }
     }
 
-    /* init shared memory threads */
-    pluginRTJam.init();
-
-    /* Fire up the server connection */
-    // pluginRTJam.connect("music.basscleftech.com", 7892, 2335);
-
     /* Tell the JACK server that we are ready to roll.  Our
      * process() callback will start running now. */
-
     if (jack_activate(client))
     {
         fprintf(stderr, "cannot activate client");
