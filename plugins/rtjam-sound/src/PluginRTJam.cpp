@@ -10,6 +10,10 @@
 
 static const float kAMP_DB = 8.656170245f;
 
+string BoxAPI::s_token = "";
+bool isRunning = true;
+LevelData BoxAPI::s_levelData;
+
 void paramFetch(PluginRTJam *pJamPlugin)
 {
   pJamPlugin->paramFlush();
@@ -19,8 +23,16 @@ void paramFetch(PluginRTJam *pJamPlugin)
   }
 }
 
-string BoxAPI::s_token = "";
-bool isRunning = true;
+int fastCGIStuff()
+{
+  Fastcgipp::Manager<BoxAPI> manager;
+  manager.setupSignals();
+  manager.listen("/tmp/rtjambox.sock", 0666);
+  manager.start();
+  manager.join();
+  isRunning = false;
+  return 0;
+}
 
 int jamNationStuff()
 {
@@ -118,7 +130,8 @@ void PluginRTJam::init()
   // write the effect chain json data
   syncConfigData();
   m_threads.push_back(std::thread(paramFetch, this));
-  m_threads.push_back(thread(jamNationStuff));
+  m_threads.push_back(std::thread(jamNationStuff));
+  m_threads.push_back(std::thread(fastCGIStuff));
 }
 
 void PluginRTJam::syncLevels()
