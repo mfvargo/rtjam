@@ -18,14 +18,12 @@ libs:
 
 plugins: libs
 	$(MAKE) all -C plugins/RTJam
-	$(MAKE) all -C plugins/server
-	$(MAKE) all -C plugins/nojack
 
-pi-embed: libs
+pi-embed:
+	mkdir -p bin
 	$(MAKE) all -C plugins/rtjam-broadcast
 	$(MAKE) all -C plugins/rtjam-status
 	$(MAKE) all -C plugins/rtjam-sound
-	$(MAKE) all -C plugins/rtjam-box
 	$(MAKE) all -C plugins/testHarness
 
 gitversion:
@@ -55,20 +53,11 @@ clean:
 	$(MAKE) clean -C dpf/dgl
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	$(MAKE) clean -C plugins/RTJam
-	$(MAKE) clean -C plugins/server
-	$(MAKE) clean -C plugins/nojack
 	$(MAKE) clean -C plugins/rtjam-broadcast
 	$(MAKE) clean -C plugins/rtjam-status
-	$(MAKE) clean -C plugins/rtjam-sound
 	$(MAKE) clean -C plugins/rtjam-box
 	$(MAKE) clean -C plugins/testHarness
 	rm -rf bin build
-
-install: all
-	$(MAKE) install -C plugins/RTJam
-
-install-user: all
-	$(MAKE) install-user -C plugins/RTJam
 
 # this will install code on the local raspberry pi this build is on
 install-pi: pi-embed
@@ -107,10 +96,6 @@ deploy-pi: all
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-box ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/version.txt ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
-
-deploy-mac:
-	zip -r bin/rtjam.vst.zip bin/rtjam.vst
-	scp bin/rtjam.vst.zip  pi@music.basscleftech.com:/home/pi/www/html/mac
 
 deploy-linux:
 	cp bin/rtjam ~/bin
