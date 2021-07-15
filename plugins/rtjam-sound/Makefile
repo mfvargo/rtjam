@@ -20,6 +20,8 @@ SRCS = \
 	../common/ChannelMap.cpp \
 	../common/SharedMemory.cpp \
 	../common/MessageQueue.cpp \
+	../common/Settings.cpp \
+	../common/RTJamNationApi.cpp \
 	../common/LevelData.cpp \
 	../common/ParamData.cpp \
 	../common/LightData.cpp \
