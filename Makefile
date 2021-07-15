@@ -55,7 +55,6 @@ clean:
 	$(MAKE) clean -C plugins/RTJam
 	$(MAKE) clean -C plugins/rtjam-broadcast
 	$(MAKE) clean -C plugins/rtjam-status
-	$(MAKE) clean -C plugins/rtjam-box
 	$(MAKE) clean -C plugins/testHarness
 	rm -rf bin build
 
@@ -65,18 +64,15 @@ install-pi: pi-embed
 	cp doc/piRoot/home/pi/rtjam/* /home/pi/rtjam
 	chmod +x /home/pi/rtjam/*.bash
 	cp bin/rtjam-sound /home/pi/rtjam
-	cp bin/rtjam-box /home/pi/rtjam
 	cp bin/rtjam-status /home/pi/rtjam
 	systemctl daemon-reload
 	systemctl restart rtjam-jack
 	systemctl restart rtjam-sound
-	systemctl restart rtjam-box
 	systemctl restart rtjam-status
 
 stop-pi:
 	systemctl stop rtjam-jack
 	systemctl stop rtjam-sound
-	systemctl stop rtjam-box
 	systemctl stop rtjam-status
 
 uninstall-pi: stop-pi
@@ -93,7 +89,6 @@ deploy-pi: all
 #	scp -i ~/.ssh/rtjam.cer bin/rtjam ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-status ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-sound ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
-	scp -i ~/.ssh/rtjam.cer bin/rtjam-box ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/version.txt ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 
