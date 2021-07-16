@@ -19,7 +19,6 @@ public:
   void syncLevels();
   void syncConfigData();
   void run(const float **inputs, float **outputs, uint32_t frames);
-  void paramFlush();
   void getParams();
   void connect(const char *host, int port, uint32_t id);
   void disconnect();
@@ -32,7 +31,6 @@ private:
   JamNetStuff::StreamTimeStats leftInput;
   JamNetStuff::StreamTimeStats rightInput;
   float *m_outputs[NUM_OUTPUTS];
-  ParamData m_paramData;
   RTJamParam m_param;
   LightData m_lightData;
   uint64_t m_framecount;

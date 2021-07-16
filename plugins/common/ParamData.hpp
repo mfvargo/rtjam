@@ -1,5 +1,4 @@
-#ifndef PARAMDATA_RTJAM_HPP
-#define PARAMDATA_RTJAM_HPP
+#pragma once
 
 #include "JamNetStuff.hpp"
 #include "MessageQueue.hpp"
@@ -53,19 +52,3 @@ struct RTJamParam
   float fValue;
   char sValue[1024];
 };
-
-class ParamData
-{
-public:
-  ParamData();
-  ~ParamData();
-
-  void flush();
-  void send(RTJamParam *param);
-  void receive(RTJamParam *param);
-
-private:
-  CMessageQueue m_queue;
-};
-
-#endif

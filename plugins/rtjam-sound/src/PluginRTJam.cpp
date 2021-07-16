@@ -13,13 +13,20 @@ static const float kAMP_DB = 8.656170245f;
 string BoxAPI::s_token = "";
 bool isRunning = true;
 LevelData BoxAPI::s_levelData;
+ParamQueue<RTJamParam> BoxAPI::s_paramQueue;
 
 void paramFetch(PluginRTJam *pJamPlugin)
 {
-  pJamPlugin->paramFlush();
   while (1)
   {
-    pJamPlugin->getParams();
+    if (BoxAPI::s_paramQueue.empty())
+    {
+      std::this_thread::sleep_for(std::chrono::microseconds(2000));
+    }
+    else
+    {
+      pJamPlugin->getParams();
+    }
   }
 }
 
@@ -142,15 +149,11 @@ void PluginRTJam::syncConfigData()
   sprintf(BoxAPI::s_levelData.m_pJsonInfo, "%s", config.dump().c_str());
 }
 
-void PluginRTJam::paramFlush()
-{
-  m_paramData.flush();
-}
-
 void PluginRTJam::getParams()
 {
-  m_paramData.receive(&m_param);
+  m_param = BoxAPI::s_paramQueue.dequeue();
   printf("received param %d: %s, %f, %d, %d\n", m_param.param, m_param.sValue, m_param.fValue, m_param.iValue, m_param.iValue2);
+
   switch (m_param.param)
   {
   case paramChanGain1:

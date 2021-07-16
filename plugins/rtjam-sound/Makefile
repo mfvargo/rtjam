@@ -22,7 +22,6 @@ SRCS = \
 	../common/MessageQueue.cpp \
 	../common/Settings.cpp \
 	../common/RTJamNationApi.cpp \
-	../common/ParamData.cpp \
 	../common/LightData.cpp \
 
 

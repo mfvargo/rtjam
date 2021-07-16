@@ -2,6 +2,7 @@
 
 #include "LevelData.hpp"
 #include "ParamData.hpp"
+#include "ParamQueue.hpp"
 #include "json.hpp"
 #include <fastcgi++/request.hpp>
 #include <fastcgi++/manager.hpp>
@@ -19,6 +20,7 @@ public:
     }
     static string s_token;
     static LevelData s_levelData;
+    static ParamQueue<RTJamParam> s_paramQueue;
 
 private:
     RTJamLevels m_jamLevels;
@@ -139,9 +141,7 @@ private:
         else
         {
             // This is a sound engine parameter
-            ParamData paramData;
-            paramData.flush();
-            paramData.send(&param);
+            s_paramQueue.enqueue(param);
             out << "OK";
             // getParamForm();
         }
