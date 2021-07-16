@@ -18,9 +18,9 @@ public:
     {
     }
     static string s_token;
+    static LevelData s_levelData;
 
 private:
-    static LevelData s_levelData;
     RTJamLevels m_jamLevels;
 
     void doGet()
@@ -149,18 +149,19 @@ private:
 
     string execMyCommand(string cmd)
     {
-        array<char, 128> buffer;
-        string result;
-        unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
-        if (!pipe)
-        {
-            throw std::runtime_error("popen() failed!");
-        }
-        while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
-        {
-            result += buffer.data();
-        }
-        return result;
+        return "bob";
+        // array<char, 128> buffer;
+        // string result;
+        // unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+        // if (!pipe)
+        // {
+        //     throw std::runtime_error("popen() failed!");
+        // }
+        // while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+        // {
+        //     result += buffer.data();
+        // }
+        // return result;
     }
 
     void getParamForm()

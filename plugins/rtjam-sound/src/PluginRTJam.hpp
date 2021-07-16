@@ -40,7 +40,6 @@ private:
   JamNetStuff::StreamTimeStats leftInput;
   JamNetStuff::StreamTimeStats rightInput;
   float *m_outputs[NUM_OUTPUTS];
-  LevelData m_levelData;
   ParamData m_paramData;
   RTJamParam m_param;
   LightData m_lightData;

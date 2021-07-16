@@ -136,7 +136,7 @@ void PluginRTJam::init()
 
 void PluginRTJam::syncLevels()
 {
-  memcpy(m_levelData.m_pJamLevels, &m_levels, sizeof(RTJamLevels));
+  memcpy(BoxAPI::s_levelData.m_pJamLevels, &m_levels, sizeof(RTJamLevels));
   // m_levelData.unlock();
 }
 
@@ -149,7 +149,7 @@ void PluginRTJam::syncConfigData()
     sprintf(name, "channel_%d", i);
     config.push_back(m_effectChains[0].getChainConfig(name));
   }
-  sprintf(m_levelData.m_pJsonInfo, "%s", config.dump().c_str());
+  sprintf(BoxAPI::s_levelData.m_pJsonInfo, "%s", config.dump().c_str());
 }
 
 void PluginRTJam::paramFlush()

@@ -1,8 +1,6 @@
-#ifndef LEVELDATA_RTJAM_HPP
-#define LEVELDATA_RTJAM_HPP
+#pragma once
 
 #include "JamNetStuff.hpp"
-#include "SharedMemory.hpp"
 
 struct RTJamLevels
 {
@@ -28,8 +26,11 @@ struct JsonInfo
 class LevelData
 {
 public:
-  LevelData();
-  ~LevelData();
+  LevelData()
+  {
+    m_pJamLevels = &m_levels;
+    m_pJsonInfo = m_json.buffer;
+  }
 
   void lock();
   void unlock();
@@ -38,7 +39,6 @@ public:
   char *m_pJsonInfo;
 
 private:
-  CSharedMemory m_sharedMemory;
+  RTJamLevels m_levels;
+  JsonInfo m_json;
 };
-
-#endif
