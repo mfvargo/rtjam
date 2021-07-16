@@ -32,8 +32,13 @@ public:
     m_pJsonInfo = m_json.buffer;
   }
 
-  void lock();
-  void unlock();
+  // TODO: make a mutex for this
+  void lock(){
+
+  };
+  void unlock(){
+
+  };
 
   RTJamLevels *m_pJamLevels;
   char *m_pJsonInfo;
