@@ -74,6 +74,9 @@ stop-pi:
 	systemctl stop rtjam-jack
 	systemctl stop rtjam-sound
 	systemctl stop rtjam-status
+	rm -f /dev/mqueue/rtjamParams
+	rm -f /dev/shm/rtjamLightSettings
+	rm -f /dev/shm/sem.rtjamLightSettings
 
 uninstall-pi: stop-pi
 	rm -f /home/pi/rtjam/*

@@ -34,6 +34,7 @@ enum RTJamParameters
   paramReverbOne,
   paramReverbTwo,
   paramGetConfigJson,
+  paramSetEffectConfig,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,
@@ -50,7 +51,7 @@ struct RTJamParam
   int iValue;
   int iValue2;
   float fValue;
-  char sValue[128];
+  char sValue[1024];
 };
 
 class ParamData
