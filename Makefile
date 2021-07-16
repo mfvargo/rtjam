@@ -24,6 +24,7 @@ pi-embed:
 	$(MAKE) all -C plugins/rtjam-broadcast
 	$(MAKE) all -C plugins/rtjam-status
 	$(MAKE) all -C plugins/rtjam-sound
+	$(MAKE) all -C plugins/rtjam-box
 	$(MAKE) all -C plugins/testHarness
 
 gitversion:
@@ -54,6 +55,8 @@ clean:
 	$(MAKE) clean -C dpf/utils/lv2-ttl-generator
 	$(MAKE) clean -C plugins/RTJam
 	$(MAKE) clean -C plugins/rtjam-broadcast
+	$(MAKE) clean -C plugins/rtjam-sound
+	$(MAKE) clean -C plugins/rtjam-box
 	$(MAKE) clean -C plugins/rtjam-status
 	$(MAKE) clean -C plugins/testHarness
 	rm -rf bin build
@@ -74,7 +77,6 @@ stop-pi:
 	systemctl stop rtjam-jack
 	systemctl stop rtjam-sound
 	systemctl stop rtjam-status
-	rm -f /dev/mqueue/rtjamParams
 	rm -f /dev/shm/rtjamLightSettings
 	rm -f /dev/shm/sem.rtjamLightSettings
 
@@ -92,6 +94,7 @@ deploy-pi: all
 #	scp -i ~/.ssh/rtjam.cer bin/rtjam ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-status ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-sound ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/rtjam.cer bin/rtjam-box ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/version.txt ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 
