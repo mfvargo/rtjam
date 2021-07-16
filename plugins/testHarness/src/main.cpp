@@ -29,7 +29,7 @@ static void signal_handler(int sig)
 
 int process(jack_nframes_t nframes, void *arg)
 {
-    EffectChain *chain = (EffectChain *)arg;
+    PedalBoard *board = (PedalBoard *)arg;
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
@@ -37,7 +37,7 @@ int process(jack_nframes_t nframes, void *arg)
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
     // Do stuff here
-    chain->process(inputs[0], outputs[0], nframes);
+    board->process(inputs[0], outputs[0], nframes);
     memcpy(outputs[1], outputs[0], sizeof(float) * nframes);
     return 0;
 }
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     PedalBoard pedalBoard;
     pedalBoard.init();
 
-    std::cout << pedalBoard.m_effectChain.getChainConfig("yank_it", 0).dump(2);
+    std::cout << pedalBoard.getChainConfig("yank_it", 0).dump(2);
 
     int i;
     const char **ports;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "unique name `%s' assigned\n", client_name);
     }
 
-    jack_set_process_callback(client, process, &(pedalBoard.m_effectChain));
+    jack_set_process_callback(client, process, &(pedalBoard));
 
     jack_on_shutdown(client, jack_shutdown, 0);
 
@@ -170,7 +170,7 @@ int main(int argc, char *argv[])
     {
         std::string input_line;
         std::getline(std::cin, input_line);
-        pedalBoard.m_effectChain.toggleEffect(atoi(input_line.c_str()));
+        pedalBoard.toggleEffect(atoi(input_line.c_str()));
     }
     jack_client_close(client);
     exit(0);

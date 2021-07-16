@@ -144,7 +144,7 @@ void PluginRTJam::syncConfigData()
   {
     char name[64];
     sprintf(name, "channel_%d", i);
-    config.push_back(m_pedalBoards[i].m_effectChain.getChainConfig(name, i));
+    config.push_back(m_pedalBoards[i].getChainConfig(name, i));
   }
   sprintf(BoxAPI::s_levelData.m_pJsonInfo, "%s", config.dump().c_str());
 }
@@ -204,14 +204,12 @@ void PluginRTJam::getParams()
     syncConfigData();
     break;
   case paramSetEffectConfig:
-    if ((m_param.iValue >= 0 && m_param.iValue < 2) &&
-        (m_param.iValue2 >= 0 && m_param.iValue2 < m_pedalBoards[m_param.iValue].m_effectChain.size()))
+    if ((m_param.iValue >= 0 && m_param.iValue < 2) && (m_param.iValue2 >= 0))
     {
       try
       {
-        Effect *pEffect = m_pedalBoards[m_param.iValue].m_effectChain.getEffect(m_param.iValue2);
+        m_pedalBoards[m_param.iValue].setEffectSetting(json::parse(m_param.sValue), m_param.iValue2);
         cerr << json::parse(m_param.sValue).dump(2) << endl;
-        pEffect->setSettingValue(json::parse(m_param.sValue));
       }
       catch (json::exception &e)
       {
@@ -253,8 +251,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   try
   {
     // run the effect chains
-    m_pedalBoards[0].m_effectChain.process(inputs[0], oneBuffOut, frames);
-    m_pedalBoards[1].m_effectChain.process(inputs[1], twoBuffOut, frames);
+    m_pedalBoards[0].process(inputs[0], oneBuffOut, frames);
+    m_pedalBoards[1].process(inputs[1], twoBuffOut, frames);
   }
   catch (...)
   {

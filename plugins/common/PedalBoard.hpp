@@ -8,6 +8,8 @@
 #include "Tremelo.hpp"
 #include "ToneStack.hpp"
 
+#include <mutex>
+
 class PedalBoard
 {
 public:
@@ -30,9 +32,30 @@ public:
   {
     m_effectChain.process(input, output, framesize);
   }
-  EffectChain m_effectChain;
+  json getChainConfig(std::string name, int channel)
+  {
+    return m_effectChain.getChainConfig(name, channel);
+  }
+  bool setEffectSetting(json setting, int idx)
+  {
+    bool rval = false;
+    // Check index bounds
+    if (idx < m_effectChain.size())
+    {
+      Effect *pEffect = m_effectChain.getEffect(idx);
+      rval = pEffect->setSettingValue(setting);
+    }
+    return rval;
+  }
+
+  void toggleEffect(int idx)
+  {
+    m_effectChain.toggleEffect(idx);
+  }
 
 private:
+  mutex m_mutex;
+  EffectChain m_effectChain;
   HighPassFilter m_hpfilter;
   Distortion m_distortion;
   SigmaDelay m_delay;
