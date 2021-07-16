@@ -104,7 +104,7 @@ private:
         if (param.param > paramCount)
         {
             // This is a command to be handled by rtjam-box, not passed to sound engine
-            cout << "svalue: " << param.sValue << endl;
+            cout << "param: " << param.param << " svalue: " << param.sValue << endl;
             switch (param.param)
             {
             case paramSetAudioInput:
@@ -120,7 +120,7 @@ private:
             }
             break;
             case paramListAudioConfig:
-                out << execMyCommand("aplay -l");
+                out << execMyCommand("cat devices.txt");
                 break;
             case paramCheckForUpdate:
                 out << execMyCommand("./checkupdate.bash");
@@ -151,15 +151,16 @@ private:
     {
         array<char, 256> buffer;
         string result;
-        unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+        FILE *pipe = popen(cmd.c_str(), "r");
         if (!pipe)
         {
-            return ("popen() failed!");
+            return "popen() failed!";
         }
-        while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr)
         {
             result += buffer.data();
         }
+        pclose(pipe);
         return result;
     }
 

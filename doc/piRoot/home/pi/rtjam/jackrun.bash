@@ -23,6 +23,5 @@ then
   OUTDEV=$INDEV
 fi
 #
-echo $INDEV
-echo $OUTDEV
+/usr/bin/aplay -l > devices.txt
 /usr/bin/jackd -R -dalsa -r48000 -n 2 -p128 -C $INDEV -P $OUTDEV -i2 -o2
