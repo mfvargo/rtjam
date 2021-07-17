@@ -8,8 +8,6 @@
 #include "Tremelo.hpp"
 #include "ToneStack.hpp"
 
-#include <mutex>
-
 class PedalBoard
 {
 public:
@@ -54,7 +52,6 @@ public:
   }
 
 private:
-  mutex m_mutex;
   EffectChain m_effectChain;
   HighPassFilter m_hpfilter;
   Distortion m_distortion;
