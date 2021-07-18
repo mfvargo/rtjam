@@ -66,17 +66,23 @@ install-pi: pi-embed
 	cp doc/piRoot/etc/systemd/system/* /etc/systemd/system
 	cp doc/piRoot/home/pi/rtjam/* /home/pi/rtjam
 	chmod +x /home/pi/rtjam/*.bash
+	cp bin/rtjam-box /home/pi/rtjam
 	cp bin/rtjam-sound /home/pi/rtjam
 	cp bin/rtjam-status /home/pi/rtjam
 	systemctl daemon-reload
+	systemctl restart rtjam-box
 	systemctl restart rtjam-jack
 	systemctl restart rtjam-sound
 	systemctl restart rtjam-status
 
 stop-pi:
+	systemctl stop rtjam-box
 	systemctl stop rtjam-jack
 	systemctl stop rtjam-sound
 	systemctl stop rtjam-status
+	rm -f /dev/mqueue/rtjamParams
+	rm -f /dev/shm/rtjamValues
+	rm -f /dev/shm/sem.rtjamValues
 	rm -f /dev/shm/rtjamLightSettings
 	rm -f /dev/shm/sem.rtjamLightSettings
 

@@ -52,3 +52,31 @@ struct RTJamParam
   float fValue;
   char sValue[1024];
 };
+
+class ParamData
+{
+public:
+  ParamData() : m_queue("/rtjamParams", sizeof(RTJamParam))
+  {
+  }
+
+  ~ParamData()
+  {
+  }
+
+  void flush()
+  {
+    m_queue.flush();
+  }
+  void send(RTJamParam *param)
+  {
+    m_queue.send(param, sizeof(RTJamParam));
+  }
+  void receive(RTJamParam *param)
+  {
+    m_queue.recv(param, sizeof(RTJamParam));
+  }
+
+private:
+  CMessageQueue m_queue;
+};

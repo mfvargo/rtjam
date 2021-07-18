@@ -36,6 +36,8 @@ private:
   uint64_t m_framecount;
   RTJamLevels m_levels;
   std::vector<std::thread> m_threads;
+  LevelData m_levelData;
+  ParamData m_paramData;
 };
 
 #endif

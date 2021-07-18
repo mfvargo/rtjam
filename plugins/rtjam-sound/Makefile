@@ -21,7 +21,6 @@ SRCS = \
 	../common/SharedMemory.cpp \
 	../common/MessageQueue.cpp \
 	../common/Settings.cpp \
-	../common/RTJamNationApi.cpp \
 	../common/LightData.cpp \
 
 
@@ -30,7 +29,7 @@ DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lcurl -lfastcgipp
+LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt
 
 CPPFLAGS ?= $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP -g -Wno-psabi
 
