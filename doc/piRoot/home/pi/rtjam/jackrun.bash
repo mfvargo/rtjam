@@ -5,6 +5,7 @@ then
   INDEV=`cat soundin.cfg`
 else
   INDEV=hw:USB
+  echo $INDEV > soundin.cfg
 fi
 # make sure there was something in the file
 if [ -z ${INDEV} ];
