@@ -20,15 +20,19 @@ public:
     m_tremelo.init();
     m_toneStack.init();
     m_effectChain.push(&m_hpfilter);
-    m_effectChain.push(&m_distortion);
-    m_effectChain.push(&m_delay);
+    // m_effectChain.push(&m_distortion);
+    // m_effectChain.push(&m_delay);
     m_effectChain.push(&m_reverb);
-    m_effectChain.push(&m_tremelo);
-    m_effectChain.push(&m_toneStack);
+    // m_effectChain.push(&m_tremelo);
+    // m_effectChain.push(&m_toneStack);
+    m_stable = true;
   }
   void process(const float *input, float *output, int framesize)
   {
-    m_effectChain.process(input, output, framesize);
+    if (m_stable)
+      m_effectChain.process(input, output, framesize);
+    else
+      memcpy(output, input, sizeof(float) * framesize);
   }
   json getChainConfig(std::string name, int channel)
   {
@@ -38,11 +42,13 @@ public:
   {
     bool rval = false;
     // Check index bounds
+    m_stable = false;
     if (idx < m_effectChain.size())
     {
       Effect *pEffect = m_effectChain.getEffect(idx);
       rval = pEffect->setSettingValue(setting);
     }
+    m_stable = true;
     return rval;
   }
 
@@ -52,6 +58,7 @@ public:
   }
 
 private:
+  bool m_stable;
   EffectChain m_effectChain;
   HighPassFilter m_hpfilter;
   Distortion m_distortion;
