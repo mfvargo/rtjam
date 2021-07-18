@@ -39,7 +39,6 @@ void CMessageQueue::flush()
 
 void CMessageQueue::recv(void *msg, int size)
 {
-  printf("receiving\n");
   if (mq_receive(m_queueID, (char *)msg, size, NULL) == -1)
   {
     perror("CMessageQueue: mq_receive");
@@ -48,10 +47,10 @@ void CMessageQueue::recv(void *msg, int size)
 
 void CMessageQueue::send(void *msg, int size)
 {
-  printf("sending\n");
-  mq_attr attrs;
-  mq_getattr(m_queueID, &attrs);
-  printf("sending, depth: %ld\n", attrs.mq_curmsgs);
+  // printf("sending\n");
+  // mq_attr attrs;
+  // mq_getattr(m_queueID, &attrs);
+  // printf("sending, depth: %ld\n", attrs.mq_curmsgs);
   if (mq_send(m_queueID, (char *)msg, size, 0) == -1)
   {
     perror("CMessageQueue: Not able to send message to client");

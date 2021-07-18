@@ -18,6 +18,7 @@ public:
   {
   }
   static string s_token;
+  static ParamData s_paramData;
 
 private:
   static LevelData s_levelData;
@@ -139,9 +140,8 @@ private:
     else
     {
       // This is a sound engine parameter
-      ParamData paramData;
-      paramData.flush();
-      paramData.send(&param);
+      s_paramData.flush();
+      s_paramData.send(&param);
       out << "OK";
       // getParamForm();
     }

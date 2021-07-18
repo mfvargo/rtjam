@@ -17,6 +17,8 @@ bool CSharedMemory::Create(size_t nSize, int mode /*= READ_WRITE*/)
 {
    m_nSize = nSize;
    m_iD = shm_open(m_sName.c_str(), O_CREAT | mode, S_IRWXU | S_IRWXG | S_IRWXO);
+   fchmod(m_iD, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+
    if (m_iD < 0)
    {
       switch (errno)

@@ -8,6 +8,8 @@ using namespace std;
 
 LevelData BoxAPI::s_levelData;
 string BoxAPI::s_token = "";
+ParamData BoxAPI::s_paramData;
+
 bool isRunning = true;
 
 vector<thread> myThreads;
