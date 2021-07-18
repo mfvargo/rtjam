@@ -14,10 +14,11 @@ CMessageQueue::CMessageQueue(const string &sName, int msgSize) : m_sName(sName)
   m_attrs.mq_maxmsg = 10;
   m_attrs.mq_msgsize = msgSize;
   m_attrs.mq_curmsgs = 0;
-  if ((m_queueID = mq_open(sName.c_str(), O_CREAT | O_RDWR, 0660, &m_attrs)) == -1)
+  if ((m_queueID = mq_open(sName.c_str(), O_CREAT | O_RDWR, 0666, &m_attrs)) == -1)
   {
     perror("mq_open failed");
   }
+  fchmod(m_queueID, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
 }
 
 CMessageQueue::~CMessageQueue()
