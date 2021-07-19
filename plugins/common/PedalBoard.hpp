@@ -19,7 +19,7 @@ public:
     m_reverb.init();
     m_tremelo.init();
     m_toneStack.init();
-    m_effectChain.push(&m_hpfilter);
+    // m_effectChain.push(&m_hpfilter);
     // m_effectChain.push(&m_distortion);
     // m_effectChain.push(&m_delay);
     m_effectChain.push(&m_reverb);
