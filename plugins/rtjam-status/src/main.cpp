@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
     {
 
         codecControl.updateVolumes();
+        delayMicroseconds(1000000);
     };
     return 0;
 }

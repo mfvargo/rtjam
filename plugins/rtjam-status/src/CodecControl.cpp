@@ -79,7 +79,7 @@ void CodecControlAndStatus::updateVolumes(void)
     ADC_ScanInputs();
    
    // For ADC debug only
-    #if 1
+    #if 0
         // print out adc results
         std::cout << "ADC CH0 = " << m_adcValue[0] << endl;
         std::cout << "ADC CH1 = " << m_adcValue[1] << endl;
@@ -90,19 +90,19 @@ void CodecControlAndStatus::updateVolumes(void)
 
     // Pot 1 - channel 0 - Instrument input gain
     //temp = ALPHA*adcValue + (1-ALPHA)*pot1Filt;
-    std::cout << "Instrument Gain =  " << m_adcValue[0]/5 << endl;   
+    //std::cout << "Instrument Gain =  " << m_adcValue[0]/5 << endl;   
     wiringPiI2CWriteReg8(m_codecI2cAddress, 15, (unsigned char)(m_adcValue[0]/5));
         
     // Pot 2 - channel 1 - mic/headset input gain
     //temp = ALPHA*adcValue + (1-ALPHA)*pot2Filt;
-    std::cout << "Mic Gain =  " << m_adcValue[1]/4 << endl;
+    //std::cout << "Mic Gain =  " << m_adcValue[1]/4 << endl;
     wiringPiI2CWriteReg8(m_codecI2cAddress, 16, m_adcValue[1]/4);
         
     // Pot 3 - channel 2 - Headphone amp gain]
     m_temp = s_alpha*m_adcValue[2] + (1-s_alpha)*m_pot3Filt;
     m_temp = (255 - m_adcValue[2])/2; // invert and scale pot value 
     m_temp |= 0x80;    // set bit 7 (enable DAC-HP path)
-    std::cout << "Headphone Gain =  " <<  m_temp << endl;
+    //std::cout << "Headphone Gain =  " <<  m_temp << endl;
        
     wiringPiI2CWriteReg8(m_codecI2cAddress, 47, m_temp); // update L and R volumes
     wiringPiI2CWriteReg8(m_codecI2cAddress, 64, m_temp);      
@@ -126,27 +126,23 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
     for(unsigned int i=0; i<3; i++)
     {
         m_adcControlReg = 0x01 << i + 4; // set channel bit (shift left each time through)       
-        wiringPiI2CWrite(m_adcI2cAddress, m_adcControlReg);
-        std::cout << "ADC Write " << i << "= " << m_adcControlReg << endl;
-
+    
         delayMicroseconds(10);  // wait for conversion before reading result back from part
 
-        m_adcReadResult = wiringPiI2CReadReg16(m_adcI2cAddress, 0x00);
-        //m_adcResultHigh = wiringPiI2CRead(m_adcI2cAddress);
-        //m_adcResultLow = wiringPiI2CRead(m_adcI2cAddress);
-            // For debug only
+        m_adcReadResult = wiringPiI2CReadReg16(m_adcI2cAddress, m_adcControlReg);
 
-
-    
-        std::cout << "ADC result  " << i << "= " << m_adcReadResult << endl;
         m_adcValue[i] = m_adcReadResult;
 
         // save and mask off channel information, then convert adc result to 16 bits
-        m_adcChannel = (m_adcResultHigh & 0x30) >> 4;
+        m_adcChannel = (m_adcReadResult & 0x30) >> 4;
         m_temp = (m_adcResultHigh & 0x0f);
         m_temp <<= 8;
         m_adcValue[m_adcChannel] = m_adcResultHigh | m_adcResultLow;
         delayMicroseconds(2);
+        
+        std::cout << "ADC Ch " << m_adcChannel << "= " << (m_adcReadResult & 0x0fff) << endl;
+
+
 
     }
 
