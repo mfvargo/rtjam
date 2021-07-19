@@ -19,8 +19,8 @@ public:
         "mix",                    // Name
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
-        1.0,                      // Max value
-        0.1,                      // Step Size
+        0.5,                      // Max value
+        0.02,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));

@@ -70,9 +70,9 @@ public:
   {
     for (int i = 0; i < framesize; i++)
     {
-      output[i] = m_bass * m_fBass.getSample(input[i]);
-      output[i] += m_mid * m_fMid.getSample(input[i]);
-      output[i] += m_treble * m_fHigh.getSample(input[i]);
+      output[i] = m_bass * m_fBass.getSample(input[i]) / 3.0;
+      output[i] += m_mid * m_fMid.getSample(input[i]) / 3.0;
+      output[i] += m_treble * m_fHigh.getSample(input[i]) / 3.0;
     }
   };
 

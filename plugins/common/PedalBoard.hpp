@@ -15,16 +15,18 @@ public:
   {
     m_hpfilter.init();
     m_distortion.init();
+    m_distortion2.init();
     m_delay.init();
     m_reverb.init();
     m_tremelo.init();
     m_toneStack.init();
     // m_effectChain.push(&m_hpfilter);
-    // m_effectChain.push(&m_distortion);
-    // m_effectChain.push(&m_delay);
+    m_effectChain.push(&m_distortion);
+    m_effectChain.push(&m_distortion2);
+    m_effectChain.push(&m_delay);
     m_effectChain.push(&m_reverb);
-    // m_effectChain.push(&m_tremelo);
-    // m_effectChain.push(&m_toneStack);
+    m_effectChain.push(&m_tremelo);
+    m_effectChain.push(&m_toneStack);
     m_stable = true;
   }
   void process(const float *input, float *output, int framesize)
@@ -62,6 +64,7 @@ private:
   EffectChain m_effectChain;
   HighPassFilter m_hpfilter;
   Distortion m_distortion;
+  Distortion m_distortion2;
   SigmaDelay m_delay;
   MonoVerb m_reverb;
   Tremelo m_tremelo;
