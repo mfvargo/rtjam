@@ -163,17 +163,10 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   tempOut[0] = oneBuffOut;
   tempOut[1] = twoBuffOut;
 
-  try
-  {
-    // run the effect chains
-    m_pedalBoards[0].process(inputs[0], oneBuffOut, frames);
-    m_pedalBoards[1].process(inputs[1], twoBuffOut, frames);
-  }
-  catch (...)
-  {
-    memcpy(tempOut[0], inputs[0], frames * sizeof(float));
-    memcpy(tempOut[1], inputs[1], frames * sizeof(float));
-  }
+  // run the effect chains
+  m_pedalBoards[0].process(inputs[0], oneBuffOut, frames);
+  m_pedalBoards[1].process(inputs[1], twoBuffOut, frames);
+
   // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
 
