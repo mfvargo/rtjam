@@ -7,55 +7,54 @@ void CodecControlAndStatus::init(void)
 {
 
 
-    // setup wiring Pi - use GPIO pin names
-    wiringPiSetupGpio();     
+    // setup wiring library for Pi - use GPIO pin names
+    wiringPiSetupGpio();    
     
-    // reset the codec at startup - reset line tied to GPIO17 on CM4   
+    // Setup I2C communication to codec and ADC - device handles for wiring library
+    m_codecI2cAddress = wiringPiI2CSetup(0x18);
+    m_adcI2cAddress = wiringPiI2CSetup(0x29);  
+    
+    // initialize GPIO 17 as output - RSTN line to codec (reset = low, active = high)
     pinMode(17, OUTPUT);
-    digitalWrite(17, HIGH);
-    delayMicroseconds(20000);
+
+    // reset the codec at startup - reset line tied to GPIO17 on CM4   
     digitalWrite(17, LOW);
-
-    delayMicroseconds(20000);
-    digitalWrite(17, HIGH);
-
-    
-    // Setup I2C communication
-    fd = wiringPiI2CSetup(s_TLV320AIC3101_ADD);
-    
-    delayMicroseconds(20000);
+    delayMicroseconds(200000);  // delay 200ms for codec to reset
+    digitalWrite(17, HIGH);     // bring codec out of reset
+    delayMicroseconds(20000);   // delay before sending I2C commands
   
 
-    // Set Reg 0 - select Page 0 
-    // wiringPiI2CWriteReg8(fd, 0, 0);
+    // Initialize the Codec I2C registers 
+    // Mode = slave, LRCLK = 48kHz, SCLK = 64xFs
     
-    // test
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 0, 0);
+    // Set Reg 0 - select Page 0 
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 0, 0);
 
 
     // Init Page 0 Registers
     for(unsigned char i = 0; i <= 20; i++)
     {
-        wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, m_codecRegDataP0[i][0], m_codecRegDataP0[i][1]);   
+        wiringPiI2CWriteReg8(m_codecI2cAddress, m_codecRegDataP0[i][0], m_codecRegDataP0[i][1]);   
     }
     
-    // Set Reg 0 - select Page 1
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 0, 1);   // set page to 1
+    // Init Page 1 Registers - set Reg 0 to 1 (select Page 1)
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 0, 1);   // set page to 1
 
-    // Init Page 1 Register (ADC HPF filter coeffs - 10Hz to remove DC offset)
+    // Init ADC HPF filter coeffs - 10Hz filter to remove DC offset
     for(unsigned char i = 0; i <= 14; i++)
     {
-        wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, m_codecRegDataP1[i][0], m_codecRegDataP1[i][1]);   
+        wiringPiI2CWriteReg8(m_codecI2cAddress, m_codecRegDataP1[i][0], m_codecRegDataP1[i][1]);   
     }
 
     // Set Reg 0 - select Page 0
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 0, 0);   // set page back to 0
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 0, 0);   // set page back to 0
 
     // Set Reg 12 - Enable Left and Right ADC Channel HPF  
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 12, 0x50);
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 12, 0x50);
 
     // Set Reg 107 - set HPF to use custom coeffs loaded above
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 0, 0);  
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 0, 0);  
+
 
 }
 
@@ -74,45 +73,50 @@ void CodecControlAndStatus::init(void)
 void CodecControlAndStatus::updateVolumes(void)
 {
       
+    m_adcI2cAddress = wiringPiI2CSetup(0x29); 
+
     // Check pot values and update gain registers in the '3101 if value changes
     ADC_ScanInputs();
+   
+   // For ADC debug only
+    #if 1
+        // print out adc results
+        std::cout << "ADC CH0 = " << m_adcValue[0] << endl;
+        std::cout << "ADC CH1 = " << m_adcValue[1] << endl;
+        std::cout << "ADC CH2 = " << m_adcValue[2] << endl;
+    #endif 
     
+    m_adcI2cAddress = wiringPiI2CSetup(0x18); 
+
     // Pot 1 - channel 0 - Instrument input gain
     //temp = ALPHA*adcValue + (1-ALPHA)*pot1Filt;
     std::cout << "Instrument Gain =  " << m_adcValue[0]/5 << endl;   
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 15, (unsigned char)(m_adcValue[0]/5));
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 15, (unsigned char)(m_adcValue[0]/5));
         
     // Pot 2 - channel 1 - mic/headset input gain
     //temp = ALPHA*adcValue + (1-ALPHA)*pot2Filt;
     std::cout << "Mic Gain =  " << m_adcValue[1]/4 << endl;
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 16, m_adcValue[1]/4);
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 16, m_adcValue[1]/4);
         
     // Pot 3 - channel 2 - Headphone amp gain]
     m_temp = s_alpha*m_adcValue[2] + (1-s_alpha)*m_pot3Filt;
-
-    
     m_temp = (255 - m_adcValue[2])/2; // invert and scale pot value 
     m_temp |= 0x80;    // set bit 7 (enable DAC-HP path)
     std::cout << "Headphone Gain =  " <<  m_temp << endl;
        
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 47, m_temp); // update L and R volumes
-    wiringPiI2CWriteReg8(s_TLV320AIC3101_ADD, 64, m_temp);      
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 47, m_temp); // update L and R volumes
+    wiringPiI2CWriteReg8(m_codecI2cAddress, 64, m_temp);      
             
     // store current state for next time through loop
     m_lastPot1Value = m_pot1Filt;
     m_lastPot2Value = m_pot2Filt;
     m_lastPot3Value = m_pot3Filt;    
-        
-}
 
-
-
-unsigned int CodecControlAndStatus::ADC_Init(void)
-{
-
-    fd = wiringPiI2CSetup(s_ADS7991_ADD);
+   
 
 }
+
+
 
 
 void CodecControlAndStatus::ADC_ScanInputs(void)
@@ -121,25 +125,28 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
     // read 3 ADC channels - sequential??? TODO - change to single?
     for(unsigned int i=0; i<3; i++)
     {
-        m_adcControlReg = 0x01 << i; // set channel bit (shift left each time through)       
-        wiringPiI2CWrite(s_ADS7991_ADD, m_adcControlReg);
+        m_adcControlReg = 0x01 << i + 4; // set channel bit (shift left each time through)       
+        wiringPiI2CWrite(m_adcI2cAddress, m_adcControlReg);
+        std::cout << "ADC Write " << i << "= " << m_adcControlReg << endl;
 
-        m_adcResultHigh = wiringPiI2CRead(s_ADS7991_ADD);
-        m_adcResultLow = wiringPiI2CRead(s_ADS7991_ADD);
-        
+        delayMicroseconds(10);  // wait for conversion before reading result back from part
+
+        m_adcReadResult = wiringPiI2CReadReg16(m_adcI2cAddress, 0x00);
+        //m_adcResultHigh = wiringPiI2CRead(m_adcI2cAddress);
+        //m_adcResultLow = wiringPiI2CRead(m_adcI2cAddress);
+            // For debug only
+
+
+    
+        std::cout << "ADC result  " << i << "= " << m_adcReadResult << endl;
+        m_adcValue[i] = m_adcReadResult;
+
         // save and mask off channel information, then convert adc result to 16 bits
         m_adcChannel = (m_adcResultHigh & 0x30) >> 4;
         m_temp = (m_adcResultHigh & 0x0f);
         m_temp <<= 8;
         m_adcValue[m_adcChannel] = m_adcResultHigh | m_adcResultLow;
-        delayMicroseconds(2); 
-
-        // print out adc results
-        std::cout << "ADC CH0 =  " << m_adcValue[0] << endl;
-        std::cout << "ADC_CH1 =  " << m_adcValue[1] << endl;
-        std::cout << "ADC_CH2 =  " << m_adcValue[2] << "\n" << endl;
-
-
+        delayMicroseconds(2);
 
     }
 

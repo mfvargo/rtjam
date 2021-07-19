@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
     while (1)
     {
 
-        codecControl.updateVolumes()
+        codecControl.updateVolumes();
     };
     return 0;
 }
