@@ -61,7 +61,6 @@ int main(int argc, char *argv[])
     jack_status_t status;
 
     PluginRTJam pluginRTJam;
-    /* init shared memory threads */
     pluginRTJam.init();
 
     // loop while trying to connect to jack.  If jack is not running this will just keep looping
@@ -73,8 +72,8 @@ int main(int argc, char *argv[])
         if (client == NULL)
         {
             fprintf(stderr, "jack_client_open() failed, status = 0x%2.0x\n", status);
+            sleep(1);
         }
-        sleep(1);
     }
     if (status & JackNameNotUnique)
     {

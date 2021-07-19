@@ -258,7 +258,6 @@ namespace JamNetStuff
     float cBuf0[MAX_FRAME_SIZE];
     float cBuf1[MAX_FRAME_SIZE];
     float *conversionBuf[2];
-    ::std::mutex mMutex;
   };
 
   class JamSocket

@@ -12,8 +12,6 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
-	../common/LevelData.cpp \
-	../common/ParamData.cpp \
 	../common/MessageQueue.cpp \
 	../common/SharedMemory.cpp \
 	../common/RTJamNationApi.cpp \

@@ -14,51 +14,85 @@ public:
     even,
   };
 
-  json getConfig()
-  {
-    json cliptypes = {
-        {"hard", 0},
-        {"soft", 1},
-        {"asymetric", 2},
-        {"even", 3},
-    };
-    json config;
-    config["name"] = "Distortion";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["gain"] = {{"type", "float"}, {"min", 0.0}, {"max", 60.0}, {"units", "linear"}, {"value", m_gain}};
-    config["settings"]["clipType"] = {{"type", "integer"}, {"min", ClipType::hard}, {"max", ClipType::even}, {"units", "selector"}, {"labels", cliptypes}, {"value", m_clipType}};
-    config["settings"]["lowPassFreq"] = {{"type", "float"}, {"min", 5.0}, {"max", 5000}, {"units", "Hz"}, {"value", m_lpfFreq}};
-    config["settings"]["hiPassFreq"] = {{"type", "float"}, {"min", 200.0}, {"max", 12000}, {"units", "Hz"}, {"value", m_hpfFreq}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    m_gain = config["gain"]["value"];
-    m_clipType = config["clipType"]["value"];
-    m_lpfFreq = config["lowPassFreq"]["value"];
-    m_hpfFreq = config["hiPassFreq"]["value"];
-    setupFilters();
-  };
-
   void init() override
   {
-    m_lpfFreq = 150;
-    m_hpfFreq = 5000;
-    m_gain = 1.0;
-    m_clipType = soft;
-    setupFilters();
+    // Setup base class stuff
+    Effect::init();
+    // What is this effects name?
+    m_name = "Distortion";
+
+    // Now setup the settings this effect can receive.
+    EffectSetting setting;
+    setting.init(
+        "drive",                  // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        40.0,                     // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(6.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    setting.init(
+        "clipType",             // Name
+        EffectSetting::intType, // Type of setting
+        ClipType::hard,         // Min value
+        ClipType::even,         // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setIntValue(ClipType::soft);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    setting.init(
+        "level",                  // Name
+        EffectSetting::floatType, // Type of setting
+        -30.0,                    // Min value
+        10.0,                     // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    // TODO: figure out how to make these programmable (tone knob?)
+    m_lpfFreq = 5000;
+    m_hpfFreq = 200;
+
+    loadFromConfig();
   };
 
+  void loadFromConfig() override
+  {
+    // Read the settings from the map and apply them to our copy of the data.
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+
+    it = m_settingMap.find("drive");
+    if (it != m_settingMap.end())
+    {
+      m_gain = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("clipType");
+    if (it != m_settingMap.end())
+    {
+      m_clipType = (ClipType)it->second.getIntValue();
+    }
+
+    it = m_settingMap.find("level");
+    if (it != m_settingMap.end())
+    {
+      m_level = it->second.getFloatValue();
+    }
+
+    setupFilters();
+  }
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)
     {
-      float value = m_hpf.getSample(input[i]);
-      value = clipSample(value * m_gain);
+      float value = clipSample(input[i] * m_gain) * m_level;
+      value = m_lpf.getSample(value);
+      value = m_hpf.getSample(value);
       // value = distortionAlgorithm(value);
-      output[i] = m_lpf.getSample(value);
+      output[i] = value;
     }
   };
 
@@ -70,6 +104,7 @@ private:
 
   // Parameters
   float m_gain;        // gain before clip function
+  float m_level;       // Overall level
   ClipType m_clipType; // what kind of clipping funciton
   float m_lpfFreq;     // frequency of the final lpf  (tone knob)
   float m_hpfFreq;     // frequency of the hpf before effect (is this a knob?)
@@ -77,8 +112,8 @@ private:
   void setupFilters()
   {
     // Setup the biquad filter for the upsampled data
-    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_lpfFreq, 1.0, 1.0, 48000);
-    m_lpf.init(BiQuadFilter::FilterType::LowPass, m_hpfFreq, 1.0, 1.0, 48000);
+    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_hpfFreq, 1.0, 1.0, 48000);
+    m_lpf.init(BiQuadFilter::FilterType::LowPass, m_lpfFreq, 1.0, 1.0, 48000);
     m_upsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 48000);
     m_downsample.init(BiQuadFilter::FilterType::HighPass, 48000, 1.0, 1.0, 8 * 48000);
   };

@@ -1,4 +1,6 @@
 #include "PluginRTJam.hpp"
+#include "Settings.hpp"
+
 #include <string.h>
 #include <math.h>
 
@@ -6,9 +8,10 @@
 
 static const float kAMP_DB = 8.656170245f;
 
+bool isRunning = true;
+
 void paramFetch(PluginRTJam *pJamPlugin)
 {
-  pJamPlugin->paramFlush();
   while (1)
   {
     pJamPlugin->getParams();
@@ -36,17 +39,7 @@ void PluginRTJam::init()
 {
   for (int i = 0; i < 2; i++)
   {
-    m_filters[i].init();
-    m_filters[i].setByPass(true);
-    m_effectChains[i].push(&m_filters[i]);
-    m_distortions[i].init();
-    m_distortions[i].setByPass(true);
-    m_effectChains[i].push(&m_distortions[i]);
-    m_delays[i].init();
-    m_delays[i].setByPass(true);
-    m_effectChains[i].push(&m_delays[i]);
-    m_reverbs[i].init();
-    m_effectChains[i].push(&m_reverbs[i]);
+    m_pedalBoards[i].init();
   }
   // write the effect chain json data
   syncConfigData();
@@ -66,20 +59,16 @@ void PluginRTJam::syncConfigData()
   {
     char name[64];
     sprintf(name, "channel_%d", i);
-    config.push_back(m_effectChains[0].getChainConfig(name));
+    config.push_back(m_pedalBoards[i].getChainConfig(name, i));
   }
   sprintf(m_levelData.m_pJsonInfo, "%s", config.dump().c_str());
-}
-
-void PluginRTJam::paramFlush()
-{
-  m_paramData.flush();
 }
 
 void PluginRTJam::getParams()
 {
   m_paramData.receive(&m_param);
   printf("received param %d: %s, %f, %d, %d\n", m_param.param, m_param.sValue, m_param.fValue, m_param.iValue, m_param.iValue2);
+
   switch (m_param.param)
   {
   case paramChanGain1:
@@ -115,22 +104,37 @@ void PluginRTJam::getParams()
     disconnect();
     break;
   case paramHPFOn:
-    m_filters[0].setByPass(false);
-    m_filters[1].setByPass(false);
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramHPFOff:
-    m_filters[0].setByPass(true);
-    m_filters[1].setByPass(true);
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramReverbOne:
-    m_reverbs[0].setMix(m_param.fValue);
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramReverbTwo:
-    m_reverbs[1].setMix(m_param.fValue);
+    // deprecated.  This is done with paramSetEffectConfig instead
     break;
   case paramGetConfigJson:
     syncConfigData();
     break;
+  case paramSetEffectConfig:
+    if ((m_param.iValue >= 0 && m_param.iValue < 2) && (m_param.iValue2 >= 0))
+    {
+      try
+      {
+        m_pedalBoards[m_param.iValue].setEffectSetting(json::parse(m_param.sValue), m_param.iValue2);
+        cerr << json::parse(m_param.sValue).dump(2) << endl;
+      }
+      catch (json::exception &e)
+      {
+        cerr << e.what() << endl;
+      }
+      catch (...)
+      {
+        cerr << "failed to parse json!" << endl;
+      }
+    }
   }
 }
 
@@ -160,8 +164,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   tempOut[1] = twoBuffOut;
 
   // run the effect chains
-  m_effectChains[0].process(inputs[0], oneBuffOut, frames);
-  m_effectChains[1].process(inputs[1], twoBuffOut, frames);
+  m_pedalBoards[0].process(inputs[0], oneBuffOut, frames);
+  m_pedalBoards[1].process(inputs[1], twoBuffOut, frames);
 
   // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);

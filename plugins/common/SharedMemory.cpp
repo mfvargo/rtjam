@@ -3,23 +3,25 @@
 #include <errno.h>
 #include <cstdio>
 #include <cstdlib>
- 
-CSharedMemory::CSharedMemory( const string& sName ):m_sName(sName),m_Ptr(NULL),m_iD(-1),
-   m_SemID(NULL), m_nSize(0)
+
+CSharedMemory::CSharedMemory(const string &sName) : m_sName(sName), m_Ptr(NULL), m_iD(-1),
+                                                    m_SemID(NULL), m_nSize(0)
 {
    /**
    * Semaphore open
    */
-   m_SemID = sem_open(sName.c_str(), O_CREAT, S_IRUSR | S_IWUSR, 1);
+   m_SemID = sem_open(sName.c_str(), O_CREAT, S_IRWXU | S_IRWXG | S_IRWXO, 1);
 }
- 
-bool CSharedMemory::Create( size_t nSize, int mode /*= READ_WRITE*/ )
+
+bool CSharedMemory::Create(size_t nSize, int mode /*= READ_WRITE*/)
 {
    m_nSize = nSize;
-   m_iD = shm_open(m_sName.c_str(), O_CREAT | mode, S_IRWXU | S_IRWXG);
-   if(m_iD < 0)
+   m_iD = shm_open(m_sName.c_str(), O_CREAT | mode, S_IRWXU | S_IRWXG | S_IRWXO);
+   fchmod(m_iD, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+
+   if (m_iD < 0)
    {
-      switch(errno)
+      switch (errno)
       {
       case EACCES:
          throw CSharedMemoryException("Permission Exception ");
@@ -46,11 +48,11 @@ bool CSharedMemory::Create( size_t nSize, int mode /*= READ_WRITE*/ )
    }
    /* adjusting mapped file size (make room for the whole segment to map)      --  ftruncate() */
    ftruncate(m_iD, m_nSize);
- 
+
    return true;
 }
- 
-bool CSharedMemory::Attach( int mode /*= A_READ | A_WRITE*/ )
+
+bool CSharedMemory::Attach(int mode /*= A_READ | A_WRITE*/)
 {
    /* requesting the shared segment    --  mmap() */
    m_Ptr = mmap(NULL, m_nSize, mode, MAP_SHARED, m_iD, 0);
@@ -60,13 +62,13 @@ bool CSharedMemory::Attach( int mode /*= A_READ | A_WRITE*/ )
    }
    return true;
 }
- 
+
 bool CSharedMemory::Detach()
 {
    munmap(m_Ptr, m_nSize);
    return true;
 }
- 
+
 bool CSharedMemory::Lock()
 {
    int sval;
@@ -75,27 +77,28 @@ bool CSharedMemory::Lock()
    sem_wait(m_SemID);
    return true;
 }
- 
+
 bool CSharedMemory::UnLock()
 {
    int sval;
    sem_getvalue(m_SemID, &sval);
-   if (sval == 0) {
+   if (sval == 0)
+   {
       sem_post(m_SemID);
    }
    return true;
 }
- 
+
 CSharedMemory::~CSharedMemory()
 {
    Clear();
 }
- 
+
 void CSharedMemory::Clear()
 {
-   if(m_iD != -1)
+   if (m_iD != -1)
    {
-      if ( shm_unlink(m_sName.c_str()) < 0 )
+      if (shm_unlink(m_sName.c_str()) < 0)
       {
          perror("shm_unlink");
       }
@@ -103,31 +106,29 @@ void CSharedMemory::Clear()
    /**
    * Semaphore unlink: Remove a named semaphore  from the system.
    */
-   if(m_SemID != NULL)
+   if (m_SemID != NULL)
    {
       /**
       * Semaphore Close: Close a named semaphore
       */
-      if ( sem_close(m_SemID) < 0 )
+      if (sem_close(m_SemID) < 0)
       {
          perror("sem_close");
       }
       /**
       * Semaphore unlink: Remove a named semaphore  from the system.
       */
-      if ( sem_unlink(m_sName.c_str()) < 0 )
+      if (sem_unlink(m_sName.c_str()) < 0)
       {
          perror("sem_unlink");
       }
    }
 }
- 
-CSharedMemoryException::CSharedMemoryException( const string &message, bool bSysMsg /*= false*/ ) throw()
+
+CSharedMemoryException::CSharedMemoryException(const string &message, bool bSysMsg /*= false*/) throw()
 {
- 
 }
- 
-CSharedMemoryException::~CSharedMemoryException() throw ()
+
+CSharedMemoryException::~CSharedMemoryException() throw()
 {
- 
 }

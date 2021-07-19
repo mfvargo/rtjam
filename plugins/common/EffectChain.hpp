@@ -27,34 +27,54 @@ public:
     // Loop through all the effects for channel 1 and process them
     for (int i = 0; i < m_chain.size(); i++)
     {
-      m_chain[i]->doProcess(inBuff, outBuff, framesize);
-      // Now swap the pointers
-      float *temp = inBuff;
-      inBuff = outBuff;
-      outBuff = temp;
+      if (!m_chain[i]->getByPass())
+      {
+        m_chain[i]->doProcess(inBuff, outBuff, framesize);
+        // Now swap the pointers
+        float *temp = inBuff;
+        inBuff = outBuff;
+        outBuff = temp;
+      }
     }
     memcpy(output, inBuff, framesize * sizeof(float));
   };
 
-  json getChainConfig(std::string name)
+  json getChainConfig(std::string name, int channel)
   {
     json effects = json::array();
     for (int i = 0; i < m_chain.size(); i++)
     {
-      effects.push_back(m_chain[i]->getConfig());
+      json config = m_chain[i]->getSettings();
+      config["index"] = i;
+      effects.push_back(config);
     }
     json rval = {
         {"name", name},
+        {"channel", channel},
         {"effects", effects}};
     return rval;
-  }
+  };
+
+  int size()
+  {
+    return m_chain.size();
+  };
+
   void toggleEffect(int i)
   {
     if (i < m_chain.size())
     {
-      m_chain[i]->setByPass(!m_chain[i]->getByPass());
+      json setting;
+      setting["name"] = "bypass";
+      setting["value"] = !m_chain[i]->getByPass();
+      m_chain[i]->setSettingValue(setting);
     }
-  }
+  };
+
+  Effect *getEffect(int i)
+  {
+    return m_chain[i];
+  };
 
 private:
   std::vector<Effect *> m_chain;

@@ -5,6 +5,7 @@ then
   INDEV=`cat soundin.cfg`
 else
   INDEV=hw:USB
+  echo $INDEV > soundin.cfg
 fi
 # make sure there was something in the file
 if [ -z ${INDEV} ];
@@ -23,6 +24,5 @@ then
   OUTDEV=$INDEV
 fi
 #
-echo $INDEV
-echo $OUTDEV
+/usr/bin/aplay -l > devices.txt
 /usr/bin/jackd -R -dalsa -r48000 -n 2 -p128 -C $INDEV -P $OUTDEV -i2 -o2
