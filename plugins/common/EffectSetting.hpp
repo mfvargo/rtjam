@@ -2,7 +2,7 @@
 
 #include "json.hpp"
 #include "SignalBlock.hpp"
-
+#include <vector>
 using json = nlohmann::json;
 
 class EffectSetting
@@ -40,6 +40,11 @@ public:
     m_units = units;
   };
 
+  void setLabels(std::vector<std::string> labels)
+  {
+    m_labels = labels;
+  };
+
   // This is how the effect will provide it's setting (bottom up)
   json toJson()
   {
@@ -50,7 +55,8 @@ public:
         {"max", m_max},
         {"step", m_step},
         {"units", m_units},
-        {"type", m_type}};
+        {"type", m_type},
+        {"labels", m_labels}};
   };
 
   // This is how the api will put a setting down (top down)
@@ -128,5 +134,6 @@ private:
   float m_step;
   Types m_type;
   Units m_units;
+  std::vector<std::string> m_labels;
   std::string m_name;
 };

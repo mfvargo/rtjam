@@ -10,7 +10,7 @@ public:
   {
     hard,
     soft,
-    asymetric,
+    asymmetric,
     even,
   };
 
@@ -39,6 +39,7 @@ public:
         ClipType::even,         // Max value
         1,                      // Step Size
         EffectSetting::selector);
+    setting.setLabels({"hard", "soft", "asym", "even"});
     setting.setIntValue(ClipType::soft);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
     setting.init(
@@ -168,7 +169,7 @@ private:
     case soft:
       return softClipSample(input);
       break;
-    case asymetric:
+    case asymmetric:
       return asymmetricClipSample(input);
       break;
     case even:
