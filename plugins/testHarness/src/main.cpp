@@ -8,6 +8,10 @@
 #include <unistd.h>
 #endif
 #include <jack/jack.h>
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <pwd.h>
 
 #include "PedalBoard.hpp"
 
@@ -57,7 +61,13 @@ int main(int argc, char *argv[])
 {
     json config;
     PedalBoard pedalBoard;
-    pedalBoard.init();
+
+    std::ifstream infile("testboard.json");
+    json boardConfig;
+    infile >> boardConfig;
+    pedalBoard.init(boardConfig["effects"]);
+
+    pedalBoard.init(boardConfig["effects"]);
 
     std::cout << pedalBoard.getChainConfig("yank_it", 0).dump(2);
 

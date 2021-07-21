@@ -1,72 +1,116 @@
 #pragma once
 
-#include "EffectChain.hpp"
-#include "Delay.hpp"
-#include "HighPassFilter.hpp"
-#include "MonoVerb.hpp"
-#include "Distortion.hpp"
-#include "Tremelo.hpp"
-#include "ToneStack.hpp"
+#include "EffectFactory.hpp"
+#include <thread>
 
 class PedalBoard
 {
 public:
-  void init()
+  // Initialize the pedal board. config should be a json::array() of pedals to construct
+  // For an empty pedalboard, just pass in json::array()
+  void init(json config)
   {
-    m_hpfilter.init();
-    m_distortion.init();
-    m_distortion2.init();
-    m_delay.init();
-    m_reverb.init();
-    m_tremelo.init();
-    m_toneStack.init();
-    // m_effectChain.push(&m_hpfilter);
-    m_effectChain.push(&m_distortion);
-    m_effectChain.push(&m_distortion2);
-    m_effectChain.push(&m_delay);
-    m_effectChain.push(&m_reverb);
-    m_effectChain.push(&m_tremelo);
-    m_effectChain.push(&m_toneStack);
+    m_stable = false;
+    std::this_thread::sleep_for(std::chrono::microseconds(10000));
+    // Clear out any existing pedals
+    for (auto &effect : m_chain)
+    {
+      delete effect;
+    }
+    m_chain.clear();
+
+    // Now load up new pedals from factory
+    for (auto &effectJson : config)
+    {
+      Effect *pEffect = EffectFactory::manufacture(effectJson);
+      if (pEffect != NULL)
+      {
+        m_chain.push_back(pEffect);
+      }
+    }
     m_stable = true;
   }
+
+  // This is the way to invoke the pedalboard on a block of samples
   void process(const float *input, float *output, int framesize)
   {
     if (m_stable)
-      m_effectChain.process(input, output, framesize);
+      processBlock(input, output, framesize);
     else
       memcpy(output, input, sizeof(float) * framesize);
   }
+
+  // this will dump out the json for all the pedasl
   json getChainConfig(std::string name, int channel)
   {
-    return m_effectChain.getChainConfig(name, channel);
-  }
+    json effects = json::array();
+    for (int i = 0; i < m_chain.size(); i++)
+    {
+      json config = m_chain[i]->getSettings();
+      config["index"] = i;
+      effects.push_back(config);
+    }
+    json rval = {
+        {"name", name},
+        {"channel", channel},
+        {"effects", effects}};
+    return rval;
+  };
+
+  // This will apply a setting to a particular pedal
   bool setEffectSetting(json setting, int idx)
   {
     bool rval = false;
     // Check index bounds
     m_stable = false;
-    if (idx < m_effectChain.size())
+    if (idx < m_chain.size())
     {
-      Effect *pEffect = m_effectChain.getEffect(idx);
-      rval = pEffect->setSettingValue(setting);
+      m_chain[idx]->setSettingValue(setting);
     }
     m_stable = true;
     return rval;
   }
 
+  // This will toggle the bypass for a pedal
   void toggleEffect(int idx)
   {
-    m_effectChain.toggleEffect(idx);
+    if (idx < m_chain.size())
+    {
+      json setting;
+      setting["name"] = "bypass";
+      setting["value"] = !m_chain[idx]->getByPass();
+      m_chain[idx]->setSettingValue(setting);
+    }
   }
 
 private:
+  void processBlock(const float *input, float *output, int framesize)
+  {
+    float ping[framesize];
+    float pong[framesize];
+
+    float *inBuff = ping;
+    float *outBuff = pong;
+
+    // Copy channel 1 into local buffer
+    memcpy(inBuff, input, framesize * sizeof(float));
+
+    // Loop through all the effects for channel 1 and process them
+    for (int i = 0; i < m_chain.size(); i++)
+    {
+      if (!m_chain[i]->getByPass())
+      {
+        m_chain[i]->doProcess(inBuff, outBuff, framesize);
+        // Now swap the pointers
+        float *temp = inBuff;
+        inBuff = outBuff;
+        outBuff = temp;
+      }
+    }
+    memcpy(output, inBuff, framesize * sizeof(float));
+  };
+
+private:
   bool m_stable;
-  EffectChain m_effectChain;
-  HighPassFilter m_hpfilter;
-  Distortion m_distortion;
-  Distortion m_distortion2;
-  SigmaDelay m_delay;
-  MonoVerb m_reverb;
-  Tremelo m_tremelo;
-  ToneStack m_toneStack;
+  std::vector<Effect *> m_chain;
 };

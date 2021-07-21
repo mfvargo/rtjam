@@ -1,5 +1,7 @@
 #include "PluginRTJam.hpp"
 #include "Settings.hpp"
+#include <iostream>
+#include <fstream>
 
 #include <string.h>
 #include <math.h>
@@ -37,9 +39,13 @@ PluginRTJam::~PluginRTJam()
 
 void PluginRTJam::init()
 {
+  std::ifstream infile("../testHarness/testboard.json");
+  json boardConfig;
+  infile >> boardConfig;
+
   for (int i = 0; i < 2; i++)
   {
-    m_pedalBoards[i].init();
+    m_pedalBoards[i].init(boardConfig["effects"]);
   }
   // write the effect chain json data
   syncConfigData();
