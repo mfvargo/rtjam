@@ -7,6 +7,7 @@
 #include <fastcgi++/manager.hpp>
 #include <iostream>
 #include <fstream>
+#include "EffectFactory.hpp"
 
 using namespace std;
 using json = nlohmann::json;
@@ -85,7 +86,7 @@ private:
       }
       if (post.first == "sValue")
       {
-        snprintf(param.sValue, 126, "%s", post.second.c_str());
+        snprintf(param.sValue, sizeof(param.sValue) - 1, "%s", post.second.c_str());
       }
       if (post.first == "fValue")
       {
@@ -133,6 +134,12 @@ private:
       case paramRandomCommand:
         out << execMyCommand(param.sValue);
         break;
+      case paramGetPedalTypes:
+      {
+        json pedalTypes(s_PedalTypes);
+        out << pedalTypes.dump(2);
+      }
+      break;
       default:
         out << "Unknown Command";
       }

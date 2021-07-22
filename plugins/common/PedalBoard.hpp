@@ -10,6 +10,7 @@ public:
   // For an empty pedalboard, just pass in json::array()
   void init(json config)
   {
+    markUnstable();
     m_stable = false;
     std::this_thread::sleep_for(std::chrono::microseconds(10000));
     // Clear out any existing pedals
@@ -28,7 +29,68 @@ public:
         m_chain.push_back(pEffect);
       }
     }
-    m_stable = true;
+    markStable();
+  }
+
+  // This will insert a new Pedal on the board
+  void insertPedal(int idx, string pedalName)
+  {
+    markUnstable();
+    json config = json::object();
+    config["name"] = pedalName;
+    config["settings"] = json::array();
+    Effect *pEffect = EffectFactory::manufacture(config);
+    if (pEffect != NULL)
+    {
+      if (idx >= m_chain.size())
+      {
+        m_chain.push_back(pEffect);
+      }
+      else
+      {
+        m_chain.insert(m_chain.begin() + idx, pEffect);
+      }
+    }
+    markStable();
+  }
+
+  // This will delete the pedal at the specified index
+  void deletePedal(int idx)
+  {
+    markUnstable();
+    if (idx < m_chain.size())
+    {
+      Effect *pEffect = m_chain[idx];
+      m_chain.erase(m_chain.begin() + idx);
+      delete pEffect;
+    }
+    markStable();
+  }
+
+  // This will move a pedal from one idx to another
+  void movePedal(int fromIdx, int toIdx)
+  {
+    // Check values of fromIdx and toIdx to see if they make sense
+    if (fromIdx >= m_chain.size() || toIdx > m_chain.size() || fromIdx == toIdx)
+      return;
+
+    // Do the thing
+    markUnstable();
+
+    int size = m_chain.size();
+
+    Effect *pEffect = m_chain[fromIdx];
+    m_chain.erase(m_chain.begin() + fromIdx);
+    // to put it on the end
+    if (toIdx == size)
+    {
+      m_chain.push_back(pEffect);
+    }
+    else
+    {
+      m_chain.insert(m_chain.begin() + toIdx, pEffect);
+    }
+    markStable();
   }
 
   // This is the way to invoke the pedalboard on a block of samples
@@ -84,6 +146,16 @@ public:
   }
 
 private:
+  void markUnstable()
+  {
+    m_stable = false;
+    std::this_thread::sleep_for(std::chrono::microseconds(10000));
+  }
+  void markStable()
+  {
+    m_stable = true;
+  }
+
   void processBlock(const float *input, float *output, int framesize)
   {
     float ping[framesize];

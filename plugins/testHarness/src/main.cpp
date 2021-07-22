@@ -65,11 +65,22 @@ int main(int argc, char *argv[])
     std::ifstream infile("testboard.json");
     json boardConfig;
     infile >> boardConfig;
-    pedalBoard.init(boardConfig["effects"]);
+    // pedalBoard.init(boardConfig["effects"]);
 
-    pedalBoard.init(boardConfig["effects"]);
+    // Add an extra ToneStack in second spot
+    pedalBoard.insertPedal(10, "Tone Stack");
+    pedalBoard.insertPedal(10, "Tremelo");
+    pedalBoard.insertPedal(10, "Reverb");
 
     std::cout << pedalBoard.getChainConfig("yank_it", 0).dump(2);
+
+    pedalBoard.deletePedal(0);
+
+    std::cout << pedalBoard.getChainConfig("yank_it", 0).dump(2);
+
+    pedalBoard.movePedal(1, 0);
+
+    std::cout << pedalBoard.getChainConfig("bob_it", 0).dump(2);
 
     int i;
     const char **ports;

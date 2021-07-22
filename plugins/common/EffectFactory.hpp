@@ -10,6 +10,14 @@
 using json = nlohmann::json;
 using namespace std;
 
+const static json s_PedalTypes = {
+    {"Distortion", "Distortion Overdrive"},
+    {"Delay", "Delay Pedal"},
+    {"Reverb", "Reverb"},
+    {"Tremelo", "Tremelo ala Fender"},
+    {"Tone Stack", "Tone controls (3 band)"},
+    {"DC Offset HighPass", "DC removal Filter"}};
+
 class EffectFactory
 {
 public:
