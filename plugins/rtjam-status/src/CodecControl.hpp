@@ -32,16 +32,19 @@ private:
     // pot filter coefficient 
     float s_alpha = 0.3;
 
-    // handles to I2C devices (used by Wiring library) 
+    // file handles to I2C devices 
     int m_codecI2cAddress;   // TLV320AIC3101 Codec I2C address handle
     int m_adcI2cAddress;     // AD7991 ADC I2C address handle
-    
+
+	int m_file;
+	char *m_filename = "/dev/i2c-1";
+	char m_I2cDataBuffer[2] = {0};
+
     // adc read intermediate result registers
-    unsigned int m_adcControlReg = 0;
+    char m_adcCommand[2] = 0;
     unsigned int m_adcChannel = 0;
     unsigned int m_adcResultHigh = 0;
     unsigned int m_adcResultLow = 0;
-    unsigned short m_adcReadResult = 0;
 
     // adc value array
     unsigned int m_adcValue[3];
