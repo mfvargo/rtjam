@@ -41,7 +41,7 @@ private:
 	char m_I2cDataBuffer[2] = {0};
 
     // adc read intermediate result registers
-    char m_adcCommand[2] = 0;
+    char m_adcCommand[2] = {0};
     unsigned int m_adcChannel = 0;
     unsigned int m_adcResultHigh = 0;
     unsigned int m_adcResultLow = 0;
