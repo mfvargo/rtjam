@@ -2,7 +2,7 @@
 
 #include "Effect.hpp"
 #include "BiQuad.hpp"
-#include "CrossFade.hpp"
+#include "SignalBlock.hpp"
 
 class Distortion : public Effect
 {
@@ -140,14 +140,14 @@ public:
     {
       // HPF in chain - determines amount of low-freqs sent to clipper block
       // use F~140 Hz for full-range. F=720 for Tubescreamer type distorion
-      float value = m_hpf.getSample(value);
+      float value = m_hpf.getSample(input[i]);
       
       // Stage 1 - first clipper (set to emulate op-amp clipping before diodes)
-      value = clipSample(input[i] * m_gain1); // clip signal
+      value = clipSample(value * m_gain1); // clip signal
       value = m_lpf1.getSample(value);   // filter out higher-order harmonics
 
       // Stage 2 - diode clipper 
-      value = clipSample(input[i] * m_gain2) * m_level;
+      value = clipSample(value * m_gain2) * m_level;
       value = m_lpf2.getSample(value);   // filter out higher-order harmonics
       
       // Stage 3 - Tone control
@@ -155,7 +155,7 @@ public:
       //
       float m_toneLpfOut = m_toneLpf.getSample(value);
       float m_toneHpfOut = m_toneHpf.getSample(value);
-      value = m_crossFade.getSample(m_toneLpfOut, m_toneHpfOut, m_tone); 
+      value = SignalBlock::crossFade(m_toneLpfOut, m_toneHpfOut, m_tone); 
 
       // value = distortionAlgorithm(value);
       output[i] = value * m_level;
@@ -174,8 +174,6 @@ private:
 
   BiQuadFilter m_toneLpf;   
   BiQuadFilter m_toneHpf; 
-
-  CrossFade m_crossFade;    // crossfader for tone control
 
   float m_toneLpfOut;
   float m_toneHpfOut;
@@ -228,7 +226,7 @@ private:
     /* filter the vector */
     for (i = 0; i < 8; i++)
     {
-      // filter
+      // filter at upsampled Fs/8
       filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
     }
     // add gain to signal and clip
@@ -239,7 +237,7 @@ private:
       clipOut[i] = clipSample(filterOut[i]);
     }
     
-    // filter before downsampling 
+    // filter at upsampled Fs/8 before downsampling 
     for (i = 0; i < 8; i++)
     {
       clipOut[i] = m_downsample.getSample(clipOut[i]);
