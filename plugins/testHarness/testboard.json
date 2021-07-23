@@ -1,0 +1,41 @@
+{
+  "channel":0,
+  "effects":[
+    {"index":0,"name":"Distortion","settings":[
+      {"labels":[],"max":1,"min":0,"name":"bypass","step":1,"type":2,"units":4,"value":false},
+      {"labels":["hard","soft","asym","even"],"max":3,"min":0,"name":"clipType","step":1,"type":1,"units":3,"value":1},
+      {"labels":[],"max":40,"min":0,"name":"drive","step":0.5,"type":0,"units":1,"value":6},
+      {"labels":["hard","soft","asym","even"],"max":10,"min":-30,"name":"level","step":0.5,"type":0,"units":1,"value":0}
+    ]},
+    {"index":1,"name":"Distortion","settings":[
+      {"labels":[],"max":1,"min":0,"name":"bypass","step":1,"type":2,"units":4,"value":true},
+      {"labels":["hard","soft","asym","even"],"max":3,"min":0,"name":"clipType","step":1,"type":1,"units":3,"value":1},
+      {"labels":[],"max":40,"min":0,"name":"drive","step":0.5,"type":0,"units":1,"value":6},
+      {"labels":["hard","soft","asym","even"],"max":10,"min":-30,"name":"level","step":0.5,"type":0,"units":1,"value":0}
+    ]},
+    {"index":2,"name":"Delay","settings":[
+      {"labels":[],"max":1,"min":0,"name":"bypass","step":1,"type":2,"units":4,"value":false},
+      {"labels":[],"max":-25,"min":-60,"name":"drift","step":1,"type":0,"units":1,"value":-42},
+      {"labels":[],"max":500,"min":5,"name":"duration","step":5,"type":0,"units":0,"value":250},
+      {"labels":[],"max":1,"min":0,"name":"feedback","step":0.10000000149011612,"type":0,"units":2,"value":0.10000000149011612},
+      {"labels":[],"max":1,"min":0,"name":"level","step":0.10000000149011612,"type":0,"units":2,"value":0.5},
+      {"labels":[],"max":5,"min":0.10000000149011612,"name":"rate","step":0.10000000149011612,"type":0,"units":2,"value":1.399999976158142}
+    ]},
+    {"index":3,"name":"Reverb","settings":[
+      {"labels":[],"max":1,"min":0,"name":"bypass","step":1,"type":2,"units":4,"value":false},
+      {"labels":[],"max":0.5,"min":0,"name":"mix","step":0.019999999552965164,"type":0,"units":2,"value":0.2}
+    ]},
+    {"index":4,"name":"Tremelo","settings":[
+      {"labels":[],"max":1,"min":0,"name":"bypass","step":1,"type":2,"units":4,"value":true},
+      {"labels":[],"max":1,"min":0,"name":"depth","step":0.10000000149011612,"type":0,"units":2,"value":0.4000000059604645},
+      {"labels":[],"max":8,"min":0,"name":"rate","step":0.10000000149011612,"type":0,"units":2,"value":1.2000000476837158}
+    ]},
+    {"index":5,"name":"Tone Stack","settings":[
+      {"labels":[],"max":1,"min":0,"name":"bypass","step":1,"type":2,"units":4,"value":true},
+      {"labels":[],"max":10,"min":-10,"name":"low","step":0.25,"type":0,"units":1,"value":0},
+      {"labels":[],"max":10,"min":-10,"name":"mid","step":0.25,"type":0,"units":1,"value":0},
+      {"labels":[],"max":10,"min":-10,"name":"treble","step":0.25,"type":0,"units":1,"value":0}
+    ]}
+  ],
+  "name":"channel_0"
+}

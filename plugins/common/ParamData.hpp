@@ -34,12 +34,17 @@ enum RTJamParameters
   paramReverbTwo,
   paramGetConfigJson,
   paramSetEffectConfig,
+  paramInsertPedal,
+  paramDeletePedal,
+  paramMovePedal,
+  paramLoadBoard,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,
   paramListAudioConfig,
   paramCheckForUpdate,
   paramRandomCommand,
+  paramGetPedalTypes,
   paramRebootDevice = 9998,
   paramShutdownDevice = 9999,
 };
@@ -50,7 +55,7 @@ struct RTJamParam
   int iValue;
   int iValue2;
   float fValue;
-  char sValue[1024];
+  char sValue[8096];
 };
 
 class ParamData

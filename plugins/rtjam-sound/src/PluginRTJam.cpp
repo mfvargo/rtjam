@@ -1,5 +1,7 @@
 #include "PluginRTJam.hpp"
 #include "Settings.hpp"
+#include <iostream>
+#include <fstream>
 
 #include <string.h>
 #include <math.h>
@@ -39,7 +41,7 @@ void PluginRTJam::init()
 {
   for (int i = 0; i < 2; i++)
   {
-    m_pedalBoards[i].init();
+    m_pedalBoards[i].init(json::array());
   }
   // write the effect chain json data
   syncConfigData();
@@ -135,6 +137,41 @@ void PluginRTJam::getParams()
         cerr << "failed to parse json!" << endl;
       }
     }
+  case paramInsertPedal:
+    if ((m_param.iValue >= 0 && m_param.iValue < 2) && (m_param.iValue2 >= 0))
+    {
+      m_pedalBoards[m_param.iValue].insertPedal(m_param.iValue2, m_param.sValue);
+      syncConfigData();
+    }
+    break;
+  case paramDeletePedal:
+    if ((m_param.iValue >= 0 && m_param.iValue < 2) && (m_param.iValue2 >= 0))
+    {
+      m_pedalBoards[m_param.iValue].deletePedal(m_param.iValue2);
+      syncConfigData();
+    }
+    break;
+  case paramMovePedal:
+    if ((m_param.iValue >= 0 && m_param.iValue < 2) && (m_param.iValue2 >= 0))
+    {
+      m_pedalBoards[m_param.iValue].movePedal(m_param.iValue2, m_param.fValue);
+      syncConfigData();
+    }
+    break;
+  case paramLoadBoard:
+    try
+    {
+      if (m_param.iValue >= 0 && m_param.iValue < 2)
+      {
+        m_pedalBoards[m_param.iValue].init(json::parse(m_param.sValue)["config"]);
+        syncConfigData();
+      }
+    }
+    catch (...)
+    {
+      cerr << "failed to parse json!" << endl;
+    }
+    break;
   }
 }
 
