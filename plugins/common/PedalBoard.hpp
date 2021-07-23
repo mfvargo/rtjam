@@ -12,7 +12,7 @@ public:
   {
     markUnstable();
     m_stable = false;
-    std::this_thread::sleep_for(std::chrono::microseconds(10000));
+    std::this_thread::sleep_for(std::chrono::microseconds(2000));
     // Clear out any existing pedals
     for (auto &effect : m_chain)
     {
