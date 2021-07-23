@@ -158,6 +158,20 @@ void PluginRTJam::getParams()
       syncConfigData();
     }
     break;
+  case paramLoadBoard:
+    try
+    {
+      if (m_param.iValue >= 0 && m_param.iValue < 2)
+      {
+        m_pedalBoards[m_param.iValue].init(json::parse(m_param.sValue)["config"]);
+        syncConfigData();
+      }
+    }
+    catch (...)
+    {
+      cerr << "failed to parse json!" << endl;
+    }
+    break;
   }
 }
 

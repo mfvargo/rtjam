@@ -37,6 +37,7 @@ enum RTJamParameters
   paramInsertPedal,
   paramDeletePedal,
   paramMovePedal,
+  paramLoadBoard,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,
@@ -54,7 +55,7 @@ struct RTJamParam
   int iValue;
   int iValue2;
   float fValue;
-  char sValue[1024];
+  char sValue[8096];
 };
 
 class ParamData
