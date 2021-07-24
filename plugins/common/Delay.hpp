@@ -21,9 +21,9 @@ public:
     setting.init(
         "duration",               // Name
         EffectSetting::floatType, // Type of setting
-        5,                        // Min value
+        2,                        // Min value
         500.0,                    // Max value
-        5,                        // Step Size
+        2,                        // Step Size
         EffectSetting::msec);
     setting.setFloatValue(250.0); // 1/8 note at 120BPM = 250msec.
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
@@ -33,7 +33,7 @@ public:
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
         1.0,                      // Max value
-        0.1,                      // Step Size
+        0.01,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.1);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
@@ -43,7 +43,7 @@ public:
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
         1.0,                      // Max value
-        0.1,                      // Step Size
+        0.01,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.5);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
@@ -114,6 +114,20 @@ public:
     m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_color)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
   }
 
+  // Simple Digital Delay Effect - Signal Flow Diagram
+  //
+  //          ┌───────────────────────────────────────────┐
+  //          │                                           │
+  //          │              ┌────────┐                   ▼
+  //          │  ┌─────┐     │        │    ┌─────┐     ┌─────┐
+  //  input ──┴─►│ sum ├────►│ delay  ├─┬─►│level├────►│ sum ├────►
+  //             └─────┘     │        │ │  └─────┘     └─────┘
+  //                ▲        └────────┘ │
+  //                │                   │
+  //                │        ┌────────┐ │
+  //                └────────┤feedback│◄┘
+  //                         └────────┘
+  //
   void process(const float *input, float *output, int framesize) override
   {
     // Implement the delay
@@ -135,10 +149,10 @@ public:
       readIndex %= m_bufferDepth;
 
       // return original plus delay
-      output[sample] = input[sample] + m_delayBuffer[readIndex];
+      output[sample] = input[sample] + m_delayBuffer[readIndex] * m_level;
 
       // add feedback to the buffer
-      m_delayBuffer[m_writePointerIndex] = m_level * input[sample] + (output[sample] * m_feedback);
+      m_delayBuffer[m_writePointerIndex] = input[sample] + (output[sample] * m_feedback);
     }
   };
 

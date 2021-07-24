@@ -11,7 +11,6 @@ public:
   void init(json config)
   {
     markUnstable();
-    m_stable = false;
     std::this_thread::sleep_for(std::chrono::microseconds(2000));
     // Clear out any existing pedals
     for (auto &effect : m_chain)
@@ -124,12 +123,10 @@ public:
   {
     bool rval = false;
     // Check index bounds
-    m_stable = false;
     if (idx < m_chain.size())
     {
       m_chain[idx]->setSettingValue(setting);
     }
-    m_stable = true;
     return rval;
   }
 

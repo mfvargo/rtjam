@@ -69,14 +69,18 @@ public:
     {
     case floatType:
       fValue = setting["value"];
-      if (fValue < m_min || fValue > m_max)
-        return false;
+      if (fValue < m_min)
+        fValue = m_min;
+      if (fValue > m_max)
+        fValue = m_max;
       m_setting["value"] = fValue;
       break;
     case intType:
       iValue = setting["value"];
-      if (iValue < m_min || iValue > m_max)
-        return false;
+      if (iValue < m_min)
+        iValue = m_min;
+      if (iValue > m_max)
+        iValue = m_max;
       m_setting["value"] = iValue;
       break;
     case booleanType:
