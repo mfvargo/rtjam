@@ -32,7 +32,7 @@ public:
         "feedback",               // Name
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
-        1.0,                      // Max value
+        1.1,                      // Max value
         0.01,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.1);
@@ -152,7 +152,7 @@ public:
       output[sample] = input[sample] + m_delayBuffer[readIndex] * m_level;
 
       // add feedback to the buffer
-      m_delayBuffer[m_writePointerIndex] = input[sample] + (output[sample] * m_feedback);
+      m_delayBuffer[m_writePointerIndex] = input[sample] + (m_delayBuffer[readIndex] * m_feedback);
     }
   };
 
