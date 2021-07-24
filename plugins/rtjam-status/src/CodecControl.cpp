@@ -48,7 +48,7 @@ void CodecControlAndStatus::init(void)
     // Set Reg 0 - select Page 0 
     m_I2cDataBuffer[0] = 0;
     m_I2cDataBuffer[1] = 0;
-    if (write(m_file, m_I2cDataBuffer, 2) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
 	   cerr << "Failed to write to i2c bus" << endl;
        exit(-1);
@@ -60,7 +60,7 @@ void CodecControlAndStatus::init(void)
     {
         m_I2cDataBuffer[0] = m_codecRegDataP0[i][0];
         m_I2cDataBuffer[1] = m_codecRegDataP0[i][1];
-        if (write(m_file, m_I2cDataBuffer, 2) != 1)
+        if (write(m_file, m_I2cDataBuffer, 2) != 2)
         {
 	        cerr << "Failed to write to i2c bus" << endl;
 	    }
@@ -69,7 +69,7 @@ void CodecControlAndStatus::init(void)
     // Init Page 1 Registers - set Reg 0 to 1 (select Page 1)
     m_I2cDataBuffer[0] = 0;
     m_I2cDataBuffer[1] = 1;
-    if (write(m_file, m_I2cDataBuffer, 2) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
 	    cerr << "Failed to write to i2c bus" << endl;
         exit(-1);
@@ -80,7 +80,7 @@ void CodecControlAndStatus::init(void)
     {
         m_I2cDataBuffer[0] = m_codecRegDataP1[i][0];
         m_I2cDataBuffer[1] = m_codecRegDataP1[i][1];
-        if (write(m_file, m_I2cDataBuffer, 2) != 1)
+        if (write(m_file, m_I2cDataBuffer, 2) != 2)
         {
 	        cerr << "Failed to write to i2c bus" << endl;
             exit(-1);
@@ -91,7 +91,7 @@ void CodecControlAndStatus::init(void)
     // Set Reg 0 - select Page 0
     m_I2cDataBuffer[0] = 0;
     m_I2cDataBuffer[1] = 0;
-    if (write(m_file, m_I2cDataBuffer, 2) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
 	    cerr << "Failed to write to i2c bus" << endl;
         exit(-1);
@@ -102,7 +102,7 @@ void CodecControlAndStatus::init(void)
     //wiringPiI2CWriteReg8(m_codecI2cAddress, 12, 0x50);
     m_I2cDataBuffer[0] = 12;
     m_I2cDataBuffer[1] = 0X50;
-    if (write(m_file, m_I2cDataBuffer, 2) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
 	   cerr << "Failed to write to i2c bus" << endl;
        exit(-1);
@@ -112,7 +112,7 @@ void CodecControlAndStatus::init(void)
     //wiringPiI2CWriteReg8(m_codecI2cAddress, 0, 0);  
     m_I2cDataBuffer[0] = 107;
     m_I2cDataBuffer[1] = 0xc0;
-    if (write(m_file, m_I2cDataBuffer, 2) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
 	   cerr << "Failed to write to i2c bus" << endl;
        exit(-1);
@@ -145,9 +145,9 @@ void CodecControlAndStatus::updateVolumes(void)
     cout << "Instrument Gain =  " << m_adcValue[0]/5 << endl;   
     m_I2cDataBuffer[0] = 15;
  	m_I2cDataBuffer[1] = m_adcValue[0]/5; 
-    if (write(m_file, m_I2cDataBuffer, 1) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
-	   cerr << "Failed to write to i2c bus" << endl;
+	   cerr << "Failed to write instrument gain to i2c bus" << endl;
 	}
 
     // Pot 2 - channel 1 - mic/headset input gain
@@ -155,9 +155,9 @@ void CodecControlAndStatus::updateVolumes(void)
     cout << "Mic Gain =  " << m_adcValue[1]/4 << endl;
     m_I2cDataBuffer[0] = 16;
     m_I2cDataBuffer[1] = m_adcValue[1]/4;
-    if (write(m_file, m_I2cDataBuffer, 1) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
-	   cerr << "Failed to write to i2c bus" << endl;
+	   cerr << "Failed to write mic gain to i2c bus" << endl;
 	}
 
     // Pot 3 - channel 2 - Headphone amp gain]
@@ -168,16 +168,16 @@ void CodecControlAndStatus::updateVolumes(void)
 
     m_I2cDataBuffer[0] = 47;
     m_I2cDataBuffer[1] = m_temp;    
-    if (write(m_file, m_I2cDataBuffer, 2) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
-	   cerr << "Failed to write to i2c bus" << endl;
+	   cerr << "Failed to write left headphone gain to i2c bus" << endl;
 	}
     
     m_I2cDataBuffer[0] = 64;
     m_I2cDataBuffer[1] = m_adcValue[1]/4;
-    if (write(m_file, m_I2cDataBuffer, 2) != 1)
+    if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
-	   cerr << "Failed to write to i2c bus" << endl;
+	   cerr << "Failed to write right headphone gain to i2c bus" << endl;
 	}
             
     // store current state for next time through loop
@@ -194,19 +194,19 @@ void CodecControlAndStatus::updateVolumes(void)
 void CodecControlAndStatus::ADC_ScanInputs(void)
 {
     // setup I2C to write to ADC at address 0x29
-	//mFile = wiringPiI2CSetup(0x29);
-	if (ioctl(m_file, I2C_SLAVE, 0x29) < 0)
-	{
-		cerr << "Failed to access i2c bus" << endl;
-		exit(-1);
-	}
+	m_file = wiringPiI2CSetup(0x29);
+//	if (ioctl(m_file, I2C_SLAVE, 0x29) < 0)
+//	{
+//		cerr << "Failed to access i2c bus" << endl;
+//		exit(-1);
+//	}
 	
 	// write to ADC to start conversion
 	m_adcCommand[0] = 0b11110000;		// CH3-CH0, 
 	wiringPiI2CWrite(m_file, 0xF0);
     if (write(m_file, m_adcCommand, 1) != 1)
     {
-	   cerr << "Failed to write to i2c bus" << endl;
+	   cerr << "Failed to write to adc on i2c bus" << endl;
 	   exit(-1);	
     }
 	
@@ -217,16 +217,18 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
 	{
         
         // read 2 bytes back from ADC
-        //m_adcReadResult = wiringPiI2CReadReg16(m_file, 0);
+        int m_adcReadResult = wiringPiI2CReadReg16(m_file, 0);
 
-        if (read(m_file, m_I2cDataBuffer, 2) != 2); // DFM test
-        {
-            cerr << "Failed to read from i2c bus" << endl;
-        }
+
+        //if ( read(m_file, m_I2cDataBuffer, 2) != 2)
+        //{
+        //    cerr << "Failed to read adc from i2c bus" << endl;
+        //}
 
         // save and mask off channel information, then convert adc result to 16 bits
         m_adcChannel = ((m_I2cDataBuffer[0] & 0x30) >> 4);
 		m_adcValue[i] = (float)((m_I2cDataBuffer[0] & 0x0F) << 8) + m_I2cDataBuffer[1];
+        m_adcValue[i] = m_adcReadResult;
 
         cout << "ADC Ch " << m_adcChannel << "= " << m_adcValue[i] << endl;
     }
@@ -242,8 +244,8 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
        // m_adcValue[i] = m_adcReadResult;
 
         // save and mask off channel information, then convert adc result to 16 bits
-        m_adcChannel = (m_adcReadResult & 0x30) >> 12;;
-        m_adcValue[m_adcChannel] = m_adcReadResult
+        m_adcChannel = (m_adcReadResult & 0x30) >> 12;
+        m_adcValue[m_adcChannel] = m_adcReadResult/16;      // store 8 bit ADC value
         delayMicroseconds(2);
         
         std::cout << "ADC Ch " << m_adcChannel << "= " << (m_adcReadResult & 0x0fff) << endl;
