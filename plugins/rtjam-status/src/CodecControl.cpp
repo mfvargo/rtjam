@@ -194,16 +194,14 @@ void CodecControlAndStatus::updateVolumes(void)
 void CodecControlAndStatus::ADC_ScanInputs(void)
 {
     // setup I2C to write to ADC at address 0x29
-	m_file = wiringPiI2CSetup(0x29);
-//	if (ioctl(m_file, I2C_SLAVE, 0x29) < 0)
-//	{
-//		cerr << "Failed to access i2c bus" << endl;
-//		exit(-1);
-//	}
+	if (ioctl(m_file, I2C_SLAVE, 0x29) < 0)
+	{
+		cerr << "Failed to access i2c bus" << endl;
+		exit(-1);
+	}
 	
 	// write to ADC to start conversion
 	m_adcCommand[0] = 0b11110000;		// CH3-CH0, 
-	wiringPiI2CWrite(m_file, 0xF0);
     if (write(m_file, m_adcCommand, 1) != 1)
     {
 	   cerr << "Failed to write to adc on i2c bus" << endl;
@@ -216,44 +214,21 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
     for (unsigned int i = 0; i < 3; i++)
 	{
         
-        // read 2 bytes back from ADC
-        int m_adcReadResult = wiringPiI2CReadReg16(m_file, 0);
-
-
-        //if ( read(m_file, m_I2cDataBuffer, 2) != 2)
-        //{
-        //    cerr << "Failed to read adc from i2c bus" << endl;
-        //}
+        // read 2 byte result back from ADC
+        if ( read(m_file, m_I2cDataBuffer, 2) != 2)
+        {
+            cerr << "Failed to read adc from i2c bus" << endl;
+        }
 
         // save and mask off channel information, then convert adc result to 16 bits
         m_adcChannel = ((m_I2cDataBuffer[0] & 0x30) >> 4);
 		m_adcValue[i] = (float)((m_I2cDataBuffer[0] & 0x0F) << 8) + m_I2cDataBuffer[1];
-        m_adcValue[i] = m_adcReadResult;
 
+        // scale down to 8 bits for knobs
+        m_adcValue[i] /=  16;
+       
         cout << "ADC Ch " << m_adcChannel << "= " << m_adcValue[i] << endl;
     }
-
-#if 0 
-    // read 3 ADC channels - sequential??? TODO - change to single?
-    for(unsigned int i=0; i<3; i++)
-    {
-        m_adcControlReg = 0x01 << i + 4; // set channel bit (shift left each time through)       
-    
-        m_adcReadResult = wiringPiI2CReadReg16(m_adcI2cAddress, m_adcControlReg);
-
-       // m_adcValue[i] = m_adcReadResult;
-
-        // save and mask off channel information, then convert adc result to 16 bits
-        m_adcChannel = (m_adcReadResult & 0x30) >> 12;
-        m_adcValue[m_adcChannel] = m_adcReadResult/16;      // store 8 bit ADC value
-        delayMicroseconds(2);
-        
-        std::cout << "ADC Ch " << m_adcChannel << "= " << (m_adcReadResult & 0x0fff) << endl;
-
-
-
-    }
-#endif
 
 }
 
