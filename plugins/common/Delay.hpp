@@ -2,6 +2,7 @@
 
 #include "Effect.hpp"
 #include "LowFreqOsc.hpp"
+#include "BiQuad.hpp"
 
 #define DELAY_BUFFER_SIZE 96000
 #define LFO_GAIN -42.0
@@ -9,6 +10,13 @@
 class SigmaDelay : public Effect
 {
 public:
+  enum DelayMode
+  {
+    digital = 0,
+    analog,
+    highpass
+  };
+
   void init() override
   {
     // Setup base class stuff (bypass etc)
@@ -68,8 +76,20 @@ public:
     setting.setFloatValue(1.4);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
+    setting.init(
+        "delayMode",            // Name
+        EffectSetting::intType, // Type of setting
+        DelayMode::digital,     // Min value
+        DelayMode::highpass,    // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setLabels({"Dig", "Ana", "HPF"});
+    setting.setIntValue(DelayMode::digital);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
     // Do some init stuff
     m_writePointerIndex = 0;
+    m_delayMode = DelayMode::digital;
 
     loadFromConfig();
   };
@@ -110,23 +130,51 @@ public:
       m_rate = it->second.getFloatValue();
     }
 
+    it = m_settingMap.find("delayMode");
+    if (it != m_settingMap.end())
+    {
+      m_delayMode = (DelayMode)it->second.getIntValue();
+    }
+
+    switch (m_delayMode)
+    {
+    case DelayMode::digital:
+      m_feedbackFilter.init(BiQuadFilter::FilterType::LowPass, 10000, 1.0, 1.0, 48000);
+      break;
+    case DelayMode::analog:
+      m_feedbackFilter.init(BiQuadFilter::FilterType::LowPass, 1250, 1.0, 1.0, 48000);
+      break;
+    case DelayMode::highpass:
+      m_feedbackFilter.init(BiQuadFilter::FilterType::HighPass, 1500, 1.0, 1.0, 48000);
+      break;
+    }
     m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_color, 48000);
     m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_color)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
   }
 
-  // Simple Digital Delay Effect - Signal Flow Diagram
+  //  Digital Delay Effect - Signal Flow Diagram
+  //
+  //  Delay with modulation and filter.
+  //  LPF for analog delay simulation
+  //  HPF for "thinning delay"
   //
   //          ┌───────────────────────────────────────────┐
   //          │                                           │
-  //          │              ┌────────┐                   ▼
-  //          │  ┌─────┐     │        │    ┌─────┐     ┌─────┐
-  //  input ──┴─►│ sum ├────►│ delay  ├─┬─►│level├────►│ sum ├────►
-  //             └─────┘     │        │ │  └─────┘     └─────┘
-  //                ▲        └────────┘ │
-  //                │                   │
-  //                │        ┌────────┐ │
-  //                └────────┤feedback│◄┘
-  //                         └────────┘
+  //          │             ┌────────────┐                ▼
+  //          │    ┌────┐   │            │    ┌─────┐   ┌────┐
+  //  Input───┴───►│Sum ├──►│   Delay    ├─┬─►│Level├──►│Sum ├───► Output
+  //               └────┘   │            │ │  └─────┘   └────┘
+  //                 ▲      └────────────┘ │
+  //                 │            ▲        │
+  //                 │            │        │
+  //              ┌──┴───┐     ┌──┴──┐     │
+  //      LPF/HPF │Filter│     │ Mod │     │
+  //              └──────┘     └─────┘     │
+  //                 ▲                     │
+  //                 │        ┌────────┐   │
+  //                 └────────┤Feedback│◄──┘
+  //                          └────────┘
+  //                            0-1.2
   //
   void process(const float *input, float *output, int framesize) override
   {
@@ -152,12 +200,14 @@ public:
       output[sample] = input[sample] + m_delayBuffer[readIndex] * m_level;
 
       // add feedback to the buffer
-      m_delayBuffer[m_writePointerIndex] = input[sample] + (m_delayBuffer[readIndex] * m_feedback);
+      m_delayBuffer[m_writePointerIndex] = input[sample] + (m_feedbackFilter.getSample(m_delayBuffer[readIndex]) * m_feedback);
     }
   };
 
 private:
   LowFreqOsc m_osc;
+  BiQuadFilter m_feedbackFilter;
+  int m_delayMode;
   float m_delayBuffer[DELAY_BUFFER_SIZE]; // 1 second of delay buffer
   int m_sampleRate = 48000;
   int m_bufferDepth;
