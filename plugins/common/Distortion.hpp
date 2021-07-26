@@ -7,6 +7,7 @@
 class Distortion : public Effect
 {
 public:
+
   enum ClipType
   {
     hard,
@@ -14,6 +15,13 @@ public:
     asymmetric,
     even,
   };
+
+  enum HpfMode
+  {
+    low,
+    high,
+  };
+
 
   void init() override
   {
@@ -26,23 +34,13 @@ public:
     EffectSetting setting;
 
     setting.init(
-        "drive1",                 // Name
+        "drive",                 // Name
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
         40.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(6.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
-    setting.init(
-        "drive2",                 // Name
-        EffectSetting::floatType, // Type of setting
-        0.0,                      // Min value
-        40.0,                     // Max value
-        0.5,                      // Step Size
-        EffectSetting::dB);
-    setting.setFloatValue(0.0);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
     setting.init(
@@ -76,8 +74,21 @@ public:
     setting.setFloatValue(0.0);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
+    setting.init(
+        "hpfMode",              // Name
+        EffectSetting::intType, // Type of setting
+        HpfMode::low,           // Min value
+        HpfMode::high,          // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setLabels({"Low", "Mid"});   // better names - low/mid???
+    setting.setIntValue(HpfMode::low);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+
     // pre-and post-distortion filters (fixed)
-    m_hpfFreq = 200;
+    m_hpfFreq1 = 200;   // full-range overdrive cutoff
+    m_hpfFreq2 = 720;   // TS style low cutoff
     m_lpf1Freq = 5000;
     m_lpf2Freq = 5000;
 
@@ -86,6 +97,8 @@ public:
     // "warm" and "bright"
     m_toneLpfFreq = 2000;
     m_toneHpfFreq = 3000;
+
+    m_dryLevel = 0.01; // fixed for now - need to tune - add to param set?
 
     loadFromConfig();
   };
@@ -96,16 +109,10 @@ public:
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("drive1");
+    it = m_settingMap.find("drive");
     if (it != m_settingMap.end())
     {
-      m_gain1 = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("drive2");
-    if (it != m_settingMap.end())
-    {
-      m_gain2 = it->second.getFloatValue();
+      m_gain = it->second.getFloatValue();
     }
 
     it = m_settingMap.find("clipType");
@@ -126,8 +133,21 @@ public:
       m_level = it->second.getFloatValue();
     }
 
+    it = m_settingMap.find("hpfMode");
+    if (it != m_settingMap.end())
+    {
+      m_hpfMode = (HpfMode)it->second.getIntValue();
+    }
+
+
     setupFilters();
   }
+
+
+
+
+
+  
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)
@@ -137,17 +157,23 @@ public:
       float value = m_hpf.getSample(input[i]);
 
       // Stage 1 - first clipper (set to emulate op-amp clipping before diodes)
-      value = clipSample(value * m_gain1); // clip signal
+      value = clipSample(value * m_gain); // clip signal
+      value = m_lpf1.getSample(value);     // filter out higher-order harmonics
       value = m_lpf1.getSample(value);     // filter out higher-order harmonics
 
+
       // Stage 2 - diode clipper
-      value = clipSample(value * m_gain2);
+      value = clipSample(value * m_gain);
       value = m_lpf2.getSample(value); // filter out higher-order harmonics
+      value = m_lpf2.getSample(value);     // filter out higher-order harmonics
+
 
       // Stage 3 - Tone control
       // simple tone control that cross-fades between low and high-pass filters
       //
       value = SignalBlock::crossFade(m_toneHpf.getSample(value), m_toneLpf.getSample(value), m_tone);
+
+      value = value + m_dryLevel * input[i];   // mix some dry signal in to add "detail" 
 
       // value = distortionAlgorithm(value);
       output[i] = value * m_level;
@@ -156,6 +182,7 @@ public:
 
 private:
   BiQuadFilter m_hpf;  // runs at 48k on input signal
+  
   BiQuadFilter m_lpf1; // runs at 48k on clip1 output signal
   BiQuadFilter m_lpf2; // runs at 48k on clip1 output signal
 
@@ -166,21 +193,28 @@ private:
   BiQuadFilter m_toneHpf;
 
   // Parameters
-  float m_gain1;       // gain before clip functions
-  float m_gain2;       // gain before clip functions
+  float m_gain;       // gain before clip functions
   float m_tone;        // tone control
   float m_level;       // Overall level
   ClipType m_clipType; // what kind of clipping funciton
   float m_lpf1Freq;    // frequency of the first clip block lpf (fixed filter)
   float m_lpf2Freq;    // frequency of the first clip block lpf (fixed filter)
-  float m_hpfFreq;     // frequency of the hpf before first clip block (fixed filter)
+  
+  float m_hpfFreq1;     // frequency setting 1 - hpf before clip (fixed filter)
+  float m_hpfFreq2;     // frequency setting 1 - hpf before clip (fixed filter)
+  int m_hpfMode;        // high-pass filter mode - low or mid 
+
   float m_toneLpfFreq; // LPF cut-off frequency for tone control
   float m_toneHpfFreq; // HPF cut-off frequency for tone control
+
+  float m_dryLevel;     // amount of dry to add in at end of chain 
+                        // (to model Klon type drives or add detail to high gain model)
+
 
   void setupFilters()
   {
     // Setup the biquad filter for the upsampled data
-    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_hpfFreq, 1.0, 1.0, 48000);
+    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_hpfFreq1, 1.0, 1.0, 48000);
     m_lpf1.init(BiQuadFilter::FilterType::LowPass, m_lpf1Freq, 1.0, 1.0, 48000);
     m_lpf2.init(BiQuadFilter::FilterType::LowPass, m_lpf2Freq, 1.0, 1.0, 48000);
     m_upsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 48000);
@@ -210,24 +244,32 @@ private:
     /* filter the vector */
     for (i = 0; i < 8; i++)
     {
-      // filter at upsampled Fs/8
+      // filter at upsampled Fs/8 - 8th order filter
       filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
+      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
+      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
+      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
+
     }
     // add gain to signal and clip
     // using either hard, soft, asymmetric or symmetric clipper
     for (i = 0; i < 8; i++)
     {
-      filterOut[i] = 8 * m_gain1 * filterOut[i];
+      filterOut[i] = 8 * m_gain * filterOut[i];
       clipOut[i] = clipSample(filterOut[i]);
     }
 
-    // filter at upsampled Fs/8 before downsampling
+    // filter at upsampled Fs/8 before downsampling - 8th order filter
     for (i = 0; i < 8; i++)
     {
       clipOut[i] = m_downsample.getSample(clipOut[i]);
+      clipOut[i] = m_downsample.getSample(clipOut[i]);
+      clipOut[i] = m_downsample.getSample(clipOut[i]);
+      clipOut[i] = m_downsample.getSample(clipOut[i]);
+
     }
 
-    // down-sample the vector to back native sample rate
+    // down-sample the vector back to original sample rate
     return clipOut[0];
   };
 

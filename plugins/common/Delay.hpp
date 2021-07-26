@@ -2,13 +2,25 @@
 
 #include "Effect.hpp"
 #include "LowFreqOsc.hpp"
+#include "BiQuad.hpp"
 
 #define DELAY_BUFFER_SIZE 96000
 #define LFO_GAIN -42.0
 
+
+
 class SigmaDelay : public Effect
 {
 public:
+
+  enum DelayMode
+  {
+    digital = 0,
+    analog,
+    highpass
+  };
+
+
   void init() override
   {
     // Setup base class stuff (bypass etc)
@@ -16,6 +28,7 @@ public:
     // What are we?
     m_name = "Delay";
 
+  
     // What settings can we receive?
     EffectSetting setting;
     setting.init(
@@ -68,6 +81,17 @@ public:
     setting.setFloatValue(1.4);
     m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
 
+    setting.init(
+        "delayMode",             // Name
+        EffectSetting::intType, // Type of setting
+        DelayMode::digital,         // Min value
+        DelayMode::highpass,         // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setLabels({"Digital", "Analog", "HPF"});
+    setting.setIntValue(DelayMode::digital);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
     // Do some init stuff
     m_writePointerIndex = 0;
 
@@ -110,24 +134,41 @@ public:
       m_rate = it->second.getFloatValue();
     }
 
+    it = m_settingMap.find("delayMode");
+    if (it != m_settingMap.end())
+    {
+      m_delayMode = (DelayMode)it->second.getIntValue();
+    }
+
     m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_color, 48000);
     m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_color)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
   }
 
-  // Simple Digital Delay Effect - Signal Flow Diagram
-  //
-  //          ┌───────────────────────────────────────────┐
-  //          │                                           │
-  //          │              ┌────────┐                   ▼
-  //          │  ┌─────┐     │        │    ┌─────┐     ┌─────┐
-  //  input ──┴─►│ sum ├────►│ delay  ├─┬─►│level├────►│ sum ├────►
-  //             └─────┘     │        │ │  └─────┘     └─────┘
-  //                ▲        └────────┘ │
-  //                │                   │
-  //                │        ┌────────┐ │
-  //                └────────┤feedback│◄┘
-  //                         └────────┘
-  //
+
+//  Digital Delay Effect - Signal Flow Diagram
+//  
+//  Delay with modulation and filter. 
+//  LPF for analog delay simulation
+//  HPF for "thinning delay"
+//
+//          ┌───────────────────────────────────────────┐
+//          │                                           │
+//          │             ┌────────────┐                ▼
+//          │    ┌────┐   │            │    ┌─────┐   ┌────┐
+//  Input───┴───►│Sum ├──►│   Delay    ├─┬─►│Level├──►│Sum ├───► Output
+//               └────┘   │            │ │  └─────┘   └────┘
+//                 ▲      └────────────┘ │
+//                 │            ▲        │
+//                 │            │        │
+//              ┌──┴───┐     ┌──┴──┐     │
+//      LPF/HPF │Filter│     │ Mod │     │
+//              └──────┘     └─────┘     │
+//                 ▲                     │
+//                 │        ┌────────┐   │
+//                 └────────┤Feedback│◄──┘
+//                          └────────┘
+//                            0-1.2
+//
   void process(const float *input, float *output, int framesize) override
   {
     // Implement the delay
@@ -158,6 +199,7 @@ public:
 
 private:
   LowFreqOsc m_osc;
+  int m_delayMode;
   float m_delayBuffer[DELAY_BUFFER_SIZE]; // 1 second of delay buffer
   int m_sampleRate = 48000;
   int m_bufferDepth;
