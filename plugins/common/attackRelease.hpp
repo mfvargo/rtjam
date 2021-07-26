@@ -56,3 +56,5 @@ private:
   bool m_lastTrigger;
   float m_attackCoeff, m_releaseCoeff;
   float m_attackReleaseOut;
+
+};
