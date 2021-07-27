@@ -34,7 +34,7 @@ public:
         2,                        // Step Size
         EffectSetting::msec);
     setting.setFloatValue(250.0); // 1/8 note at 120BPM = 250msec.
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "feedback",               // Name
@@ -44,7 +44,7 @@ public:
         0.01,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.1);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "level",                  // Name
@@ -54,7 +54,7 @@ public:
         0.01,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.5);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "drift",                  // Name
@@ -64,7 +64,7 @@ public:
         1,                        // Step Size
         EffectSetting::dB);
     setting.setFloatValue(-42);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "rate",                   // Name
@@ -74,7 +74,7 @@ public:
         0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(1.4);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "delayMode",            // Name
@@ -85,7 +85,7 @@ public:
         EffectSetting::selector);
     setting.setLabels({"Dig", "Ana", "HPF"});
     setting.setIntValue(DelayMode::digital);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     // Do some init stuff
     m_writePointerIndex = 0;

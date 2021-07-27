@@ -23,7 +23,7 @@ public:
         0.02,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
     m_pReverb = new MVerb<float>;
     m_pReverb->setSampleRate(48000);
     m_pReverb->setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
