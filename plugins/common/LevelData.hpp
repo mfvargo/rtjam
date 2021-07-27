@@ -1,5 +1,4 @@
-#ifndef LEVELDATA_RTJAM_HPP
-#define LEVELDATA_RTJAM_HPP
+#pragma once
 
 #include "JamNetStuff.hpp"
 #include "SharedMemory.hpp"
@@ -28,17 +27,23 @@ struct JsonInfo
 class LevelData
 {
 public:
-  LevelData();
-  ~LevelData();
-
-  void lock();
-  void unlock();
+  LevelData() : m_sharedMemory("rtjamValues")
+  {
+    m_sharedMemory.Create(sizeof(RTJamLevels) + sizeof(JsonInfo));
+    m_sharedMemory.Attach();
+    m_pJamLevels = (RTJamLevels *)m_sharedMemory.GetData();
+    m_pJsonInfo = (char *)m_sharedMemory.GetData() + sizeof(RTJamLevels);
+  }
+  ~LevelData()
+  {
+    m_sharedMemory.Detach();
+  }
 
   RTJamLevels *m_pJamLevels;
   char *m_pJsonInfo;
 
 private:
   CSharedMemory m_sharedMemory;
+  RTJamLevels m_levels;
+  JsonInfo m_json;
 };
-
-#endif

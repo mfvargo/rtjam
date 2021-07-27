@@ -40,7 +40,7 @@ private:
     int m_adcI2cAddress;     // AD7991 ADC I2C address handle
 
 	int m_file;
-	char *m_filename = "/dev/i2c-1";
+	const char *m_filename = "/dev/i2c-1";
 	char m_I2cDataBuffer[2] = {0};
 
     // adc read intermediate result registers
@@ -54,10 +54,12 @@ private:
 
 
 // input pot variables
-    float m_pot1Filter = 0;
+   // float m_pot1Filter = 0;
     float m_pot2Filter = 0;
     float m_pot3Filter = 0;
 
+    EmaFilter m_pot1Filter;
+ 
 
     float m_pot1Value = 0;
     float m_lastPot1Value = 0;

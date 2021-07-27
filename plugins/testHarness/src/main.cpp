@@ -8,17 +8,12 @@
 #include <unistd.h>
 #endif
 #include <jack/jack.h>
+#include <iostream>
+#include <fstream>
+#include <unistd.h>
+#include <pwd.h>
 
-#include <vector>
-#include "EffectChain.hpp"
-#include "Delay.hpp"
-#include "HighPassFilter.hpp"
-#include "MonoVerb.hpp"
-#include "Distortion.hpp"
-#include "Tremelo.hpp"
-#include "ToneStack.hpp"
-#include "GeneralFilter.hpp"
-#include "BiQuad.hpp"
+#include "PedalBoard.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -38,7 +33,7 @@ static void signal_handler(int sig)
 
 int process(jack_nframes_t nframes, void *arg)
 {
-    EffectChain *chain = (EffectChain *)arg;
+    PedalBoard *board = (PedalBoard *)arg;
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
@@ -46,7 +41,7 @@ int process(jack_nframes_t nframes, void *arg)
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
     // Do stuff here
-    chain->process(inputs[0], outputs[0], nframes);
+    board->process(inputs[0], outputs[0], nframes);
     memcpy(outputs[1], outputs[0], sizeof(float) * nframes);
     return 0;
 }
@@ -65,115 +60,27 @@ void jack_shutdown(void *arg)
 int main(int argc, char *argv[])
 {
     json config;
-    EffectChain effectChain;
- 
- #if 0 
-    SigmaDelay delay;
-    delay.init();
-    config = delay.getConfig()["settings"];
-    config["duration"]["value"] = 220;
-    config["feedback"]["value"] = 0.0;
-    config["level"]["value"] = 0.05;
-    delay.setConfig(config);
-    HighPassFilter filter;
-    filter.init();
-    filter.setByPass(false);
-    MonoVerb reverb;
-    reverb.init();
-    config = reverb.getConfig()["settings"];
-    config["mix"]["value"] = 0.1;
-    reverb.setConfig(config);
-    Distortion distortion;
-    distortion.init();
-    config = distortion.getConfig()["settings"];
-    config["clipType"]["value"] = Distortion::ClipType::soft;
-    config["gain"]["value"] = 5.0;
-    distortion.setConfig(config);
-    Tremelo tremelo;
-    tremelo.init();
-    config = tremelo.getConfig()["settings"];
-    config["rate"]["value"] = 2.5;
-    config["depth"]["value"] = -10.0;
-    tremelo.setConfig(config);
-    ToneStack toneStack;
-    toneStack.init();
-    config = toneStack.getConfig()["settings"];
-    config["treble"]["value"] = 6.0;
-    config["mid"]["value"] = 0.0;
-    config["bass"]["value"] = 4.0;
-    toneStack.setConfig(config);
-    effectChain.push(&filter);
-    effectChain.push(&toneStack);
-    effectChain.push(&distortion);
-    effectChain.push(&delay);
-    effectChain.push(&reverb);
-    effectChain.push(&tremelo);
+    PedalBoard pedalBoard;
 
-    // Turn on/off effects
-    filter.setByPass(true);
-    toneStack.setByPass(true);
-    delay.setByPass(true);
-    reverb.setByPass(true);
-    distortion.setByPass(true);
-    tremelo.setByPass(true);
-#else
-    GeneralFilter filter1, filter2, filter3, filter4;
-    
-    // LPF
-    filter1.init();
-    filter1.setByPass(false);
-    config = filter1.getConfig()["settings"];
-    config["filterType"]["value"] = BiQuadFilter::LowPass;
-    config["filterFreq"]["value"] = 1000;
-    config["filterQ"]["value"] = 0.707;
-    config["filterCutBoost"]["value"] = -20;
-    filter1.setConfig(config);
+    std::ifstream infile("testboard.json");
+    json boardConfig;
+    infile >> boardConfig;
+    // pedalBoard.init(boardConfig["effects"]);
 
+    // Add an extra ToneStack in second spot
+    pedalBoard.insertPedal(10, "Tone Stack");
+    pedalBoard.insertPedal(10, "Tremelo");
+    pedalBoard.insertPedal(10, "Reverb");
 
-    // Low Shelf
-    filter2.init();
-    filter2.setByPass(false);
-    config = filter2.getConfig()["settings"];
-    config["filterType"]["value"] = BiQuadFilter::LowShelf;
-    config["filterFreq"]["value"] = 200;
-    config["filterQ"]["value"] = 0.707;
-    config["filterCutBoost"]["value"] = -20;
-    filter2.setConfig(config);
+    std::cout << pedalBoard.getChainConfig("yank_it", 0).dump(2);
 
+    pedalBoard.deletePedal(0);
 
-    // High Shelf
-    filter3.init();
-    filter3.setByPass(false);
-    config = filter3.getConfig()["settings"];
-    config["filterType"]["value"] = BiQuadFilter::HighShelf;
-    config["filterFreq"]["value"] = 2000;
-    config["filterQ"]["value"] = 0.707;
-    config["filterCutBoost"]["value"] = -20;
-    filter3.setConfig(config);
+    std::cout << pedalBoard.getChainConfig("yank_it", 0).dump(2);
 
-    // Notch
-    filter4.init();
-    filter4.setByPass(false);
-    config = filter4.getConfig()["settings"];
-    config["filterType"]["value"] = BiQuadFilter::Notch;
-    config["filterFreq"]["value"] = 60;
-    config["filterQ"]["value"] = 0.707;
-    config["filterCutBoost"]["value"] = -40;
-    filter4.setConfig(config);
+    pedalBoard.movePedal(1, 0);
 
-
-
-
-    effectChain.push(&filter1);
-    effectChain.push(&filter2);
-    effectChain.push(&filter3);
-    effectChain.push(&filter4);
-    
- 
-#endif
-
-
-    std::cout << effectChain.getChainConfig("yank_it").dump(2);
+    std::cout << pedalBoard.getChainConfig("bob_it", 0).dump(2);
 
     int i;
     const char **ports;
@@ -204,7 +111,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "unique name `%s' assigned\n", client_name);
     }
 
-    jack_set_process_callback(client, process, &effectChain);
+    jack_set_process_callback(client, process, &(pedalBoard));
 
     jack_on_shutdown(client, jack_shutdown, 0);
 
@@ -284,7 +191,7 @@ int main(int argc, char *argv[])
     {
         std::string input_line;
         std::getline(std::cin, input_line);
-        effectChain.toggleEffect(atoi(input_line.c_str()));
+        pedalBoard.toggleEffect(atoi(input_line.c_str()));
     }
     jack_client_close(client);
     exit(0);

@@ -17,14 +17,7 @@ public:
 
   };
 
-  json getConfig() override
-  {
-    json config = {
-        {"FirCoeffs", m_FirCoeffs},
-       
-    };
-    return config;
-  }
+
 
   float getSample(float input) override
   {

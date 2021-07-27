@@ -183,9 +183,9 @@ void CodecControlAndStatus::updateVolumes(void)
 	}
             
     // store current state for next time through loop
-    m_lastPot1Value = m_pot1Filter;
-    m_lastPot2Value = m_pot2Filter;
-    m_lastPot3Value = m_pot3Filter;    
+   // m_lastPot1Value = m_pot1Filter;
+   // m_lastPot2Value = m_pot2Filter;
+   // m_lastPot3Value = m_pot3Filter;    
 
    
 }

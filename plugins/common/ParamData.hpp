@@ -1,5 +1,4 @@
-#ifndef PARAMDATA_RTJAM_HPP
-#define PARAMDATA_RTJAM_HPP
+#pragma once
 
 #include "JamNetStuff.hpp"
 #include "MessageQueue.hpp"
@@ -34,12 +33,18 @@ enum RTJamParameters
   paramReverbOne,
   paramReverbTwo,
   paramGetConfigJson,
+  paramSetEffectConfig,
+  paramInsertPedal,
+  paramDeletePedal,
+  paramMovePedal,
+  paramLoadBoard,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,
   paramListAudioConfig,
   paramCheckForUpdate,
   paramRandomCommand,
+  paramGetPedalTypes,
   paramRebootDevice = 9998,
   paramShutdownDevice = 9999,
 };
@@ -50,21 +55,33 @@ struct RTJamParam
   int iValue;
   int iValue2;
   float fValue;
-  char sValue[128];
+  char sValue[8096];
 };
 
 class ParamData
 {
 public:
-  ParamData();
-  ~ParamData();
+  ParamData() : m_queue("/rtjamParams", sizeof(RTJamParam))
+  {
+  }
 
-  void flush();
-  void send(RTJamParam *param);
-  void receive(RTJamParam *param);
+  ~ParamData()
+  {
+  }
+
+  void flush()
+  {
+    m_queue.flush();
+  }
+  void send(RTJamParam *param)
+  {
+    m_queue.send(param, sizeof(RTJamParam));
+  }
+  void receive(RTJamParam *param)
+  {
+    m_queue.recv(param, sizeof(RTJamParam));
+  }
 
 private:
   CMessageQueue m_queue;
 };
-
-#endif

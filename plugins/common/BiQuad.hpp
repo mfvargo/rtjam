@@ -65,16 +65,6 @@ public:
     }
   };
 
-  json getConfig() override
-  {
-    json config = {
-        {"filterType", m_type},
-        {"cutoffFreq", m_cutoffFreq},
-        {"cutBoost", m_cutBoost},
-        {"q", m_q},
-    };
-    return config;
-  }
 
   float getSample(float input) override
   {

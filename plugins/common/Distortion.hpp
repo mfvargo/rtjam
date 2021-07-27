@@ -2,6 +2,7 @@
 
 #include "Effect.hpp"
 #include "BiQuad.hpp"
+#include "SignalBlock.hpp"
 
 class Distortion : public Effect
 {
@@ -10,77 +11,209 @@ public:
   {
     hard,
     soft,
-    asymetric,
+    asymmetric,
     even,
   };
 
-  json getConfig()
+  enum HpfMode
   {
-    json cliptypes = {
-        {"hard", 0},
-        {"soft", 1},
-        {"asymetric", 2},
-        {"even", 3},
-    };
-    json config;
-    config["name"] = "Distortion";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["gain"] = {{"type", "float"}, {"min", 0.0}, {"max", 60.0}, {"units", "linear"}, {"value", m_gain}};
-    config["settings"]["clipType"] = {{"type", "integer"}, {"min", ClipType::hard}, {"max", ClipType::even}, {"units", "selector"}, {"labels", cliptypes}, {"value", m_clipType}};
-    config["settings"]["lowPassFreq"] = {{"type", "float"}, {"min", 5.0}, {"max", 5000}, {"units", "Hz"}, {"value", m_lpfFreq}};
-    config["settings"]["hiPassFreq"] = {{"type", "float"}, {"min", 200.0}, {"max", 12000}, {"units", "Hz"}, {"value", m_hpfFreq}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    m_gain = config["gain"]["value"];
-    m_clipType = config["clipType"]["value"];
-    m_lpfFreq = config["lowPassFreq"]["value"];
-    m_hpfFreq = config["hiPassFreq"]["value"];
-    setupFilters();
+    low,
+    high,
   };
 
   void init() override
   {
-    m_lpfFreq = 150;
-    m_hpfFreq = 5000;
-    m_gain = 1.0;
-    m_clipType = soft;
-    setupFilters();
+    // Setup base class stuff
+    Effect::init();
+    // What is this effects name?
+    m_name = "Distortion";
+
+    // Now setup the settings this effect can receive.
+    EffectSetting setting;
+
+    setting.init(
+        "drive",                  // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        40.0,                     // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(6.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "clipType",             // Name
+        EffectSetting::intType, // Type of setting
+        ClipType::hard,         // Min value
+        ClipType::even,         // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setLabels({"hard", "tube", "brit", "oct"});
+    setting.setIntValue(ClipType::soft);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "tone",                   // Name
+        EffectSetting::floatType, // Type of setting
+        -1.0,                     // Min value
+        1.0,                      // Max value
+        0.05,                     // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(0.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "level",                  // Name
+        EffectSetting::floatType, // Type of setting
+        -60.0,                    // Min value
+        6.0,                      // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "hpfMode",              // Name
+        EffectSetting::intType, // Type of setting
+        HpfMode::low,           // Min value
+        HpfMode::high,          // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setLabels({"Low", "Mid"}); // better names - low/mid???
+    setting.setIntValue(HpfMode::low);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    // pre-and post-distortion filters (fixed)
+    m_lpf1Freq = 5000;
+    m_lpf2Freq = 5000;
+
+    // tone filters used in crossFade tone control
+    // fixed but cross-fading between the two changes tone between
+    // "warm" and "bright"
+    m_toneLpfFreq = 2000;
+    m_toneHpfFreq = 3000;
+
+    m_dryLevel = 0.01; // fixed for now - need to tune - add to param set?
+
+    loadFromConfig();
   };
+
+  void loadFromConfig() override
+  {
+    // Read the settings from the map and apply them to our copy of the data.
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+
+    it = m_settingMap.find("drive");
+    if (it != m_settingMap.end())
+    {
+      m_gain = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("clipType");
+    if (it != m_settingMap.end())
+    {
+      m_clipType = (ClipType)it->second.getIntValue();
+    }
+
+    it = m_settingMap.find("tone");
+    if (it != m_settingMap.end())
+    {
+      m_tone = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("level");
+    if (it != m_settingMap.end())
+    {
+      m_level = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("hpfMode");
+    if (it != m_settingMap.end())
+    {
+      m_hpfMode = (HpfMode)it->second.getIntValue();
+    }
+
+    setupFilters();
+  }
 
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)
     {
+      // HPF in chain - determines amount of low-freqs sent to clipper block
+      // use F~140 Hz for full-range. F=720 for Tubescreamer type distorion
       float value = m_hpf.getSample(input[i]);
+
+      // Stage 1 - first clipper (set to emulate op-amp clipping before diodes)
+      value = clipSample(value * m_gain); // clip signal
+      value = m_lpf1.getSample(value);    // filter out higher-order harmonics
+      value = m_lpf1.getSample(value);    // filter out higher-order harmonics
+
+      // Stage 2 - diode clipper
       value = clipSample(value * m_gain);
+      value = m_lpf2.getSample(value); // filter out higher-order harmonics
+      value = m_lpf2.getSample(value); // filter out higher-order harmonics
+
+      // Stage 3 - Tone control
+      // simple tone control that cross-fades between low and high-pass filters
+      //
+      value = SignalBlock::crossFade(m_toneHpf.getSample(value), m_toneLpf.getSample(value), m_tone);
+
+      value = value + m_dryLevel * input[i]; // mix some dry signal in to add "detail"
+
       // value = distortionAlgorithm(value);
-      output[i] = m_lpf.getSample(value);
+      output[i] = value * m_level;
     }
   };
 
 private:
-  BiQuadFilter m_hpf;        // runs at 48k on input signal
-  BiQuadFilter m_lpf;        // runs at 48k on output signal
+  BiQuadFilter m_hpf; // runs at 48k on input signal
+
+  BiQuadFilter m_lpf1; // runs at 48k on clip1 output signal
+  BiQuadFilter m_lpf2; // runs at 48k on clip1 output signal
+
   BiQuadFilter m_upsample;   // runs at 8 * 48k after upsample
-  BiQuadFilter m_downsample; // runs at 8 * 48k after downsample
+  BiQuadFilter m_downsample; // runs at 8 * 48k after clip and before downsample
+
+  BiQuadFilter m_toneLpf;
+  BiQuadFilter m_toneHpf;
 
   // Parameters
-  float m_gain;        // gain before clip function
+  float m_gain;        // gain before clip functions
+  float m_tone;        // tone control
+  float m_level;       // Overall level
   ClipType m_clipType; // what kind of clipping funciton
-  float m_lpfFreq;     // frequency of the final lpf  (tone knob)
-  float m_hpfFreq;     // frequency of the hpf before effect (is this a knob?)
+  float m_lpf1Freq;    // frequency of the first clip block lpf (fixed filter)
+  float m_lpf2Freq;    // frequency of the first clip block lpf (fixed filter)
+
+  int m_hpfMode; // high-pass filter mode - low or mid
+
+  float m_toneLpfFreq; // LPF cut-off frequency for tone control
+  float m_toneHpfFreq; // HPF cut-off frequency for tone control
+
+  float m_dryLevel; // amount of dry to add in at end of chain
+                    // (to model Klon type drives or add detail to high gain model)
 
   void setupFilters()
   {
     // Setup the biquad filter for the upsampled data
-    m_hpf.init(BiQuadFilter::FilterType::HighPass, m_lpfFreq, 1.0, 1.0, 48000);
-    m_lpf.init(BiQuadFilter::FilterType::LowPass, m_hpfFreq, 1.0, 1.0, 48000);
+    switch (m_hpfMode)
+    {
+    case HpfMode::high:
+      m_hpf.init(BiQuadFilter::FilterType::HighPass, 700, 1.0, 1.0, 48000);
+      break;
+    case HpfMode::low:
+      m_hpf.init(BiQuadFilter::FilterType::HighPass, 150, 1.0, 1.0, 48000);
+    default:
+      break;
+    }
+    m_lpf1.init(BiQuadFilter::FilterType::LowPass, m_lpf1Freq, 1.0, 1.0, 48000);
+    m_lpf2.init(BiQuadFilter::FilterType::LowPass, m_lpf2Freq, 1.0, 1.0, 48000);
     m_upsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 48000);
     m_downsample.init(BiQuadFilter::FilterType::HighPass, 48000, 1.0, 1.0, 8 * 48000);
+    m_toneLpf.init(BiQuadFilter::FilterType::LowPass, m_toneLpfFreq, 1.0, 1.0, 48000);
+    m_toneHpf.init(BiQuadFilter::FilterType::HighPass, m_toneHpfFreq, 1.0, 1.0, 48000);
   };
 
   float distortionAlgorithm(float inputSample)
@@ -104,7 +237,10 @@ private:
     /* filter the vector */
     for (i = 0; i < 8; i++)
     {
-      // filter
+      // filter at upsampled Fs/8 - 8th order filter
+      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
+      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
+      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
       filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
     }
     // add gain to signal and clip
@@ -114,12 +250,17 @@ private:
       filterOut[i] = 8 * m_gain * filterOut[i];
       clipOut[i] = clipSample(filterOut[i]);
     }
-    // filter again
+
+    // filter at upsampled Fs/8 before downsampling - 8th order filter
     for (i = 0; i < 8; i++)
     {
       clipOut[i] = m_downsample.getSample(clipOut[i]);
+      clipOut[i] = m_downsample.getSample(clipOut[i]);
+      clipOut[i] = m_downsample.getSample(clipOut[i]);
+      clipOut[i] = m_downsample.getSample(clipOut[i]);
     }
-    // down-sample the vector to back native sample rate
+
+    // down-sample the vector back to original sample rate
     return clipOut[0];
   };
 
@@ -133,7 +274,7 @@ private:
     case soft:
       return softClipSample(input);
       break;
-    case asymetric:
+    case asymmetric:
       return asymmetricClipSample(input);
       break;
     case even:

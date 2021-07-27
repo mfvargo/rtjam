@@ -2,65 +2,192 @@
 
 #include "Effect.hpp"
 #include "LowFreqOsc.hpp"
+#include "BiQuad.hpp"
 
-#define DELAY_BUFFER_SIZE 48000
+#define DELAY_BUFFER_SIZE 96000
 #define LFO_GAIN -42.0
 
 class SigmaDelay : public Effect
 {
 public:
-  json getConfig()
+  enum DelayMode
   {
-    // Return the json for this block
-
-    json config;
-    config["name"] = "Delay";
-    config["settings"] = Effect::getConfig();
-    config["settings"]["duration"] = {{"type", "float"}, {"min", 0.0}, {"max", 1000.0}, {"units", "msec"}, {"value", m_currentDelayTime}};
-    config["settings"]["feedback"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_feedback}};
-    config["settings"]["level"] = {{"type", "float"}, {"min", 0.0}, {"max", 1.0}, {"units", "linear"}, {"value", m_level}};
-    return config;
+    digital = 0,
+    analog,
+    highpass
   };
-
-  void setConfig(json config)
-  {
-    setByPass(config["bypass"]["value"]);
-    m_currentDelayTime = config["duration"]["value"];
-    m_feedback = config["feedback"]["value"];
-    m_level = config["level"]["value"];
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate / 1000;
-  }
 
   void init() override
   {
+    // Setup base class stuff (bypass etc)
+    Effect::init();
+    // What are we?
+    m_name = "Delay";
+
+    // What settings can we receive?
+    EffectSetting setting;
+    setting.init(
+        "duration",               // Name
+        EffectSetting::floatType, // Type of setting
+        2,                        // Min value
+        500.0,                    // Max value
+        2,                        // Step Size
+        EffectSetting::msec);
+    setting.setFloatValue(250.0); // 1/8 note at 120BPM = 250msec.
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "feedback",               // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        1.1,                      // Max value
+        0.01,                     // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(0.1);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "level",                  // Name
+        EffectSetting::floatType, // Type of setting
+        0.0,                      // Min value
+        1.0,                      // Max value
+        0.01,                     // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(0.5);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "drift",                  // Name
+        EffectSetting::floatType, // Type of setting
+        -60.0,                    // Min value
+        -25,                      // Max value
+        1,                        // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(-42);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "rate",                   // Name
+        EffectSetting::floatType, // Type of setting
+        0.1,                      // Min value
+        5.0,                      // Max value
+        0.1,                      // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(1.4);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
+    setting.init(
+        "delayMode",            // Name
+        EffectSetting::intType, // Type of setting
+        DelayMode::digital,     // Min value
+        DelayMode::highpass,    // Max value
+        1,                      // Step Size
+        EffectSetting::selector);
+    setting.setLabels({"Dig", "Ana", "HPF"});
+    setting.setIntValue(DelayMode::digital);
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+
     // Do some init stuff
-    // setByPass(true);
-    json config = {
-        {"shape", LowFreqOsc::WaveShape::sineWave},
-        {"freq", 1.40},
-        {"amplitude", LFO_GAIN},
-    };
-    m_osc.setConfig(config);
-    // m_osc.init(LowFreqOsc::WaveShape::sineWave, 1.406, -62, 48000);
-    m_currentDelayTime = 500.0;                                                                          // msec
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(LFO_GAIN)) * m_currentDelayTime * m_sampleRate / 1000; // max delay based on depth
     m_writePointerIndex = 0;
-    m_feedback = 0.25;
-    m_level = 1.0;
+    m_delayMode = DelayMode::digital;
+
+    loadFromConfig();
   };
+
+  void loadFromConfig() override
+  {
+    // Read the settings from the map and apply them to our copy of the data.
+    Effect::loadFromConfig();
+    std::map<std::string, EffectSetting>::iterator it;
+
+    it = m_settingMap.find("duration");
+    if (it != m_settingMap.end())
+    {
+      m_currentDelayTime = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("feedback");
+    if (it != m_settingMap.end())
+    {
+      m_feedback = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("level");
+    if (it != m_settingMap.end())
+    {
+      m_level = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("drift");
+    if (it != m_settingMap.end())
+    {
+      m_color = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("rate");
+    if (it != m_settingMap.end())
+    {
+      m_rate = it->second.getFloatValue();
+    }
+
+    it = m_settingMap.find("delayMode");
+    if (it != m_settingMap.end())
+    {
+      m_delayMode = (DelayMode)it->second.getIntValue();
+    }
+
+    switch (m_delayMode)
+    {
+    case DelayMode::digital:
+      m_feedbackFilter.init(BiQuadFilter::FilterType::LowPass, 10000, 1.0, 1.0, 48000);
+      break;
+    case DelayMode::analog:
+      m_feedbackFilter.init(BiQuadFilter::FilterType::LowPass, 1250, 1.0, 1.0, 48000);
+      break;
+    case DelayMode::highpass:
+      m_feedbackFilter.init(BiQuadFilter::FilterType::HighPass, 1500, 1.0, 1.0, 48000);
+      break;
+    }
+    m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_color, 48000);
+    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_color)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
+  }
+
+  //  Digital Delay Effect - Signal Flow Diagram
+  //
+  //  Delay with modulation and filter.
+  //  LPF for analog delay simulation
+  //  HPF for "thinning delay"
+  //
+  //          ┌───────────────────────────────────────────┐
+  //          │                                           │
+  //          │             ┌────────────┐                ▼
+  //          │    ┌────┐   │            │    ┌─────┐   ┌────┐
+  //  Input───┴───►│Sum ├──►│   Delay    ├─┬─►│Level├──►│Sum ├───► Output
+  //               └────┘   │            │ │  └─────┘   └────┘
+  //                 ▲      └────────────┘ │
+  //                 │            ▲        │
+  //                 │            │        │
+  //              ┌──┴───┐     ┌──┴──┐     │
+  //      LPF/HPF │Filter│     │ Mod │     │
+  //              └──────┘     └─────┘     │
+  //                 ▲                     │
+  //                 │        ┌────────┐   │
+  //                 └────────┤Feedback│◄──┘
+  //                          └────────┘
+  //                            0-1.2
+  //
   void process(const float *input, float *output, int framesize) override
   {
     // Implement the delay
     for (int sample = 0; sample < framesize; sample++)
     {
-      // output[sample] = m_osc.getSample(input[sample]);
       // pointer arithmetic for buffer wrap
       m_writePointerIndex++;
       m_writePointerIndex %= m_bufferDepth;
 
       // Use the low freq osc to modulate the delay
       int readIndex = m_writePointerIndex -
-                      ((1 + m_osc.getSample(input[sample])) * m_currentDelayTime * m_sampleRate / 1000);
+                      ((1 + m_osc.getSample(input[sample])) * m_currentDelayTime * m_sampleRate);
 
       if (readIndex < 0)
       {
@@ -70,15 +197,17 @@ public:
       readIndex %= m_bufferDepth;
 
       // return original plus delay
-      output[sample] = input[sample] + m_delayBuffer[readIndex];
+      output[sample] = input[sample] + m_delayBuffer[readIndex] * m_level;
 
       // add feedback to the buffer
-      m_delayBuffer[m_writePointerIndex] = m_level * input[sample] + (output[sample] * m_feedback);
+      m_delayBuffer[m_writePointerIndex] = input[sample] + (m_feedbackFilter.getSample(m_delayBuffer[readIndex]) * m_feedback);
     }
   };
 
 private:
   LowFreqOsc m_osc;
+  BiQuadFilter m_feedbackFilter;
+  int m_delayMode;
   float m_delayBuffer[DELAY_BUFFER_SIZE]; // 1 second of delay buffer
   int m_sampleRate = 48000;
   int m_bufferDepth;
@@ -86,4 +215,6 @@ private:
   int m_writePointerIndex;
   float m_feedback;
   float m_level;
+  float m_color;
+  float m_rate;
 };

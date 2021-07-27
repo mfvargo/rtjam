@@ -14,7 +14,8 @@
         {
             "name": "SigmaRpi",
             "includePath": [
-                "${workspaceFolder}/**"
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/plugins/common"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

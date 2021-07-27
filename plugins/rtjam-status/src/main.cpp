@@ -30,7 +30,6 @@ int main(int argc, char *argv[])
     CodecControlAndStatus codecControl;
  
 
-    int i = 0;
     int delay = 10000;
 
     
