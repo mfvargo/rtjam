@@ -38,6 +38,12 @@ public:
     m_max = max;
     m_step = step,
     m_units = units;
+    m_index = 0;
+  };
+
+  void setIndex(int idx)
+  {
+    m_index = idx;
   };
 
   void setLabels(std::vector<std::string> labels)
@@ -50,6 +56,7 @@ public:
   {
     return {
         {"name", m_name},
+        {"index", m_index},
         {"value", m_setting["value"]},
         {"min", m_min},
         {"max", m_max},
@@ -133,6 +140,7 @@ public:
 
 private:
   json m_setting;
+  int m_index;
   float m_min;
   float m_max;
   float m_step;

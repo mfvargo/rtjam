@@ -39,7 +39,7 @@ public:
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(6.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "clipType",             // Name
@@ -50,7 +50,7 @@ public:
         EffectSetting::selector);
     setting.setLabels({"hard", "tube", "brit", "oct"});
     setting.setIntValue(ClipType::soft);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "tone",                   // Name
@@ -60,7 +60,7 @@ public:
         0.05,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "level",                  // Name
@@ -70,7 +70,7 @@ public:
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "hpfMode",              // Name
@@ -81,7 +81,7 @@ public:
         EffectSetting::selector);
     setting.setLabels({"Low", "Mid"}); // better names - low/mid???
     setting.setIntValue(HpfMode::low);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     // pre-and post-distortion filters (fixed)
     m_lpf1Freq = 5000;

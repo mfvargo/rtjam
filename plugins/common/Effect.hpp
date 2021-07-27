@@ -26,8 +26,15 @@ public:
         1,                          // Step Size
         EffectSetting::footswitch);
     bypass.setBoolValue(true);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(bypass.name(), bypass));
+    addSetting(bypass);
   };
+
+  void addSetting(EffectSetting setting)
+  {
+    setting.setIndex(m_settingMap.size());
+    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+  };
+
   // This function will return all the settings this effect has as json.
   json getSettings()
   {

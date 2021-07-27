@@ -24,7 +24,7 @@ public:
         0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.4);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
     setting.init(
         "rate",                   // Name
         EffectSetting::floatType, // Type of setting
@@ -33,7 +33,7 @@ public:
         0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(1.2);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
   };
 
   void loadFromConfig() override
