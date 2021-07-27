@@ -1,4 +1,3 @@
-#include "CodecControl.hpp"
 #include <iostream>
 //#include <stdio.h>
 #include <fcntl.h>
@@ -7,10 +6,12 @@
 #include <linux/i2c-dev.h>	
 #include <unistd.h>	
 
+#include "CodecControl.hpp"
+
 using namespace std;
 
 
-void CodecControlAndStatus::init(void)
+int CodecControlAndStatus::init(void)
 {
 
 
@@ -34,7 +35,7 @@ void CodecControlAndStatus::init(void)
     // Open I2C1 bus for read/write
     if ((m_file = open(m_filename, O_RDWR)) < 0)
 	{
-		cerr << "Failed to open i2c bus" << endl;
+		 cerr << "Failed to open i2c bus" << endl;
 		exit(-1);
 	}
 
@@ -42,7 +43,7 @@ void CodecControlAndStatus::init(void)
 	if (ioctl(m_file, I2C_SLAVE, 0x18) < 0)
 	{
 		cerr << "Failed to access codec on i2c bus" << endl;
-		exit(-1);
+		return (-1);
 	}
 
     // Set Reg 0 - select Page 0 
@@ -118,6 +119,7 @@ void CodecControlAndStatus::init(void)
        exit(-1);
 	}
 
+    return 1;
 
 }
 
@@ -152,7 +154,7 @@ void CodecControlAndStatus::updateVolumes(void)
 
     // Pot 2 - channel 1 - mic/headset input gain
     //temp = ALPHA*adcValue + (1-ALPHA)*pot2Filt;
-    cout << "Mic Gain =  " << m_adcValue[1]/4 << endl;
+//    cout << "Mic Gain =  " << m_adcValue[1]/4 << endl;
     m_I2cDataBuffer[0] = 16;
     m_I2cDataBuffer[1] = m_adcValue[1]/4;
     if (write(m_file, m_I2cDataBuffer, 2) != 2)
@@ -161,16 +163,16 @@ void CodecControlAndStatus::updateVolumes(void)
 	}
 
     // Pot 3 - channel 2 - Headphone amp gain]
-    m_temp = s_alpha*m_adcValue[2] + (1-s_alpha)*m_pot3Filt;
+    m_temp = s_alpha*m_adcValue[2] + (1-s_alpha)*m_pot3Filter;
     m_temp = (255 - m_adcValue[2])/2; // invert and scale pot value 
     m_temp |= 0x80;    // set bit 7 (enable DAC-HP path)
-    cout << "Headphone Gain =  " <<  m_temp << endl;
+//    cout << "Headphone Gain =  " <<  m_temp << endl;
 
     m_I2cDataBuffer[0] = 47;
     m_I2cDataBuffer[1] = m_temp;    
     if (write(m_file, m_I2cDataBuffer, 2) != 2)
     {
-	   cerr << "Failed to write left headphone gain to i2c bus" << endl;
+	    cerr << "Failed to write left headphone gain to i2c bus" << endl;
 	}
     
     m_I2cDataBuffer[0] = 64;
@@ -181,9 +183,9 @@ void CodecControlAndStatus::updateVolumes(void)
 	}
             
     // store current state for next time through loop
-    m_lastPot1Value = m_pot1Filt;
-    m_lastPot2Value = m_pot2Filt;
-    m_lastPot3Value = m_pot3Filt;    
+    m_lastPot1Value = m_pot1Filter;
+    m_lastPot2Value = m_pot2Filter;
+    m_lastPot3Value = m_pot3Filter;    
 
    
 }
@@ -227,7 +229,7 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
         // scale down to 8 bits for knobs
         m_adcValue[i] /=  16;
        
-        cout << "ADC Ch " << m_adcChannel << "= " << m_adcValue[i] << endl;
+        //cout << "ADC Ch " << m_adcChannel << "= " << m_adcValue[i] << endl;
     }
 
 }

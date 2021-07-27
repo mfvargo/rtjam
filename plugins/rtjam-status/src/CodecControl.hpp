@@ -3,6 +3,9 @@
 #include <wiringPi.h>
 #include <wiringPiI2C.h>
 
+#include "EmaFilter.hpp"
+
+
 class CodecControlAndStatus
 {
 
@@ -10,7 +13,7 @@ public:
 
 // RTJamIO hardware Init and Control Functions
 //
-void init(void);
+int init(void);
 void updateVolumes(void);
 
 
@@ -49,14 +52,13 @@ private:
     // adc value array
     unsigned int m_adcValue[3];
 
-    // pot filter state storage - y(n-1)
-    float m_pot1Filt = 0;
-    float m_pot2Filt = 0;
-    float m_pot3Filt = 0;
-
-    unsigned int m_temp = 0;
 
 // input pot variables
+    float m_pot1Filter = 0;
+    float m_pot2Filter = 0;
+    float m_pot3Filter = 0;
+
+
     float m_pot1Value = 0;
     float m_lastPot1Value = 0;
 
@@ -65,6 +67,9 @@ private:
 
     float m_pot3Value = 0;
     float m_lastPot3Value = 0;
+
+
+    unsigned int m_temp = 0;
 
 
 
