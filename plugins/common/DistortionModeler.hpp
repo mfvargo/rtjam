@@ -4,7 +4,7 @@
 #include "BiQuad.hpp"
 #include "SignalBlock.hpp"
 
-class Distortion : public Effect
+class DistortionModeler : public Effect
 {
 public:
   enum ClipType
@@ -26,21 +26,20 @@ public:
     // Setup base class stuff
     Effect::init();
     // What is this effects name?
-    m_name = "Distortion";
+    m_name = "DistortionModeler";
 
     // Now setup the settings this effect can receive.
     EffectSetting setting;
 
-
-setting.init(
-        "lowCut",                   // Name
+    setting.init(
+        "lowCut",                 // Name
         EffectSetting::floatType, // Type of setting
-        20,                     // Min value
+        20,                       // Min value
         720,                      // Max value
-        5,                     // Step Size
+        5,                        // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "drive",                  // Name
@@ -50,7 +49,7 @@ setting.init(
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(6.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "clipType",             // Name
@@ -61,72 +60,67 @@ setting.init(
         EffectSetting::selector);
     setting.setLabels({"hard", "tube", "brit", "oct"});
     setting.setIntValue(ClipType::soft);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "bass",                   // Name
         EffectSetting::floatType, // Type of setting
-        -15.0,                     // Min value
-        15.0,                      // Max value
-        0.5,                     // Step Size
+        -15.0,                    // Min value
+        15.0,                     // Max value
+        0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
+    addSetting(setting);
 
     setting.init(
-        "bassFreq",                   // Name
+        "bassFreq",               // Name
         EffectSetting::floatType, // Type of setting
-        30,                     // Min value
+        30,                       // Min value
         700,                      // Max value
-        0.5,                     // Step Size
+        0.5,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
-setting.init(
-        "mid",                   // Name
-        EffectSetting::floatType, // Type of setting
-        -15.0,                     // Min value
-        15.0,                      // Max value
-        0.5,                     // Step Size
-        EffectSetting::dB);
-    setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
+    addSetting(setting);
 
     setting.init(
-        "midFreq",                   // Name
+        "mid",                    // Name
         EffectSetting::floatType, // Type of setting
-        300,                     // Min value
-        1500,                      // Max value
-        0.1,                     // Step Size
+        -15.0,                    // Min value
+        15.0,                     // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
+    addSetting(setting);
+
+    setting.init(
+        "midFreq",                // Name
+        EffectSetting::floatType, // Type of setting
+        300,                      // Min value
+        1500,                     // Max value
+        0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
-
-setting.init(
-        "treble",                   // Name
-        EffectSetting::floatType, // Type of setting
-        -15.0,                     // Min value
-        15.0,                      // Max value
-        0.5,                     // Step Size
-        EffectSetting::dB);
-    setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
+    addSetting(setting);
 
     setting.init(
-        "trebleFreq",                   // Name
+        "treble",                 // Name
+        EffectSetting::floatType, // Type of setting
+        -15.0,                    // Min value
+        15.0,                     // Max value
+        0.5,                      // Step Size
+        EffectSetting::dB);
+    setting.setFloatValue(0.0);
+    addSetting(setting);
+
+    setting.init(
+        "trebleFreq",             // Name
         EffectSetting::floatType, // Type of setting
         1000,                     // Min value
-        7000,                      // Max value
-        0.5,                     // Step Size
+        7000,                     // Max value
+        0.5,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
+    addSetting(setting);
 
     setting.init(
         "level",                  // Name
@@ -136,25 +130,24 @@ setting.init(
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
-        "dryLevel",                  // Name
+        "dryLevel",               // Name
         EffectSetting::floatType, // Type of setting
-        -100.0,                    // Min value
-        0,                      // Max value
-        1,                      // Step Size
+        -100.0,                   // Min value
+        0,                        // Max value
+        1,                        // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
-
+    addSetting(setting);
 
     // pre-and post-distortion filters (fixed)
     m_lpf1Freq = 5000;
     m_lpf2Freq = 5000;
 
-    // dry level 
-    m_dryLevel = 0; 
+    // dry level
+    m_dryLevel = 0;
 
     loadFromConfig();
   };
@@ -164,7 +157,6 @@ setting.init(
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
-
 
     it = m_settingMap.find("lowCut");
     if (it != m_settingMap.end())
@@ -253,9 +245,9 @@ setting.init(
 
       // Stage 3 - Tone control - 3 band EQ - low shelf, mid cut/boost, high shelf
       //
-      value = m_toneBass.getSample(value); // mix some dry signal in to add "detail"
+      value = m_toneBass.getSample(value);     // mix some dry signal in to add "detail"
       value = m_toneMidrange.getSample(value); // mix some dry signal in to add "detail"
-      value = m_toneTreble.getSample(value); 
+      value = m_toneTreble.getSample(value);
 
       // sum in some dry level for detail (to model Klon and similar pedals)
       value = value + (m_dryLevel * input[i]);
@@ -266,16 +258,16 @@ setting.init(
   };
 
 private:
-  BiQuadFilter m_hpf;   // pre-clipping high-pass filter
+  BiQuadFilter m_hpf; // pre-clipping high-pass filter
 
-  BiQuadFilter m_lpf1;  // post clipping filter 1 
-  BiQuadFilter m_lpf2;  // post clipping filter 1
+  BiQuadFilter m_lpf1;       // post clipping filter 1
+  BiQuadFilter m_lpf2;       // post clipping filter 1
   BiQuadFilter m_upsample;   // upsample filter - runs at 8 * 48k after upsample
   BiQuadFilter m_downsample; // downsample filter - runs at 8 * 48k after clip and before downsample
 
-  BiQuadFilter m_toneBass;  // bass control frequency
-  BiQuadFilter m_toneMidrange;  // mid control frequency
-  BiQuadFilter m_toneTreble;  // treble control frequency
+  BiQuadFilter m_toneBass;     // bass control frequency
+  BiQuadFilter m_toneMidrange; // mid control frequency
+  BiQuadFilter m_toneTreble;   // treble control frequency
 
   // Parameters
   float m_gain;        // gain before clip functions
@@ -286,14 +278,13 @@ private:
 
   int m_hpfFreq; // high-pass filter mode - low or mid
 
-  float m_toneBassFreq; // LPF cut-off frequency for tone control
+  float m_toneBassFreq;     // LPF cut-off frequency for tone control
   float m_toneMidrangeFreq; // HPF cut-off frequency for tone control
-  float m_toneTrebleFreq; // HPF cut-off frequency for tone control
+  float m_toneTrebleFreq;   // HPF cut-off frequency for tone control
 
-
-  float m_toneBassCutBoost; // LPF cut-off frequency for tone control
+  float m_toneBassCutBoost;     // LPF cut-off frequency for tone control
   float m_toneMidrangeCutBoost; // HPF cut-off frequency for tone control
-  float m_toneTrebleCutBoost; // HPF cut-off frequency for tone control
+  float m_toneTrebleCutBoost;   // HPF cut-off frequency for tone control
 
   float m_dryLevel; // amount of dry to add in at end of chain
                     // (to model Klon type drives or add detail to high gain model)
@@ -309,7 +300,6 @@ private:
     m_toneBass.init(BiQuadFilter::FilterType::LowShelf, m_toneBassFreq, m_toneBassCutBoost, 0.707, 48000);
     m_toneMidrange.init(BiQuadFilter::FilterType::HighPass, m_toneMidrangeFreq, m_toneMidrangeCutBoost, 0.707, 48000);
     m_toneTreble.init(BiQuadFilter::FilterType::HighShelf, m_toneTrebleCutBoost, m_toneTrebleCutBoost, 0.707, 48000);
-  
   };
 
   float distortionAlgorithm(float inputSample)

@@ -82,6 +82,10 @@ int main(int argc, char *argv[])
 
     std::cout << pedalBoard.getChainConfig("bob_it", 0).dump(2);
 
+    DistortionModeler testPed;
+    testPed.init();
+    cout << testPed.getSettings().dump() << endl;
+
     int i;
     const char **ports;
     const char *client_name = "testHarness";
