@@ -32,7 +32,7 @@ public:
     EffectSetting setting;
 
     setting.init(
-        "tone",                   // Name
+        "lowCut",                   // Name
         EffectSetting::floatType, // Type of setting
         20,                       // Min value
         720,                      // Max value
@@ -151,7 +151,7 @@ public:
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("tone");
+    it = m_settingMap.find("lowCut");
     if (it != m_settingMap.end())
     {
       m_hpfFreq = it->second.getFloatValue();
@@ -220,6 +220,8 @@ public:
     setupFilters();
   }
 
+
+
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)
@@ -284,6 +286,8 @@ private:
 
   void setupFilters()
   {
+
+    // TODO - low-pass and highpass don't have cut/boost param - set to 0 (it's ignored in the coeff calcs)
     // Setup filters
     m_hpf.init(BiQuadFilter::FilterType::HighPass, m_hpfFreq, 1.0, 1.0, 48000);
     m_lpf1.init(BiQuadFilter::FilterType::LowPass, m_lpf1Freq, 1.0, 1.0, 48000);
@@ -291,7 +295,7 @@ private:
     m_upsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 384000);
     m_downsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 384000);
     m_toneBass.init(BiQuadFilter::FilterType::LowShelf, m_toneBassFreq, m_toneBassCutBoost, 0.707, 48000);
-    m_toneMidrange.init(BiQuadFilter::FilterType::HighPass, m_toneMidrangeFreq, m_toneMidrangeCutBoost, 0.707, 48000);
+    m_toneMidrange.init(BiQuadFilter::FilterType::Peaking, m_toneMidrangeFreq, m_toneMidrangeCutBoost, 0.707, 48000);
     m_toneTreble.init(BiQuadFilter::FilterType::HighShelf, m_toneTrebleCutBoost, m_toneTrebleCutBoost, 0.707, 48000);
   };
 
@@ -381,7 +385,6 @@ private:
   {
     return (fabs(sampleIn) / (1 + fabs(sampleIn)));
   };
-
   float asymmetricClipSample(float sampleIn)
   {
     float sampleOut;
