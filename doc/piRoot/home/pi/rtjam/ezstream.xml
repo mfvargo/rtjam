@@ -1,0 +1,12 @@
+<ezstream>
+    <url>http://localhost:8000/lobby.mp3</url>
+    <sourcepassword>icertjamnation</sourcepassword>
+    <format>MP3</format>
+    <filename>stdin</filename>
+    <svrinfoname>RTJam Nation Lobby</svrinfoname>
+    <svrinfourl>http://www.rtjam-nation.com</svrinfourl>
+    <svrinfobitrate>48</svrinfobitrate>
+    <svrinfochannels>2</svrinfochannels>
+    <svrinfosamplerate>48000</svrinfosamplerate>
+    <svrinfopublic>1</svrinfopublic>
+</ezstream>

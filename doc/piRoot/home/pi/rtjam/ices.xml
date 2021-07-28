@@ -1,0 +1,35 @@
+<ices>
+  <loglevel>4</loglevel>
+  <consolelog>1</consolelog>
+
+  <stream>
+    <metadata>
+      <name>RTJam Lobby</name>
+      <genre></genre>
+      <description>Live stream from rtjam-nation lobby.</description>
+    </metadata>
+
+    <input>
+      <module>stdinpcm</module>
+      <param name="rate">48000</param>
+      <param name="channels">2</param>
+    </input>
+
+    <instance>
+      <hostname>127.0.0.1</hostname>
+      <port>8000</port>
+      <password>icertjamnation</password>
+      <mount>/lobby.ogg</mount>
+      <reconnectdelay>2</reconnectdelay>
+      <reconnectattempts>5</reconnectattempts>
+            
+      <downmix>1</downmix>
+        
+      <encode>  
+        <quality>0</quality>
+        <samplerate>48000</samplerate>
+        <channels>2</channels>
+      </encode>
+    </instance>
+  </stream>
+</ices>
