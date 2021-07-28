@@ -239,9 +239,14 @@ public:
       value = m_lpf2.getSample(value); // filter out higher-order harmonics
 
       // Stage 3 - Tone control - 3 band EQ - low shelf, mid cut/boost, high shelf
+      // Baxandall type w/ mid control
       //
       // TODO: I don't think you want to stack these.  I think you want to add the three onto the original
       // See ToneStack.hpp lines 73-75
+      // COMMENT: this is ok and by design - tonestack uses parallel structure with gains on fixed filters that sum together
+      // this is 3 band eq with series cascade structure and the freq and cut/boost will be varied by
+      // just recalculating the filter coeffs vs a gain constant like in TS
+      // 
       value = m_toneBass.getSample(value);
       value = m_toneMidrange.getSample(value);
       value = m_toneTreble.getSample(value);
