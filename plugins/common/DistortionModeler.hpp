@@ -32,13 +32,13 @@ public:
     EffectSetting setting;
 
     setting.init(
-        "lowCut",                 // Name
+        "tone",                   // Name
         EffectSetting::floatType, // Type of setting
         20,                       // Min value
         720,                      // Max value
         5,                        // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(0.0);
+    setting.setFloatValue(20.0);
     addSetting(setting);
 
     setting.init(
@@ -79,7 +79,7 @@ public:
         700,                      // Max value
         0.5,                      // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(0.0);
+    setting.setFloatValue(30.0);
     addSetting(setting);
 
     setting.init(
@@ -99,7 +99,7 @@ public:
         1500,                     // Max value
         0.1,                      // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(0.0);
+    setting.setFloatValue(300.0);
     addSetting(setting);
 
     setting.init(
@@ -119,7 +119,7 @@ public:
         7000,                     // Max value
         0.5,                      // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(0.0);
+    setting.setFloatValue(1000.0);
     addSetting(setting);
 
     setting.init(
@@ -129,7 +129,7 @@ public:
         6.0,                      // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
-    setting.setFloatValue(0.0);
+    setting.setFloatValue(-6.0);
     addSetting(setting);
 
     setting.init(
@@ -139,15 +139,8 @@ public:
         0,                        // Max value
         1,                        // Step Size
         EffectSetting::dB);
-    setting.setFloatValue(0.0);
+    setting.setFloatValue(-100.0);
     addSetting(setting);
-
-    // pre-and post-distortion filters (fixed)
-    m_lpf1Freq = 5000;
-    m_lpf2Freq = 5000;
-
-    // dry level
-    m_dryLevel = 0;
 
     loadFromConfig();
   };
@@ -158,10 +151,10 @@ public:
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("lowCut");
+    it = m_settingMap.find("tone");
     if (it != m_settingMap.end())
     {
-      m_gain = it->second.getFloatValue();
+      m_hpfFreq = it->second.getFloatValue();
     }
 
     it = m_settingMap.find("drive");
@@ -191,7 +184,7 @@ public:
     it = m_settingMap.find("mid");
     if (it != m_settingMap.end())
     {
-      m_toneTrebleCutBoost = it->second.getFloatValue();
+      m_toneMidrangeCutBoost = it->second.getFloatValue();
     }
 
     it = m_settingMap.find("midFreq");
@@ -245,14 +238,15 @@ public:
 
       // Stage 3 - Tone control - 3 band EQ - low shelf, mid cut/boost, high shelf
       //
-      value = m_toneBass.getSample(value);     // mix some dry signal in to add "detail"
-      value = m_toneMidrange.getSample(value); // mix some dry signal in to add "detail"
+      // TODO: I don't think you want to stack these.  I think you want to add the three onto the original
+      // See ToneStack.hpp lines 73-75
+      value = m_toneBass.getSample(value);
+      value = m_toneMidrange.getSample(value);
       value = m_toneTreble.getSample(value);
 
       // sum in some dry level for detail (to model Klon and similar pedals)
       value = value + (m_dryLevel * input[i]);
 
-      // value = distortionAlgorithm(value);
       output[i] = value * m_level;
     }
   };
@@ -270,13 +264,12 @@ private:
   BiQuadFilter m_toneTreble;   // treble control frequency
 
   // Parameters
-  float m_gain;        // gain before clip functions
-  float m_level;       // Overall level
-  ClipType m_clipType; // what kind of clipping funciton
-  float m_lpf1Freq;    // frequency of the first clip block lpf (fixed filter)
-  float m_lpf2Freq;    // frequency of the first clip block lpf (fixed filter)
-
-  int m_hpfFreq; // high-pass filter mode - low or mid
+  float m_gain;            // gain before clip functions
+  float m_level;           // Overall level
+  ClipType m_clipType;     // what kind of clipping funciton
+  float m_lpf1Freq = 5000; // frequency of the first clip block lpf (fixed filter)
+  float m_lpf2Freq = 5000; // frequency of the first clip block lpf (fixed filter)
+  float m_hpfFreq = 250;   // high-pass filter mode - low or mid
 
   float m_toneBassFreq;     // LPF cut-off frequency for tone control
   float m_toneMidrangeFreq; // HPF cut-off frequency for tone control
