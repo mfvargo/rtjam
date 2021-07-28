@@ -11,7 +11,7 @@ public:
 
   void setConfig(json config)
   {
-    setByPass(config["bypass"]["value"]);
+ //   setByPass(config["bypass"]["value"]);
     
     m_filter.init(
     config["filterType"]["value"],
@@ -25,7 +25,7 @@ public:
 
   void init() override
   {
-    setByPass(true);
+//    setByPass(true);
     m_filter.init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
   }
   void process(const float *input, float *output, int framesize) override
