@@ -23,7 +23,7 @@ public:
         0.02,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
     m_pReverb = new MVerb<float>;
     m_pReverb->setSampleRate(48000);
     m_pReverb->setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
@@ -42,12 +42,7 @@ public:
   void loadFromConfig() override
   {
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
-    it = m_settingMap.find("mix");
-    if (it != m_settingMap.end())
-    {
-      m_mix = it->second.getFloatValue();
-    }
+    m_mix = getSettingByName("mix").getFloatValue();
     m_pReverb->setParameter(MVerb<float>::MIX, m_mix);
   }
 

@@ -34,7 +34,7 @@ public:
         2,                        // Step Size
         EffectSetting::msec);
     setting.setFloatValue(250.0); // 1/8 note at 120BPM = 250msec.
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "feedback",               // Name
@@ -44,7 +44,7 @@ public:
         0.01,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.1);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "level",                  // Name
@@ -54,7 +54,7 @@ public:
         0.01,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.5);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "drift",                  // Name
@@ -64,7 +64,7 @@ public:
         1,                        // Step Size
         EffectSetting::dB);
     setting.setFloatValue(-42);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "rate",                   // Name
@@ -74,7 +74,7 @@ public:
         0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(1.4);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "delayMode",            // Name
@@ -85,11 +85,10 @@ public:
         EffectSetting::selector);
     setting.setLabels({"Dig", "Ana", "HPF"});
     setting.setIntValue(DelayMode::digital);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     // Do some init stuff
     m_writePointerIndex = 0;
-    m_delayMode = DelayMode::digital;
 
     loadFromConfig();
   };
@@ -98,45 +97,13 @@ public:
   {
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("duration");
-    if (it != m_settingMap.end())
-    {
-      m_currentDelayTime = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("feedback");
-    if (it != m_settingMap.end())
-    {
-      m_feedback = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("level");
-    if (it != m_settingMap.end())
-    {
-      m_level = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("drift");
-    if (it != m_settingMap.end())
-    {
-      m_color = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("rate");
-    if (it != m_settingMap.end())
-    {
-      m_rate = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("delayMode");
-    if (it != m_settingMap.end())
-    {
-      m_delayMode = (DelayMode)it->second.getIntValue();
-    }
-
-    switch (m_delayMode)
+    m_currentDelayTime = getSettingByName("duration").getFloatValue();
+    m_feedback = getSettingByName("feedback").getFloatValue();
+    m_level = getSettingByName("level").getFloatValue();
+    m_drift = getSettingByName("drift").getFloatValue();
+    m_rate = getSettingByName("rate").getFloatValue();
+    switch (getSettingByName("delayMode").getIntValue())
     {
     case DelayMode::digital:
       m_feedbackFilter.init(BiQuadFilter::FilterType::LowPass, 10000, 1.0, 1.0, 48000);
@@ -148,8 +115,8 @@ public:
       m_feedbackFilter.init(BiQuadFilter::FilterType::HighPass, 1500, 1.0, 1.0, 48000);
       break;
     }
-    m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_color, 48000);
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_color)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
+    m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_drift, 48000);
+    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_drift)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
   }
 
   //  Digital Delay Effect - Signal Flow Diagram
@@ -207,7 +174,6 @@ public:
 private:
   LowFreqOsc m_osc;
   BiQuadFilter m_feedbackFilter;
-  int m_delayMode;
   float m_delayBuffer[DELAY_BUFFER_SIZE]; // 1 second of delay buffer
   int m_sampleRate = 48000;
   int m_bufferDepth;
@@ -215,6 +181,6 @@ private:
   int m_writePointerIndex;
   float m_feedback;
   float m_level;
-  float m_color;
+  float m_drift;
   float m_rate;
 };

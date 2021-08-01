@@ -20,7 +20,7 @@ public:
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
     setting.init(
         "mid",                    // Name
         EffectSetting::floatType, // Type of setting
@@ -29,7 +29,7 @@ public:
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
     setting.init(
         "low",                    // Name
         EffectSetting::floatType, // Type of setting
@@ -38,7 +38,7 @@ public:
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     loadFromConfig();
   };
@@ -46,23 +46,10 @@ public:
   void loadFromConfig() override
   {
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("treble");
-    if (it != m_settingMap.end())
-    {
-      m_treble = it->second.getFloatValue();
-    }
-    it = m_settingMap.find("mid");
-    if (it != m_settingMap.end())
-    {
-      m_mid = it->second.getFloatValue();
-    }
-    it = m_settingMap.find("low");
-    if (it != m_settingMap.end())
-    {
-      m_bass = it->second.getFloatValue();
-    }
+    m_treble = getSettingByName("treble").getFloatValue();
+    m_mid = getSettingByName("mid").getFloatValue();
+    m_bass = getSettingByName("low").getFloatValue();
     setParams();
   }
 

@@ -24,7 +24,7 @@ public:
         0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.4);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
     setting.init(
         "rate",                   // Name
         EffectSetting::floatType, // Type of setting
@@ -33,26 +33,16 @@ public:
         0.1,                      // Step Size
         EffectSetting::linear);
     setting.setFloatValue(1.2);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
   };
 
   void loadFromConfig() override
   {
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("depth");
-    if (it != m_settingMap.end())
-    {
-      m_depth = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("rate");
-    if (it != m_settingMap.end())
-    {
-      m_rate = it->second.getFloatValue();
-    }
+    m_depth = getSettingByName("depth").getFloatValue();
+    m_rate = getSettingByName("rate").getFloatValue();
     setParams();
   }
 

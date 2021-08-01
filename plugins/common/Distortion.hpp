@@ -39,7 +39,7 @@ public:
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(6.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "clipType",             // Name
@@ -50,7 +50,7 @@ public:
         EffectSetting::selector);
     setting.setLabels({"hard", "tube", "brit", "oct"});
     setting.setIntValue(ClipType::soft);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "tone",                   // Name
@@ -60,7 +60,7 @@ public:
         0.05,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "level",                  // Name
@@ -70,7 +70,7 @@ public:
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     setting.init(
         "hpfMode",              // Name
@@ -81,7 +81,7 @@ public:
         EffectSetting::selector);
     setting.setLabels({"Low", "Mid"}); // better names - low/mid???
     setting.setIntValue(HpfMode::low);
-    m_settingMap.insert(std::pair<std::string, EffectSetting>(setting.name(), setting));
+    addSetting(setting);
 
     // pre-and post-distortion filters (fixed)
     m_lpf1Freq = 5000;
@@ -104,35 +104,11 @@ public:
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("drive");
-    if (it != m_settingMap.end())
-    {
-      m_gain = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("clipType");
-    if (it != m_settingMap.end())
-    {
-      m_clipType = (ClipType)it->second.getIntValue();
-    }
-
-    it = m_settingMap.find("tone");
-    if (it != m_settingMap.end())
-    {
-      m_tone = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("level");
-    if (it != m_settingMap.end())
-    {
-      m_level = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("hpfMode");
-    if (it != m_settingMap.end())
-    {
-      m_hpfMode = (HpfMode)it->second.getIntValue();
-    }
+    m_gain = getSettingByName("drive").getFloatValue();
+    m_clipType = (ClipType)getSettingByName("clipType").getIntValue();
+    m_tone = getSettingByName("tone").getFloatValue();
+    m_level = getSettingByName("level").getFloatValue();
+    m_hpfMode = getSettingByName("hpfMode").getIntValue();
 
     setupFilters();
   }
