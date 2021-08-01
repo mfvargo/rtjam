@@ -32,7 +32,7 @@ public:
     EffectSetting setting;
 
     setting.init(
-        "lowCut",                   // Name
+        "lowCut",                 // Name
         EffectSetting::floatType, // Type of setting
         20,                       // Min value
         720,                      // Max value
@@ -220,8 +220,6 @@ public:
     setupFilters();
   }
 
-
-
   void process(const float *input, float *output, int framesize) override
   {
     for (int i = 0; i < framesize; i++)
@@ -246,7 +244,7 @@ public:
       // COMMENT: this is ok and by design - tonestack uses parallel structure with gains on fixed filters that sum together
       // this is 3 band eq with series cascade structure and the freq and cut/boost will be varied by
       // just recalculating the filter coeffs vs a gain constant like in TS
-      // 
+      //
       value = m_toneBass.getSample(value);
       value = m_toneMidrange.getSample(value);
       value = m_toneTreble.getSample(value);
@@ -301,7 +299,7 @@ private:
     m_downsample.init(BiQuadFilter::FilterType::LowPass, 48000, 1.0, 1.0, 8 * 384000);
     m_toneBass.init(BiQuadFilter::FilterType::LowShelf, m_toneBassFreq, m_toneBassCutBoost, 0.707, 48000);
     m_toneMidrange.init(BiQuadFilter::FilterType::Peaking, m_toneMidrangeFreq, m_toneMidrangeCutBoost, 0.707, 48000);
-    m_toneTreble.init(BiQuadFilter::FilterType::HighShelf, m_toneTrebleCutBoost, m_toneTrebleCutBoost, 0.707, 48000);
+    m_toneTreble.init(BiQuadFilter::FilterType::HighShelf, m_toneTrebleFreq, m_toneTrebleCutBoost, 0.707, 48000);
   };
 
   float distortionAlgorithm(float inputSample)
