@@ -104,35 +104,11 @@ public:
     Effect::loadFromConfig();
     std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("drive");
-    if (it != m_settingMap.end())
-    {
-      m_gain = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("clipType");
-    if (it != m_settingMap.end())
-    {
-      m_clipType = (ClipType)it->second.getIntValue();
-    }
-
-    it = m_settingMap.find("tone");
-    if (it != m_settingMap.end())
-    {
-      m_tone = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("level");
-    if (it != m_settingMap.end())
-    {
-      m_level = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("hpfMode");
-    if (it != m_settingMap.end())
-    {
-      m_hpfMode = (HpfMode)it->second.getIntValue();
-    }
+    m_gain = getSettingByName("drive").getFloatValue();
+    m_clipType = (ClipType)getSettingByName("clipType").getIntValue();
+    m_tone = getSettingByName("tone").getFloatValue();
+    m_level = getSettingByName("level").getFloatValue();
+    m_hpfMode = getSettingByName("hpfMode").getIntValue();
 
     setupFilters();
   }

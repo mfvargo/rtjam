@@ -40,19 +40,9 @@ public:
   {
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("depth");
-    if (it != m_settingMap.end())
-    {
-      m_depth = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("rate");
-    if (it != m_settingMap.end())
-    {
-      m_rate = it->second.getFloatValue();
-    }
+    m_depth = getSettingByName("depth").getFloatValue();
+    m_rate = getSettingByName("rate").getFloatValue();
     setParams();
   }
 
