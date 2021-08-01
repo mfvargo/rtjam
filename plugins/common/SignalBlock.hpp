@@ -50,4 +50,18 @@ public:
 
     return value;
   };
+
+  static float getFramePower(const float *input, int framesize)
+  {
+    // linear calcution.  sum of the squares / number of values
+    float power = 0.0;
+    for (int i = 0; i < framesize; i++)
+      power += pow(input[i], 2);
+    power /= framesize;
+    // Now turn into db
+    if (power > 1E-6)
+      return 10 * log10(power);
+
+    return -60.0f;
+  };
 };

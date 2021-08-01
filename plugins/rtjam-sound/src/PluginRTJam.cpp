@@ -200,6 +200,11 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   tempOut[0] = oneBuffOut;
   tempOut[1] = twoBuffOut;
 
+  // Save the input power levels
+  // Get input levels  (from tempOut which is what we sent to the room.)
+  m_leftInput.addSample(SignalBlock::getFramePower(inputs[0], frames));
+  m_rightInput.addSample(SignalBlock::getFramePower(inputs[1], frames));
+
   // run the effect chains
   m_pedalBoards[0].process(inputs[0], oneBuffOut, frames);
   m_pedalBoards[1].process(inputs[1], twoBuffOut, frames);
@@ -219,38 +224,13 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   uint32_t ids[MAX_JAMMERS];
   m_jamSocket.getClientIds(ids);
 
-  // Get input levels  (from tempOut which is what we sent to the room.)
-  float leftPow = 0.0;
-  float rightPow = 0.0;
-  for (uint32_t i = 0; i < frames; i++)
-  {
-    leftPow += pow(tempOut[0][i], 2);
-    rightPow += pow(tempOut[1][i], 2);
-  }
-  leftPow /= frames + 1;
-  if (leftPow > 1E-6)
-  {
-    leftPow = 10 * log10(leftPow);
-  }
-  else
-  {
-    leftPow = -60.0f;
-  }
-  rightPow /= frames + 1;
-  if (rightPow > 1E-6)
-  {
-    rightPow = 10 * log10(rightPow);
-  }
-  else
-  {
-    rightPow = -60.0f;
-  }
-  leftInput.addSample(leftPow);
-  rightInput.addSample(rightPow);
+  // Get the levels post effects  (from tempOut which is what we sent to the room.)
+  m_leftRoomInput.addSample(SignalBlock::getFramePower(tempOut[0], frames));
+  m_rightRoomInput.addSample(SignalBlock::getFramePower(tempOut[1], frames));
 
   // Communicate light values
-  m_lightData.m_pLightSettings->inputOne = dbToColor(leftInput.mean);
-  m_lightData.m_pLightSettings->inputTwo = dbToColor(rightInput.mean);
+  m_lightData.m_pLightSettings->inputOne = dbToColor(m_leftInput.mean);
+  m_lightData.m_pLightSettings->inputTwo = dbToColor(m_rightInput.mean);
 
   // Store organized levels
   for (int i = 0; i < MIX_CHANNELS; i++)
@@ -265,10 +245,14 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   }
   m_levels.masterLevel = m_jamMixer.masterLevel;
   m_levels.peakMaster = m_jamMixer.masterPeak;
-  m_levels.inputLeft = leftInput.mean;
-  m_levels.inputRight = rightInput.mean;
-  m_levels.peakLeft = leftInput.peak;
-  m_levels.peakRight = rightInput.peak;
+  m_levels.inputLeft = m_leftInput.mean;
+  m_levels.inputRight = m_rightInput.mean;
+  m_levels.peakLeft = m_leftInput.peak;
+  m_levels.peakRight = m_rightInput.peak;
+  m_levels.roomLevelLeft = m_leftRoomInput.mean;
+  m_levels.roomPeakLeft = m_leftRoomInput.peak;
+  m_levels.roomLevelRight = m_rightRoomInput.mean;
+  m_levels.roomPeakRight = m_rightRoomInput.peak;
   m_levels.beat = m_jamMixer.getBeat();
   m_levels.isConnected = m_jamSocket.isActivated;
 
