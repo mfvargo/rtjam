@@ -102,7 +102,6 @@ public:
   {
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
 
     m_gain = getSettingByName("drive").getFloatValue();
     m_clipType = (ClipType)getSettingByName("clipType").getIntValue();
