@@ -1,5 +1,5 @@
 <ezstream>
-    <url>http://localhost:8000/lobby.mp3</url>
+    <url>http://localhost:8000/live/lobby.mp3</url>
     <sourcepassword>icertjamnation</sourcepassword>
     <format>MP3</format>
     <filename>stdin</filename>
@@ -10,3 +10,4 @@
     <svrinfosamplerate>48000</svrinfosamplerate>
     <svrinfopublic>1</svrinfopublic>
 </ezstream>
+
