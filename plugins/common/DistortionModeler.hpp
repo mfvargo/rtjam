@@ -149,73 +149,18 @@ public:
   {
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
 
-    it = m_settingMap.find("lowCut");
-    if (it != m_settingMap.end())
-    {
-      m_hpfFreq = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("drive");
-    if (it != m_settingMap.end())
-    {
-      m_gain = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("clipType");
-    if (it != m_settingMap.end())
-    {
-      m_clipType = (ClipType)it->second.getIntValue();
-    }
-
-    it = m_settingMap.find("bass");
-    if (it != m_settingMap.end())
-    {
-      m_toneBassCutBoost = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("bassFreq");
-    if (it != m_settingMap.end())
-    {
-      m_toneBassFreq = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("mid");
-    if (it != m_settingMap.end())
-    {
-      m_toneMidrangeCutBoost = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("midFreq");
-    if (it != m_settingMap.end())
-    {
-      m_toneMidrangeFreq = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("treble");
-    if (it != m_settingMap.end())
-    {
-      m_toneTrebleCutBoost = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("trebleFreq");
-    if (it != m_settingMap.end())
-    {
-      m_toneTrebleFreq = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("level");
-    if (it != m_settingMap.end())
-    {
-      m_level = it->second.getFloatValue();
-    }
-
-    it = m_settingMap.find("dryLevel");
-    if (it != m_settingMap.end())
-    {
-      m_dryLevel = it->second.getFloatValue();
-    }
+    m_hpfFreq = getSettingByName("lowCut").getFloatValue();
+    m_gain = getSettingByName("drive").getFloatValue();
+    m_clipType = (ClipType)getSettingByName("clipType").getIntValue();
+    m_toneBassCutBoost = getSettingByName("bass").getFloatValue();
+    m_toneBassFreq = getSettingByName("bassFreq").getFloatValue();
+    m_toneMidrangeCutBoost = getSettingByName("mid").getFloatValue();
+    m_toneMidrangeFreq = getSettingByName("midFreq").getFloatValue();
+    m_toneTrebleCutBoost = getSettingByName("treble").getFloatValue();
+    m_toneTrebleFreq = getSettingByName("trebleFreq").getFloatValue();
+    m_level = getSettingByName("level").getFloatValue();
+    m_dryLevel = getSettingByName("dryLevel").getFloatValue();
 
     setupFilters();
   }
