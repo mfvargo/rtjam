@@ -28,8 +28,10 @@ private:
   LightColors dbToColor(float value);
   JamNetStuff::JamSocket m_jamSocket;
   JamNetStuff::JamMixer m_jamMixer;
-  JamNetStuff::StreamTimeStats leftInput;
-  JamNetStuff::StreamTimeStats rightInput;
+  JamNetStuff::StreamTimeStats m_leftInput;
+  JamNetStuff::StreamTimeStats m_rightInput;
+  JamNetStuff::StreamTimeStats m_leftRoomInput;
+  JamNetStuff::StreamTimeStats m_rightRoomInput;
   float *m_outputs[NUM_OUTPUTS];
   RTJamParam m_param;
   LightData m_lightData;
