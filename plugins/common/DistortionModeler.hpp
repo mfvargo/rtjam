@@ -190,9 +190,9 @@ public:
       // this is 3 band eq with series cascade structure and the freq and cut/boost will be varied by
       // just recalculating the filter coeffs vs a gain constant like in TS
       //
-      value = m_toneBass.getSample(value);
+      // value = m_toneBass.getSample(value);
       value = m_toneMidrange.getSample(value);
-      value = m_toneTreble.getSample(value);
+      // value = m_toneTreble.getSample(value);
 
       // sum in some dry level for detail (to model Klon and similar pedals)
       value = value + (m_dryLevel * input[i]);
