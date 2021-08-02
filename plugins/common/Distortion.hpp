@@ -102,9 +102,8 @@ public:
   {
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
-    std::map<std::string, EffectSetting>::iterator it;
 
-    m_gain = getSettingByName("drive").getFloatValue();
+    m_drive = getSettingByName("drive").getFloatValue();
     m_clipType = (ClipType)getSettingByName("clipType").getIntValue();
     m_tone = getSettingByName("tone").getFloatValue();
     m_level = getSettingByName("level").getFloatValue();
@@ -122,12 +121,12 @@ public:
       float value = m_hpf.getSample(input[i]);
 
       // Stage 1 - first clipper (set to emulate op-amp clipping before diodes)
-      value = clipSample(value * m_gain); // clip signal
-      value = m_lpf1.getSample(value);    // filter out higher-order harmonics
-      value = m_lpf1.getSample(value);    // filter out higher-order harmonics
+      value = clipSample(value * m_drive); // clip signal
+      value = m_lpf1.getSample(value);     // filter out higher-order harmonics
+      value = m_lpf1.getSample(value);     // filter out higher-order harmonics
 
       // Stage 2 - diode clipper
-      value = clipSample(value * m_gain);
+      value = clipSample(value * m_drive);
       value = m_lpf2.getSample(value); // filter out higher-order harmonics
       value = m_lpf2.getSample(value); // filter out higher-order harmonics
 
@@ -156,7 +155,7 @@ private:
   BiQuadFilter m_toneHpf;
 
   // Parameters
-  float m_gain;        // gain before clip functions
+  float m_drive;       // gain before clip functions
   float m_tone;        // tone control
   float m_level;       // Overall level
   ClipType m_clipType; // what kind of clipping funciton
@@ -223,7 +222,7 @@ private:
     // using either hard, soft, asymmetric or symmetric clipper
     for (i = 0; i < 8; i++)
     {
-      filterOut[i] = 8 * m_gain * filterOut[i];
+      filterOut[i] = 8 * m_drive * filterOut[i];
       clipOut[i] = clipSample(filterOut[i]);
     }
 

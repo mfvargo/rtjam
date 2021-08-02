@@ -13,6 +13,7 @@
 #include "JamNetStuff.hpp"
 #include <cmath>
 #include <string.h>
+#include "SignalBlock.hpp"
 
 namespace JamNetStuff
 {
@@ -35,10 +36,10 @@ namespace JamNetStuff
             levelStats[i].windowSize = 30.0;
             jitterBuffers[i].flush();
         }
+        masterStats.windowSize = 30.0;
         masterVol = 1.0;
         masterLevel = 0.0f;
         masterPeak = 0.0f;
-        masterStats.windowSize = 30.0;
     }
 
     /* print out some stats */
@@ -54,59 +55,39 @@ namespace JamNetStuff
     /* get some data for the output */
     void JamMixer::getMix(float **outputs, uint32_t frames)
     {
-        float levelSums[MIX_CHANNELS];
-
         // get a frame out of each mix buffer
         for (uint32_t i = 0; i < MIX_CHANNELS; i++)
         {
             jitterBuffers[i].getOut(mixBuffers[i], frames);
-            levelSums[i] = 0.0f;
         }
-        masterLevel = 0.0f;
         // sum all the buffers.
         for (uint32_t i = 0; i < frames; i++)
         {
             float sum = 0.0;
             for (int j = 0; j < MIX_CHANNELS; j++)
             {
+                // This just does a pass through of all the channels for separate processing
                 outputs[2 + j][i] = mixBuffers[j][i];
-                levelSums[j] += pow(gains[j] * mixBuffers[j][i], 2);
+                // this is going to sum all the channels into one one
                 sum += masterVol * gains[j] * mixBuffers[j][i];
             }
             if (sum > 1.0)
                 sum = 1.0;
             if (sum < -1.0)
                 sum = -1.0;
-            masterLevel += pow(sum, 2);
+            // Store the sum in both outputs (left and right)
             outputs[0][i] = sum;
             outputs[1][i] = sum;
         }
         for (int i = 0; i < MIX_CHANNELS; i++)
         {
-            levelSums[i] /= frames + 1;
-            if (levelSums[i] > 1E-6)
-            {
-                levelSums[i] = 10 * log10(levelSums[i]);
-            }
-            else
-            {
-                levelSums[i] = -60.0f;
-            }
-            levelStats[i].addSample(levelSums[i]);
+            levelStats[i].addSample(SignalBlock::getFramePower(outputs[i + 2], frames));
             channelLevels[i] = levelStats[i].mean;
             peakLevels[i] = levelStats[i].peak;
             bufferDepths[i] = jitterBuffers[i].getAvgDepth();
         }
-        masterLevel /= frames + 1;
-        if (masterLevel > 1E-6)
-        {
-            masterLevel = 10 * log10(masterLevel);
-        }
-        else
-        {
-            masterLevel = -60.0;
-        }
-        masterStats.addSample(masterLevel);
+        // Set the master level
+        masterStats.addSample(SignalBlock::getFramePower(outputs[0], frames));
         masterLevel = masterStats.mean;
         masterPeak = masterStats.peak;
     }

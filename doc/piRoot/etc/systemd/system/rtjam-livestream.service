@@ -1,0 +1,15 @@
+[Unit]
+Description=rtjam service to stream audio to icecast
+After=network.target
+
+[Service]
+ExecStart=/home/pi/rtjam/livestream.bash
+WorkingDirectory=/home/pi/rtjam
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+
+[Install]
+WantedBy=multi-user.target
