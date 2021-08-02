@@ -251,6 +251,7 @@ namespace JamNetStuff
     JitterBuffer jitterBuffers[MIX_CHANNELS];
     float mixBuffers[MIX_CHANNELS][MAX_FRAME_SIZE];
     StreamTimeStats levelStats[MIX_CHANNELS];
+    StreamTimeStats masterStats;
 
   private:
     char beat;

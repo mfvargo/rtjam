@@ -74,6 +74,7 @@ int main(int argc, char *argv[])
     {
         pluginRTJam.connect(serverName.c_str(), port, clientId);
     }
+    settings.saveToFile();
 
     // loop while trying to connect to jack.  If jack is not running this will just keep looping
     // until it starts.
