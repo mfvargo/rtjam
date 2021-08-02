@@ -28,6 +28,7 @@ public:
     m_rate = 1.4;
     m_delayMode = DelayMode::digital;
     m_writePointerIndex = 0;
+    m_overallGain = 1.0;
   };
 
   void loadFromConfig() override
@@ -96,7 +97,7 @@ public:
       readIndex %= m_bufferDepth;
 
       // return original plus delay
-      output[sample] = input[sample] + m_delayBuffer[readIndex] * m_level;
+      output[sample] = m_overallGain * (input[sample] + m_delayBuffer[readIndex] * m_level);
 
       // add feedback to the buffer
       m_delayBuffer[m_writePointerIndex] = input[sample] + (m_feedbackFilter.getSample(m_delayBuffer[readIndex]) * m_feedback);
@@ -115,5 +116,6 @@ protected:
   float m_level;
   float m_drift;
   float m_rate;
+  float m_overallGain;
   DelayMode m_delayMode;
 };

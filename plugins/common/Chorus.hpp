@@ -18,7 +18,7 @@ public:
         "duration",               // Name
         EffectSetting::floatType, // Type of setting
         2,                        // Min value
-        10.0,                     // Max value
+        20.0,                     // Max value
         0.1,                      // Step Size
         EffectSetting::msec);
     setting.setFloatValue(5.0);
@@ -57,6 +57,7 @@ public:
     float depth = getSettingByName("depth").getFloatValue();
     m_feedback = depth;
     m_level = depth;
+    m_overallGain = 1 - (depth / 2); // Do this to prevent chorus from doubling the volume
     m_drift = SignalBlock::dbToFloat((depth * 45.0) - 60);
     m_rate = getSettingByName("rate").getFloatValue();
 
