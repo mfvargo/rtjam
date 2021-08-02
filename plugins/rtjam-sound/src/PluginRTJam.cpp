@@ -1,5 +1,4 @@
 #include "PluginRTJam.hpp"
-#include "Settings.hpp"
 #include <iostream>
 #include <fstream>
 

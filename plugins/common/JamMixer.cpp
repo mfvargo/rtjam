@@ -36,6 +36,7 @@ namespace JamNetStuff
             levelStats[i].windowSize = 30.0;
             jitterBuffers[i].flush();
         }
+        masterStats.windowSize = 30.0;
         masterVol = 1.0;
         masterLevel = 0.0f;
         masterPeak = 0.0f;
@@ -80,13 +81,15 @@ namespace JamNetStuff
         }
         for (int i = 0; i < MIX_CHANNELS; i++)
         {
-            levelStats[i].addSample(SignalBlock::getFramePower(outputs[i], frames));
+            levelStats[i].addSample(SignalBlock::getFramePower(outputs[i + 2], frames));
             channelLevels[i] = levelStats[i].mean;
             peakLevels[i] = levelStats[i].peak;
             bufferDepths[i] = jitterBuffers[i].getAvgDepth();
         }
-        masterLevel = levelStats[0].mean;
-        masterPeak = levelStats[0].peak;
+        // Set the master level
+        masterStats.addSample(SignalBlock::getFramePower(outputs[0], frames));
+        masterLevel = masterStats.mean;
+        masterPeak = masterStats.peak;
     }
 
     /* give the mixer a packet to chew on */

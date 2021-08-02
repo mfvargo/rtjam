@@ -9,6 +9,7 @@
 #endif
 #include <jack/jack.h>
 #include "PluginRTJam.hpp"
+#include "Settings.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -62,6 +63,18 @@ int main(int argc, char *argv[])
 
     PluginRTJam pluginRTJam;
     pluginRTJam.init();
+    // Auto connect for Kevin Kirkpatrick
+    Settings settings;
+    settings.loadFromFile();
+    std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
+    int port = settings.getOrSetValue("port", 7891);
+    int clientId = rand() % 32768;
+    clientId = settings.getOrSetValue("clientId", clientId);
+    if (settings.getOrSetValue("autoconnect", 0) != 0)
+    {
+        pluginRTJam.connect(serverName.c_str(), port, clientId);
+    }
+    settings.saveToFile();
 
     // loop while trying to connect to jack.  If jack is not running this will just keep looping
     // until it starts.
