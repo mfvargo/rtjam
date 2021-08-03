@@ -63,6 +63,10 @@ public:
     default:
       break;
     }
+
+    std::cout << "b = [" << b0 << " " << b1 << " " << b2 << "]" << std::endl;
+    std::cout << "a = [ 1 " << a1 << " " << a2 << "]" << std::endl;
+
   };
 
 
@@ -126,7 +130,7 @@ private:
   void calcLowShelfCoefficients()
   {
     calcIntermediateVariables(m_cutBoost, m_q);
-    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    alpha = (sin_omega / 2.0) * sqrt((A + (1/A))*((1/m_q)-1) + 2); // special case for shelving filter
     b0 = A*((A + 1.0) - (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha)); 
     b1 = 2.0*A*((A - 1.0) - (A +1.0)*cos_omega);           
     b2 = A*((A + 1.0) - (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
@@ -139,7 +143,7 @@ private:
   void calcHighShelfCoefficients()
   {
     calcIntermediateVariables(m_cutBoost, m_q);
-    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    alpha = (sin_omega / 2.0) * sqrt((A + (1/A))*((1/m_q)-1) + 2); // special case for shelving filter
     b0 = A*((A + 1.0) + (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha)); 
     b1 = -2.0*A*((A - 1.0) + (A +1.0)*cos_omega);           
     b2 = A*((A + 1.0) - (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
@@ -184,6 +188,7 @@ private:
     cos_omega = cos(omega);
     sin_omega = sin(omega);
     alpha = sin_omega / (2.0 * fltQ);
+   
   }
 
   void normalizeCoefficients()

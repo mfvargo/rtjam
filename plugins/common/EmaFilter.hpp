@@ -11,7 +11,7 @@ public:
   {
 
       // coeeficent alpha = 1-exp(-wc/Fs)
-      m_alpha = 1 - exp(cutoffFreq/(2*3.1415)/sampleRate);
+      m_alpha = 1 - exp((-1*cutoffFreq/2*M_PI)/sampleRate);
   
   };
 

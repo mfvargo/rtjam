@@ -53,22 +53,20 @@ private:
     unsigned int m_adcValue[3];
 
 
-// input pot variables
-   // float m_pot1Filter = 0;
-    float m_pot2Filter = 0;
-    float m_pot3Filter = 0;
-
+    // filters to remove noise from pot inputs
     EmaFilter m_pot1Filter;
+    EmaFilter m_pot2Filter;
+    EmaFilter m_pot3Filter;
  
+    // potentiometer current values and last state
+    int m_pot1Value = 0;
+    int m_lastPot1Value = 0;
 
-    float m_pot1Value = 0;
-    float m_lastPot1Value = 0;
+    int m_pot2Value = 0;
+    int m_lastPot2Value = 0;
 
-    float m_pot2Value = 0;
-    float m_lastPot2Value = 0;
-
-    float m_pot3Value = 0;
-    float m_lastPot3Value = 0;
+    int m_pot3Value = 0;
+    int m_lastPot3Value = 0;
 
 
     unsigned int m_temp = 0;

@@ -7,11 +7,9 @@
 #include "LightData.hpp"
 #include "CodecControl.hpp"
 
-using namespace std;
 
 int main(int argc, char *argv[])
 {
- 
  
     LightData lightData;
     StatusLight::startInit();

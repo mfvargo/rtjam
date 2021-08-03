@@ -14,6 +14,11 @@ using namespace std;
 int CodecControlAndStatus::init(void)
 {
 
+    // initialize filters for pot inputs (sample rate is poll rate)
+    m_pot1Filter.init(10.0f, 100.0f);
+    m_pot2Filter.init(10.0f, 100.0f);
+    m_pot3Filter.init(10.0f, 100.0f);
+
 
     // setup wiring library for Pi - use GPIO pin names
     // TODO - change to libdpiod???
@@ -134,6 +139,14 @@ void CodecControlAndStatus::updateVolumes(void)
     // Check pot values and update gain registers in the '3101 if value changes
     ADC_ScanInputs();
    
+    // filter adc values
+    m_pot1Value = (int)(m_pot1Filter.getSample((float)(m_adcValue[0])));
+    m_pot2Value = (int)(m_pot2Filter.getSample((float)(m_adcValue[1])));
+    m_pot3Value = (int)(m_pot3Filter.getSample((float)(m_adcValue[2])));
+
+    // test only - print pot values after filtering
+    // cout << "Pot values:" << m_pot1Value << "   " << m_pot2Value << "   " << m_pot3Value << endl;
+    
 	// setup I2C bus to write to codec address 0x18
 	int m_codecI2cAddr = 0x18; 
 	if (ioctl(m_file, I2C_SLAVE, m_codecI2cAddr) < 0)
@@ -143,54 +156,75 @@ void CodecControlAndStatus::updateVolumes(void)
 	}
 
     // Pot 1 - channel 0 - Instrument input gain
-    //temp = ALPHA*adcValue + (1-ALPHA)*pot1Filt;
-    cout << "Instrument Gain =  " << m_adcValue[0]/5 << endl;   
-    m_I2cDataBuffer[0] = 15;
- 	m_I2cDataBuffer[1] = m_adcValue[0]/5; 
-    if (write(m_file, m_I2cDataBuffer, 2) != 2)
+    if( abs(m_pot1Value - m_lastPot1Value) > 2)
     {
-	   cerr << "Failed to write instrument gain to i2c bus" << endl;
-	}
+        m_I2cDataBuffer[0] = 15;
+ 	    m_I2cDataBuffer[1] = m_pot1Value/5; 
+        if (write(m_file, m_I2cDataBuffer, 2) != 2)
+        {
+	        cerr << "Failed to write instrument gain to i2c bus" << endl;
+	    }
+    
+      // test only - print gain value
+      //  cout << "Instrument Gain =  " << (int)(m_I2cDataBuffer[1]) << endl;   
+
+    }    
 
     // Pot 2 - channel 1 - mic/headset input gain
-    //temp = ALPHA*adcValue + (1-ALPHA)*pot2Filt;
-//    cout << "Mic Gain =  " << m_adcValue[1]/4 << endl;
-    m_I2cDataBuffer[0] = 16;
-    m_I2cDataBuffer[1] = m_adcValue[1]/4;
-    if (write(m_file, m_I2cDataBuffer, 2) != 2)
+    if( abs(m_pot2Value - m_lastPot2Value) > 2)
     {
-	   cerr << "Failed to write mic gain to i2c bus" << endl;
-	}
-
-    // Pot 3 - channel 2 - Headphone amp gain]
-    m_temp = s_alpha*m_adcValue[2] + (1-s_alpha)*m_pot3Filter;
-    m_temp = (255 - m_adcValue[2])/2; // invert and scale pot value 
-    m_temp |= 0x80;    // set bit 7 (enable DAC-HP path)
-//    cout << "Headphone Gain =  " <<  m_temp << endl;
-
-    m_I2cDataBuffer[0] = 47;
-    m_I2cDataBuffer[1] = m_temp;    
-    if (write(m_file, m_I2cDataBuffer, 2) != 2)
-    {
-	    cerr << "Failed to write left headphone gain to i2c bus" << endl;
-	}
+        
+        m_I2cDataBuffer[0] = 16;
+        m_I2cDataBuffer[1] = m_pot2Value/4;
+        if (write(m_file, m_I2cDataBuffer, 2) != 2)
+        { 
+	        cerr << "Failed to write mic gain to i2c bus" << endl;
+        }
     
-    m_I2cDataBuffer[0] = 64;
-    m_I2cDataBuffer[1] = m_adcValue[1]/4;
-    if (write(m_file, m_I2cDataBuffer, 2) != 2)
+        // test only - print gain value
+        //cout << "Microphone Gain =  " << (int)(m_I2cDataBuffer[1]) << endl;   
+
+
+    }
+    // Pot 3 - channel 2 - Headphone amp gain
+    if( abs(m_pot3Value - m_lastPot3Value) > 2)
     {
-	   cerr << "Failed to write right headphone gain to i2c bus" << endl;
-	}
-            
+
+        m_temp = (255 - m_pot3Value/2); // invert and scale pot value 
+        m_temp |= 0x80;    // set bit 7 (enable DAC-HP path)
+
+        m_I2cDataBuffer[0] = 47;
+        m_I2cDataBuffer[1] = m_temp;    
+        if (write(m_file, m_I2cDataBuffer, 2) != 2)
+        {
+	        cerr << "Failed to write left headphone gain to i2c bus" << endl;
+	    }
+    
+        m_I2cDataBuffer[0] = 64;
+        m_I2cDataBuffer[1] = m_temp;
+        if (write(m_file, m_I2cDataBuffer, 2) != 2)
+        {
+	        cerr << "Failed to write right headphone gain to i2c bus" << endl;
+	    }
+        
+        // test only - print gain value 
+        //cout << "Headphone Gain =  " <<  (int)(m_I2cDataBuffer[1]) << endl;
+    }
+
+    // test only - print delta for pot 3
+    // cout << "Delta = " << abs(m_pot3Value - m_lastPot3Value) << endl; 
+
     // store current state for next time through loop
-   // m_lastPot1Value = m_pot1Filter;
-   // m_lastPot2Value = m_pot2Filter;
-   // m_lastPot3Value = m_pot3Filter;    
+    m_lastPot1Value = m_pot1Value;
+    m_lastPot2Value = m_pot2Value;
+    m_lastPot3Value = m_pot3Value;  
+
+    // test only - print pot values after filtering
+    //cout << "Last pot values:" << m_lastPot1Value << "   " << m_lastPot2Value << "   " << m_lastPot3Value << endl;
+
 
    
 }
-
-
 
 
 void CodecControlAndStatus::ADC_ScanInputs(void)
@@ -222,15 +256,18 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
             cerr << "Failed to read adc from i2c bus" << endl;
         }
 
-        // save and mask off channel information, then convert adc result to 16 bits
+        // save and mask off channel information, then convert adc result to 8 bits
         m_adcChannel = ((m_I2cDataBuffer[0] & 0x30) >> 4);
-		m_adcValue[i] = (float)((m_I2cDataBuffer[0] & 0x0F) << 8) + m_I2cDataBuffer[1];
+		m_adcValue[m_adcChannel] = ((m_I2cDataBuffer[0] & 0x0F) << 8) + m_I2cDataBuffer[1];
 
         // scale down to 8 bits for knobs
-        m_adcValue[i] /=  16;
-       
-        //cout << "ADC Ch " << m_adcChannel << "= " << m_adcValue[i] << endl;
+        m_adcValue[m_adcChannel] /=  16;
+
+        // test only - print raw ADC values
+        //cout << "ADC Channel " << m_adcChannel << "= " << m_adcValue[i] << endl;
+
     }
+
 
 }
 
