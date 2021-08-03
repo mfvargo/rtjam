@@ -8,61 +8,58 @@ class FirFilter : public SignalBlock
 public:
   
 
-  void init(float FirCoeffs[], int N)
+  void init(float FirCoeffs[N], int N)
   {
-      for(unsigned int i=0; i<N; i++)
+
+      m_firCoeffs.resize(N);
+      m_tap.resize(N);
+   
+      for(unsigned int i = 0; i < N; i++)
       {
         m_firCoeffs[i] = FirCoeffs[i];
       }  
 
+
   };
 
-  json getConfig() override
-  {
-    json config = {
-        {"FirCoeffs", m_FirCoeffs},
-       
-    };
-    return config;
-  }
+
 
   float getSample(float input) override
   {
     
     // Copy the new sample in
-    tap[tapIndex++] = input;
-    if (tapIndex >= N)
+    m_tap[tapIndex++] = input;
+    if (m_tapIndex >= N)
     {
- 	    tapIndex = 0;
+ 	    m_tapIndex = 0;
     }
  
 // convolution sum
 // convolve input function with the impulse response
 //	
  
-   sum = 0;
-   for(i=0; i<N; i++)
+   m_sum = 0;
+   for(int i = 0; i < N; i++)
    {
- 	 sum += tap[tapIndex++] * FirCoeffs[N-i];
+ 	   m_sum += m_tap[m_tapIndex++] * m_FirCoeffs[N-i];
  
-	if (tapIndex >= N)
+	  if (m_tapIndex >= N)
     {
-	  tapIndex = 0;
+	    m_tapIndex = 0;
     }
  
-    return sum;
+   }
+    
+    return m_sum;
   
   };
 
 public:
-  float m_firCoeffs[];
-  
+  std::vector<float> m_firCoeffs[];
 
 private:
-  float tap[];
-  unsigned int tapIndex;
-  float sum;
-
-
+  std::vector<float> m_tap;
+  unsigned int m_tapIndex;
+  float m_sum;
 
 };
