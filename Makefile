@@ -86,6 +86,12 @@ stop-pi:
 	rm -f /dev/shm/rtjamLightSettings
 	rm -f /dev/shm/sem.rtjamLightSettings
 
+start-pi:
+	systemctl start rtjam-box
+	systemctl start rtjam-jack
+	systemctl start rtjam-sound
+	systemctl start rtjam-status
+
 uninstall-pi: stop-pi
 	rm -f /home/pi/rtjam/*
 	rm -f /etc/systemd/system/rtjam-*
