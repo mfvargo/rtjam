@@ -4,6 +4,8 @@ After=network.target
 
 
 [Service]
+LimitRTPRIO=infinity
+LimitMEMLOCK=infinity
 ExecStart=/home/pi/rtjam/rtjam-sound
 WorkingDirectory=/home/pi/rtjam
 StandardOutput=inherit
