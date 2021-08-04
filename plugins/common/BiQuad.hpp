@@ -2,7 +2,6 @@
 
 #include "SignalBlock.hpp"
 
-
 class BiQuadFilter : public SignalBlock
 {
 public:
@@ -63,18 +62,13 @@ public:
     default:
       break;
     }
+
+    // test only - output coeffs in MATLAB format for plotting
+    //std::cout << "b = [" << b0 << " " << b1 << " " << b2 << "]" << std::endl;
+    //std::cout << "a = [ 1 " << a1 << " " << a2 << "]" << std::endl;
+
   };
 
-  json getConfig() override
-  {
-    json config = {
-        {"filterType", m_type},
-        {"cutoffFreq", m_cutoffFreq},
-        {"cutBoost", m_cutBoost},
-        {"q", m_q},
-    };
-    return config;
-  }
 
   float getSample(float input) override
   {
@@ -89,7 +83,6 @@ public:
 public:
   float m_cutoffFreq, m_cutBoost, m_q, m_sampleRate;
   FilterType m_type;
-  
 
 private:
   float a0, a1, a2, b0, b1, b2;
@@ -116,7 +109,7 @@ private:
     a1 = -2.0 * cos_omega;
     a2 = 1.0 - (alpha / A);
     b0 = (1.0 + (alpha * A)); // * gainlinear
-    b1 = -2.0 * cos_omega;           // * gainlinear
+    b1 = -2.0 * cos_omega;    // * gainlinear
     b2 = 1.0 - (alpha * A);   // * gainlinear
     normalizeCoefficients();
   };
@@ -136,7 +129,7 @@ private:
   void calcLowShelfCoefficients()
   {
     calcIntermediateVariables(m_cutBoost, m_q);
-    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    alpha = (sin_omega / 2.0) * sqrt((A + (1/A))*((1/m_q)-1) + 2); // special case for shelving filter
     b0 = A*((A + 1.0) - (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha)); 
     b1 = 2.0*A*((A - 1.0) - (A +1.0)*cos_omega);           
     b2 = A*((A + 1.0) - (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
@@ -149,7 +142,7 @@ private:
   void calcHighShelfCoefficients()
   {
     calcIntermediateVariables(m_cutBoost, m_q);
-    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    alpha = (sin_omega / 2.0) * sqrt((A + (1/A))*((1/m_q)-1) + 2); // special case for shelving filter
     b0 = A*((A + 1.0) + (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha)); 
     b1 = -2.0*A*((A - 1.0) + (A +1.0)*cos_omega);           
     b2 = A*((A + 1.0) - (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
@@ -159,14 +152,13 @@ private:
     normalizeCoefficients();
   };
 
-
   void calcAllPassCoefficients()
   {
 
     calcIntermediateVariables(m_cutBoost, m_q);
     alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    b0 = 1.0 - alpha; 
-    b1 = -2.0 * cos_omega;      
+    b0 = 1.0 - alpha;
+    b1 = -2.0 * cos_omega;
     b2 = 1.0 + alpha;
     a0 = 1.0 + alpha;
     a1 = -2.0 * cos_omega;
@@ -178,8 +170,8 @@ private:
   {
     calcIntermediateVariables(m_cutBoost, m_q);
     alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    b0 = 1.0; 
-    b1 = -2.0 * cos_omega;      
+    b0 = 1.0;
+    b1 = -2.0 * cos_omega;
     b2 = 1.0;
     a0 = 1.0 + alpha;
     a1 = -2.0 * cos_omega;
@@ -194,6 +186,7 @@ private:
     cos_omega = cos(omega);
     sin_omega = sin(omega);
     alpha = sin_omega / (2.0 * fltQ);
+   
   }
 
   void normalizeCoefficients()

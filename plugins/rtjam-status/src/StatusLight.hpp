@@ -15,7 +15,7 @@ public:
 
   static void startInit()
   {
-    wiringPiSetup();
+    wiringPiSetupGpio();
   };
 
   void init(StatusFunction func);

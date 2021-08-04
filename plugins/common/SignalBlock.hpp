@@ -10,7 +10,6 @@ class SignalBlock
 {
 public:
   virtual float getSample(float input) = 0;
-  virtual json getConfig() = 0;
 
   void getBlock(const float *input, float *output, int framesize)
   {

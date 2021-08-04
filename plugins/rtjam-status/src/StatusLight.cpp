@@ -6,16 +6,16 @@ void StatusLight::init(StatusLight::StatusFunction func)
   switch (func)
   {
   case inputOne:
-    m_redPin = 22;   // GPIO 6
-    m_greenPin = 21; // GPIO 5
+    m_redPin = 6;   // GPIO 6
+    m_greenPin = 5; // GPIO 5
     break;
   case inputTwo:
-    m_redPin = 10;   // GPIO 8
-    m_greenPin = 11; // GPIO 7
+    m_redPin = 8;   // GPIO 8
+    m_greenPin = 7; // GPIO 7
     break;
   case status:
-    m_redPin = 4;   // GPIO 23
-    m_greenPin = 5; // GPIO 24
+    m_redPin = 23;   // GPIO 23
+    m_greenPin = 24; // GPIO 24
     break;
   }
   pinMode(m_redPin, OUTPUT);
