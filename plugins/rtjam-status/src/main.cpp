@@ -23,18 +23,18 @@ int main(int argc, char *argv[])
 
     int rtjamHardwareDetected = 0;
 
-    // Codec init and gain/volume control
-    CodecControlAndStatus codecControl;
+    // // Codec init and gain/volume control
+    // CodecControlAndStatus codecControl;
 
-    // init codec - function inits hardware and returns 1 if custom hardware detected
-    if (codecControl.init() == 1)
-    {
-        rtjamHardwareDetected = 1; // rtjam hardware detected
-    }
-    else
-    {
-        rtjamHardwareDetected = 0; // standard Rpi setup
-    };
+    // // init codec - function inits hardware and returns 1 if custom hardware detected
+    // if (codecControl.init() == 1)
+    // {
+    //     rtjamHardwareDetected = 1; // rtjam hardware detected
+    // }
+    // else
+    // {
+    //     rtjamHardwareDetected = 0; // standard Rpi setup
+    // };
 
     // main status poll loop
     //  - updates LEDs
@@ -46,11 +46,11 @@ int main(int argc, char *argv[])
         inputOne.set(lightData.m_pLightSettings->inputOne);
         inputTwo.set(lightData.m_pLightSettings->inputTwo);
 
-        // poll the hardware if custom board detected
-        if (rtjamHardwareDetected == 1)
-        {
-            codecControl.updateVolumes();
-        }
+        // // poll the hardware if custom board detected
+        // if (rtjamHardwareDetected == 1)
+        // {
+        //     codecControl.updateVolumes();
+        // }
     }
     return 0;
 }
