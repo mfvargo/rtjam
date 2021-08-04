@@ -1,7 +1,7 @@
 #pragma once
 
-#include <wiringPi.h>
 #include "LightData.hpp"
+#include "GpioPin.hpp"
 
 class StatusLight
 {
@@ -15,7 +15,7 @@ public:
 
   static void startInit()
   {
-    wiringPiSetupGpio();
+    GpioPin::InitializeGpioChip();
   };
 
   void init(StatusFunction func);
@@ -23,7 +23,6 @@ public:
   void set(LightColors color);
 
 private:
-  int m_redPin;
-  int m_greenPin;
-  bool m_bFlash;
+  GpioPin m_redPin;
+  GpioPin m_greenPin;
 };

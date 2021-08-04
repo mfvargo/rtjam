@@ -6,6 +6,7 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
+	../rtjam-status/src/StatusLight.cpp \
 	../common/LightData.cpp \
 	../common/SharedMemory.cpp
 
