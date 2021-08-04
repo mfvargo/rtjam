@@ -39,9 +39,11 @@ This is stuff you will need to be able to compile the softare on the pi
 - sudo apt install libcurl4-openssl-dev
 - sudo apt-get install libasound2-dev
 - sudo apt install cmake
+- sudo apt install gpio
+- sudo apt install libgpiod-dev
 
 ```
-sudo apt install git libgl-dev libcurl4-openssl-dev libasound2-dev cmake
+sudo apt install git libgl-dev libcurl4-openssl-dev libasound2-dev cmake gpio libgpiod-dev
 ```
 
 ###
