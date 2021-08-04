@@ -7,6 +7,7 @@
 #include "DistortionModeler.hpp"
 #include "Tremelo.hpp"
 #include "ToneStack.hpp"
+#include "Chorus.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -15,6 +16,7 @@ const static json s_PedalTypes = {
     {"DistortionModeler", "Distortion Playground"},
     {"Distortion", "Distortion Overdrive"},
     {"Delay", "Delay Pedal"},
+    {"Chorus", "Chorus"},
     {"Reverb", "Reverb"},
     {"Tremelo", "Tremelo ala Fender"},
     {"Tone Stack", "Tone controls (3 band)"},
@@ -40,6 +42,10 @@ public:
       else if (effect["name"] == "Delay")
       {
         rval = new SigmaDelay();
+      }
+      else if (effect["name"] == "Chorus")
+      {
+        rval = new Chorus();
       }
       else if (effect["name"] == "Reverb")
       {

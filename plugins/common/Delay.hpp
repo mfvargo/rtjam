@@ -1,26 +1,14 @@
 #pragma once
 
-#include "Effect.hpp"
-#include "LowFreqOsc.hpp"
-#include "BiQuad.hpp"
+#include "DelayBase.hpp"
 
-#define DELAY_BUFFER_SIZE 96000
-#define LFO_GAIN -42.0
-
-class SigmaDelay : public Effect
+class SigmaDelay : public DelayBase
 {
 public:
-  enum DelayMode
-  {
-    digital = 0,
-    analog,
-    highpass
-  };
-
   void init() override
   {
     // Setup base class stuff (bypass etc)
-    Effect::init();
+    DelayBase::init();
     // What are we?
     m_name = "Delay";
 
@@ -96,91 +84,14 @@ public:
   void loadFromConfig() override
   {
     // Read the settings from the map and apply them to our copy of the data.
-    Effect::loadFromConfig();
-
     m_currentDelayTime = getSettingByName("duration").getFloatValue();
     m_feedback = getSettingByName("feedback").getFloatValue();
     m_level = getSettingByName("level").getFloatValue();
     m_drift = getSettingByName("drift").getFloatValue();
     m_rate = getSettingByName("rate").getFloatValue();
-    switch (getSettingByName("delayMode").getIntValue())
-    {
-    case DelayMode::digital:
-      m_feedbackFilter.init(BiQuadFilter::FilterType::LowPass, 10000, 1.0, 1.0, 48000);
-      break;
-    case DelayMode::analog:
-      m_feedbackFilter.init(BiQuadFilter::FilterType::LowPass, 1250, 1.0, 1.0, 48000);
-      break;
-    case DelayMode::highpass:
-      m_feedbackFilter.init(BiQuadFilter::FilterType::HighPass, 1500, 1.0, 1.0, 48000);
-      break;
-    }
-    m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_drift, 48000);
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_drift)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
+    m_delayMode = (DelayMode)getSettingByName("delayMode").getIntValue();
+
+    // Activate the config in the base class
+    DelayBase::loadFromConfig();
   }
-
-  //  Digital Delay Effect - Signal Flow Diagram
-  //
-  //  Delay with modulation and filter.
-  //  LPF for analog delay simulation
-  //  HPF for "thinning delay"
-  //
-  //          ┌───────────────────────────────────────────┐
-  //          │                                           │
-  //          │             ┌────────────┐                ▼
-  //          │    ┌────┐   │            │    ┌─────┐   ┌────┐
-  //  Input───┴───►│Sum ├──►│   Delay    ├─┬─►│Level├──►│Sum ├───► Output
-  //               └────┘   │            │ │  └─────┘   └────┘
-  //                 ▲      └────────────┘ │
-  //                 │            ▲        │
-  //                 │            │        │
-  //              ┌──┴───┐     ┌──┴──┐     │
-  //      LPF/HPF │Filter│     │ Mod │     │
-  //              └──────┘     └─────┘     │
-  //                 ▲                     │
-  //                 │        ┌────────┐   │
-  //                 └────────┤Feedback│◄──┘
-  //                          └────────┘
-  //                            0-1.2
-  //
-  void process(const float *input, float *output, int framesize) override
-  {
-    // Implement the delay
-    for (int sample = 0; sample < framesize; sample++)
-    {
-      // pointer arithmetic for buffer wrap
-      m_writePointerIndex++;
-      m_writePointerIndex %= m_bufferDepth;
-
-      // Use the low freq osc to modulate the delay
-      int readIndex = m_writePointerIndex -
-                      ((1 + m_osc.getSample(input[sample])) * m_currentDelayTime * m_sampleRate);
-
-      if (readIndex < 0)
-      {
-        readIndex += m_bufferDepth;
-      }
-      // pointer arithmetic for buffer wrap
-      readIndex %= m_bufferDepth;
-
-      // return original plus delay
-      output[sample] = input[sample] + m_delayBuffer[readIndex] * m_level;
-
-      // add feedback to the buffer
-      m_delayBuffer[m_writePointerIndex] = input[sample] + (m_feedbackFilter.getSample(m_delayBuffer[readIndex]) * m_feedback);
-    }
-  };
-
-private:
-  LowFreqOsc m_osc;
-  BiQuadFilter m_feedbackFilter;
-  float m_delayBuffer[DELAY_BUFFER_SIZE]; // 1 second of delay buffer
-  int m_sampleRate = 48000;
-  int m_bufferDepth;
-  float m_currentDelayTime = 0.0;
-  int m_writePointerIndex;
-  float m_feedback;
-  float m_level;
-  float m_drift;
-  float m_rate;
 };
