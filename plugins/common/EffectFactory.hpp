@@ -4,6 +4,7 @@
 #include "HighPassFilter.hpp"
 #include "MonoVerb.hpp"
 #include "Distortion.hpp"
+#include "DistortionModeler.hpp"
 #include "Tremelo.hpp"
 #include "ToneStack.hpp"
 #include "Chorus.hpp"
@@ -12,6 +13,7 @@ using json = nlohmann::json;
 using namespace std;
 
 const static json s_PedalTypes = {
+    {"DistortionModeler", "Distortion Playground"},
     {"Distortion", "Distortion Overdrive"},
     {"Delay", "Delay Pedal"},
     {"Chorus", "Chorus"},
@@ -29,7 +31,11 @@ public:
     {
       // Step 1:  Figure out what kind of effect to manufacture
       Effect *rval = NULL;
-      if (effect["name"] == "Distortion")
+      if (effect["name"] == "DistortionModeler")
+      {
+        rval = new DistortionModeler();
+      }
+      else if (effect["name"] == "Distortion")
       {
         rval = new Distortion();
       }
@@ -63,6 +69,7 @@ public:
       }
       // Step 2, initialize the effect
       rval->init();
+
       for (auto &setting : effect["settings"])
       {
         rval->setSettingValue(setting);

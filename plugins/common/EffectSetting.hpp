@@ -129,12 +129,22 @@ public:
   // This is how an effect will set an initial int value
   void setIntValue(int value)
   {
+    if (value < m_min)
+      value = m_min;
+    if (value > m_max)
+      value = m_max;
+
     m_setting["value"] = value;
   };
 
   // This is how an effect will set and intial float value
   void setFloatValue(float value)
   {
+    if (value < m_min)
+      value = m_min;
+    if (value > m_max)
+      value = m_max;
+
     m_setting["value"] = value;
   };
 

@@ -32,7 +32,7 @@
 #include "../common/JamNetStuff.hpp"
 #include "../common/JamDirectory.hpp"
 #include "../common/Settings.hpp"
-#include "MVerb.h"
+#include "../common/MVerb.h"
 
 class UIRTJam;
 struct RTJamState;
@@ -40,11 +40,11 @@ struct RTJamState;
 START_NAMESPACE_DISTRHO
 
 #ifndef MIN
-#define MIN(a,b) ( (a) < (b) ? (a) : (b) )
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#define MAX(a,b) ( (a) > (b) ? (a) : (b) )
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 #endif
 
 #ifndef CLAMP
@@ -52,12 +52,13 @@ START_NAMESPACE_DISTRHO
 #endif
 
 #ifndef DB_CO
-#define DB_CO(g) ((g) > -90.0f ? powf(10.0f, (g) * 0.05f) : 0.0f)
+#define DB_CO(g) ((g) > -90.0f ? powf(10.0f, (g)*0.05f) : 0.0f)
 #endif
 
 // -----------------------------------------------------------------------
 
-class PluginRTJam : public Plugin {
+class PluginRTJam : public Plugin
+{
 public:
     enum Parameters
     {
@@ -90,34 +91,39 @@ public:
     ~PluginRTJam();
 
 protected:
-
     // Room switch
     void switchRoom(int roomParam);
 
     // -------------------------------------------------------------------
     // Information
 
-    const char* getLabel() const noexcept override {
+    const char *getLabel() const noexcept override
+    {
         return "RTJam";
     }
 
-    const char* getDescription() const override {
+    const char *getDescription() const override
+    {
         return "Real Time Music Jam";
     }
 
-    const char* getMaker() const noexcept override {
+    const char *getMaker() const noexcept override
+    {
         return "basscleftech.com";
     }
 
-    const char* getHomePage() const override {
+    const char *getHomePage() const override
+    {
         return "http://music.basscleftech.com/";
     }
 
-    const char* getLicense() const noexcept override {
+    const char *getLicense() const noexcept override
+    {
         return "https://spdx.org/licenses/MIT";
     }
 
-    uint32_t getVersion() const noexcept override {
+    uint32_t getVersion() const noexcept override
+    {
         return d_version(0, 1, 0);
     }
 
@@ -126,15 +132,16 @@ protected:
     // http://service.steinberg.de/databases/plugin.nsf/plugIn
     //
     // Get a proper plugin UID and fill it in here!
-    int64_t getUniqueId() const noexcept override {
+    int64_t getUniqueId() const noexcept override
+    {
         return d_cconst('b', 'c', 'j', 'r');
     }
 
     // -------------------------------------------------------------------
     // Init
 
-    void initParameter(uint32_t index, Parameter& parameter) override;
-    void initProgramName(uint32_t index, String& programName) override;
+    void initParameter(uint32_t index, Parameter &parameter) override;
+    void initProgramName(uint32_t index, String &programName) override;
 
     // -------------------------------------------------------------------
     // Internal data
@@ -154,14 +161,13 @@ protected:
 
     void activate() override;
     void deactivate() override;
-    void run(const float**, float** outputs, uint32_t frames) override;
-
+    void run(const float **, float **outputs, uint32_t frames) override;
 
     // -------------------------------------------------------------------
 
 private:
-    double          fSampleRate;
-    
+    double fSampleRate;
+
     Settings settings;
     JamNetStuff::JamMixer jamMixer;
     JamNetStuff::JamSocket jamSocket;
@@ -170,15 +176,15 @@ private:
 
     bool monitorInput;
 
-    float dbToFloat(float value);    
+    float dbToFloat(float value);
     int frameCount;
 
     bool reverbOnInputOne;
-    float* reverbBuf[2];
+    float *reverbBuf[2];
     MVerb<float> fVerb;
 
     Mutex fMutex;
-    RTJamState* fState;
+    RTJamState *fState;
     friend class UIRTJam;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PluginRTJam)
@@ -188,4 +194,4 @@ private:
 
 END_NAMESPACE_DISTRHO
 
-#endif  // #ifndef PLUGIN_RTJAM_H
+#endif // #ifndef PLUGIN_RTJAM_H

@@ -22,21 +22,6 @@ public:
     m_currentPhase = 0;
   };
 
-  json getConfig() override
-  {
-    // Return the json for this block
-    json config = {
-        {"shape", m_waveShape},
-        {"freq", m_frequency},
-        {"amplitude", m_amplitude}};
-    return config;
-  };
-
-  void setConfig(json config)
-  {
-    init(config["shape"], config["freq"], config["amplitude"], 48000);
-  };
-
   float getSample(float input) override
   {
     float value = 0.0;
