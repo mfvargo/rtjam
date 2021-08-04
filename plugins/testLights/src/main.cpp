@@ -1,23 +1,18 @@
-
 #include <iostream>
 #include <thread>
 #include "LightData.hpp"
-#include "../../rtjam-status/src/StatusLight.hpp"
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
-    bool bLight = true;
-    StatusLight::startInit();
-    StatusLight status, inputOne, inputTwo;
-    status.init(StatusLight::status);
-    inputOne.init(StatusLight::inputOne);
-    inputTwo.init(StatusLight::inputTwo);
+    bool bLight = false;
+    LightData lightData;
     while (true)
     {
-        status.set(bLight ? green : black);
-        inputOne.set(bLight ? red : black);
-        inputTwo.set(bLight ? orange : black);
+        lightData.m_pLightSettings->status = bLight ? red : black;
+        lightData.m_pLightSettings->inputOne = bLight ? orange : black;
+        lightData.m_pLightSettings->inputTwo = bLight ? green : black;
         cout << (bLight ? "on" : "off") << endl;
         bLight = !bLight;
         std::this_thread::sleep_for(std::chrono::microseconds(500000));

@@ -26,15 +26,15 @@ int main(int argc, char *argv[])
     // Codec init and gain/volume control
     CodecControlAndStatus codecControl;
 
-    // // init codec - function inits hardware and returns 1 if custom hardware detected
-    // if (codecControl.init() == 1)
-    // {
-    //     rtjamHardwareDetected = 1; // rtjam hardware detected
-    // }
-    // else
-    // {
-    //     rtjamHardwareDetected = 0; // standard Rpi setup
-    // };
+    // init codec - function inits hardware and returns 1 if custom hardware detected
+    if (codecControl.init() == 1)
+    {
+        rtjamHardwareDetected = 1; // rtjam hardware detected
+    }
+    else
+    {
+        rtjamHardwareDetected = 0; // standard Rpi setup
+    };
 
     // main status poll loop
     //  - updates LEDs

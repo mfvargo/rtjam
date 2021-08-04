@@ -7,40 +7,39 @@
 #include <unistd.h>
 
 #include "CodecControl.hpp"
+#include "GpioPin.hpp"
+
+#include <thread>
 
 using namespace std;
 
 int CodecControlAndStatus::init(void)
 {
+    // Open I2C1 bus for read/write
+    if ((m_file = open(m_filename, O_RDWR)) < 0)
+    {
+        cerr << "Failed to open i2c bus, no hardware there?" << endl;
+        return (-1);
+    }
 
     // initialize filters for pot inputs (sample rate is poll rate)
     m_pot1Filter.init(10.0f, 100.0f);
     m_pot2Filter.init(10.0f, 100.0f);
     m_pot3Filter.init(10.0f, 100.0f);
 
-    // setup wiring library for Pi - use GPIO pin names
-    // TODO - change to libdpiod???
-    // commented out - already called in light init code
-    // wiringPiSetupGpio();
-
     // initialize GPIO 17 as output - RSTN line to codec (reset = low, active = high)
-    pinMode(17, OUTPUT);
-
+    GpioPin resetPin;
+    resetPin.init(17, "resetPin");
     // reset the codec at startup - reset line tied to GPIO17 on CM4
-    digitalWrite(17, LOW);
-    delayMicroseconds(200000); // delay 200ms for codec to reset
-    digitalWrite(17, HIGH);    // bring codec out of reset
-    delayMicroseconds(20000);  // delay before sending I2C commands
+    resetPin.set(false);
+    // hold it low for 200msec
+    std::this_thread::sleep_for(std::chrono::microseconds(200000));
+    resetPin.set(true);
+    // delay before sending I2C commands
+    std::this_thread::sleep_for(std::chrono::microseconds(200000));
 
     // Initialize the Codec I2C registers
     // Mode = slave, LRCLK = 48kHz, SCLK = 64xFs
-
-    // Open I2C1 bus for read/write
-    if ((m_file = open(m_filename, O_RDWR)) < 0)
-    {
-        cerr << "Failed to open i2c bus" << endl;
-        return (-1);
-    }
 
     // setup I2C to write to TLC320AIC3101 codec at address 0x18
     if (ioctl(m_file, I2C_SLAVE, 0x18) < 0)
@@ -229,7 +228,8 @@ void CodecControlAndStatus::ADC_ScanInputs(void)
         exit(-1);
     }
 
-    delayMicroseconds(10); // wait for conversion before reading result back from part
+    // wait for conversion before reading result back from part
+    std::this_thread::sleep_for(std::chrono::microseconds(10));
 
     // read adc conversion result for channels 0-2 (pots 1-3)
     for (unsigned int i = 0; i < 3; i++)
