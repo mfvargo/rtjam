@@ -42,6 +42,11 @@ int main(int argc, char *argv[])
     while (1)
     {
         std::this_thread::sleep_for(std::chrono::microseconds(10000));
+        printf(
+            "status: %d, input1: %d, input2: %d\n",
+            lightData.m_pLightSettings->status,
+            lightData.m_pLightSettings->inputOne,
+            lightData.m_pLightSettings->inputTwo);
         status.set(lightData.m_pLightSettings->status);
         inputOne.set(lightData.m_pLightSettings->inputOne);
         inputTwo.set(lightData.m_pLightSettings->inputTwo);
