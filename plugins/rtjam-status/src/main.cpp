@@ -11,24 +11,21 @@
 int main(int argc, char *argv[])
 {
  
-    LightData lightData;
-    StatusLight::startInit();
-    StatusLight status, inputOne, inputTwo;
-    status.init(StatusLight::status);
-    inputOne.init(StatusLight::inputOne);
-    inputTwo.init(StatusLight::inputTwo);
+   // LightData lightData;
+   // StatusLight::startInit();
+   // StatusLight status, inputOne, inputTwo;
+   // status.init(StatusLight::status);
+   // inputOne.init(StatusLight::inputOne);
+   // inputTwo.init(StatusLight::inputTwo);
 
-    lightData.m_pLightSettings->inputOne = green;
-    lightData.m_pLightSettings->inputTwo = green;
-    lightData.m_pLightSettings->status = green;
+   // lightData.m_pLightSettings->inputOne = green;
+   // lightData.m_pLightSettings->inputTwo = green;
+   // lightData.m_pLightSettings->status = green;
 
-    int rtjamHardwareDetected = 0;
+   int rtjamHardwareDetected = 0;
 
     // Codec init and gain/volume control
     CodecControlAndStatus codecControl;
- 
-
-    int delay = 10000;
 
     
     // init codec - function inits hardware and returns 1 if custom hardware detected 
@@ -47,10 +44,10 @@ int main(int argc, char *argv[])
     //   reads pots, update codec gain control registers if custom board detected
     while (1)
     {
-        std::this_thread::sleep_for(std::chrono::microseconds(delay));
-        status.set(lightData.m_pLightSettings->status);
-        inputOne.set(lightData.m_pLightSettings->inputOne);
-        inputTwo.set(lightData.m_pLightSettings->inputTwo);
+        std::this_thread::sleep_for(std::chrono::microseconds(10000));
+       // status.set(lightData.m_pLightSettings->status);
+       // inputOne.set(lightData.m_pLightSettings->inputOne);
+       // inputTwo.set(lightData.m_pLightSettings->inputTwo);
     
         // poll the hardware if custom board detected
         if(rtjamHardwareDetected == 1)
