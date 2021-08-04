@@ -20,7 +20,8 @@ int CodecControlAndStatus::init(void)
 
     // setup wiring library for Pi - use GPIO pin names
     // TODO - change to libdpiod???
-    wiringPiSetupGpio();
+    // commented out - already called in light init code
+    // wiringPiSetupGpio();
 
     // initialize GPIO 17 as output - RSTN line to codec (reset = low, active = high)
     pinMode(17, OUTPUT);
