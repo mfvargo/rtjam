@@ -6,6 +6,7 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
+	../rtjam-status/src/StatusLight.cpp \
 	../common/LightData.cpp \
 	../common/SharedMemory.cpp
 
@@ -15,7 +16,7 @@ DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt
+LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lgpiod
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -Wno-psabi
 
