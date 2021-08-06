@@ -8,11 +8,13 @@
 #include "Tremelo.hpp"
 #include "ToneStack.hpp"
 #include "Chorus.hpp"
+#include "BassDI.hpp"
 
 using json = nlohmann::json;
 using namespace std;
 
 const static json s_PedalTypes = {
+    {"Bass DI", "Bass Guitar Tone Shaping"},
     {"DistortionModeler", "Distortion Playground"},
     {"Distortion", "Distortion Overdrive"},
     {"Delay", "Delay Pedal"},
@@ -38,6 +40,10 @@ public:
       else if (effect["name"] == "Distortion")
       {
         rval = new Distortion();
+      }
+      else if (effect["name"] == "Bass DI")
+      {
+        rval = new BassDI();
       }
       else if (effect["name"] == "Delay")
       {
