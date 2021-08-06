@@ -145,7 +145,7 @@ private:
     alpha = (sin_omega / 2.0) * sqrt((A + (1/A))*((1/m_q)-1) + 2); // special case for shelving filter
     b0 = A*((A + 1.0) + (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha)); 
     b1 = -2.0*A*((A - 1.0) + (A +1.0)*cos_omega);           
-    b2 = A*((A + 1.0) - (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
+    b2 = A*((A + 1.0) + (A -1.0)*cos_omega - (2.0*sqrt(A) * alpha));   
     a0 = (A + 1.0) - (A -1.0)*cos_omega + (2.0*sqrt(A) * alpha);
     a1 = 2.0*((A -1.0) - (A + 1.0)*cos_omega);
     a2 = (A + 1.0) - (A - 1.0)*cos_omega - (2.0*sqrt(A) * alpha);
