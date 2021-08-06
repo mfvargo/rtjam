@@ -68,7 +68,6 @@ void PluginRTJam::syncConfigData()
 void PluginRTJam::getParams()
 {
   m_paramData.receive(&m_param);
-  printf("received param %d: %s, %f, %d, %d\n", m_param.param, m_param.sValue, m_param.fValue, m_param.iValue, m_param.iValue2);
 
   switch (m_param.param)
   {
@@ -125,7 +124,6 @@ void PluginRTJam::getParams()
       try
       {
         m_pedalBoards[m_param.iValue].setEffectSetting(json::parse(m_param.sValue), m_param.iValue2);
-        cerr << json::parse(m_param.sValue).dump(2) << endl;
       }
       catch (json::exception &e)
       {

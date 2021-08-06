@@ -63,4 +63,39 @@ public:
 
     return -60.0f;
   };
+
+  enum ClipType
+  {
+    hard,
+    soft,
+    asymmetric,
+    even,
+  };
+
+  static float clipSample(ClipType type, float sampleIn)
+  {
+    float output = sampleIn;
+    switch (type)
+    {
+    case hard:
+      if (sampleIn > 0.5)
+        output = 0.5;
+      if (sampleIn < -0.5)
+        output = -0.5;
+      break;
+    case soft:
+      output = sampleIn / (1 + fabs(sampleIn));
+      break;
+    case asymmetric:
+      if (sampleIn > 0)
+        output = sampleIn / (1 + fabs(sampleIn));
+      if (sampleIn < 0)
+        output = sampleIn / (1 + fabs(3 * sampleIn));
+      break;
+    case even:
+      output = fabs(sampleIn) / (1 + fabs(sampleIn));
+      break;
+    };
+    return output;
+  };
 };

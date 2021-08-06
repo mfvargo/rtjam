@@ -7,14 +7,6 @@
 class DistortionModeler : public Effect
 {
 public:
-  enum ClipType
-  {
-    hard,
-    soft,
-    asymmetric,
-    even,
-  };
-
   enum HpfMode
   {
     low,
@@ -52,14 +44,14 @@ public:
     addSetting(setting);
 
     setting.init(
-        "clipType",             // Name
-        EffectSetting::intType, // Type of setting
-        ClipType::hard,         // Min value
-        ClipType::even,         // Max value
-        1,                      // Step Size
+        "clipType",                  // Name
+        EffectSetting::intType,      // Type of setting
+        SignalBlock::ClipType::hard, // Min value
+        SignalBlock::ClipType::even, // Max value
+        1,                           // Step Size
         EffectSetting::selector);
     setting.setLabels({"hard", "tube", "brit", "oct"});
-    setting.setIntValue(ClipType::soft);
+    setting.setIntValue(SignalBlock::ClipType::soft);
     addSetting(setting);
 
     setting.init(
@@ -136,7 +128,7 @@ public:
         "dryLevel",               // Name
         EffectSetting::floatType, // Type of setting
         -100.0,                   // Min value
-        24,                        // Max value
+        24,                       // Max value
         1,                        // Step Size
         EffectSetting::dB);
     setting.setFloatValue(-100.0);
@@ -152,7 +144,7 @@ public:
 
     m_hpfFreq = getSettingByName("lowCut").getFloatValue();
     m_gain = getSettingByName("drive").getFloatValue();
-    m_clipType = (ClipType)getSettingByName("clipType").getIntValue();
+    m_clipType = (SignalBlock::ClipType)getSettingByName("clipType").getIntValue();
     m_toneBassCutBoost = getSettingByName("bass").getFloatValue();
     m_toneBassFreq = getSettingByName("bassFreq").getFloatValue();
     m_toneMidrangeCutBoost = getSettingByName("mid").getFloatValue();
@@ -174,11 +166,11 @@ public:
       float value = m_hpf.getSample(input[i]);
 
       // Stage 1 - first clipper (set to emulate op-amp clipping before diodes)
-      value = clipSample(value * m_gain); // clip signal
-      value = m_lpf1.getSample(value);    // filter out higher-order harmonics
+      value = SignalBlock::clipSample(m_clipType, value * m_gain); // clip signal
+      value = m_lpf1.getSample(value);                             // filter out higher-order harmonics
 
       // Stage 2 - diode clipper
-      value = clipSample(value * m_gain);
+      value = SignalBlock::clipSample(m_clipType, value * m_gain);
       value = m_lpf2.getSample(value); // filter out higher-order harmonics
 
       // Stage 3 - Tone control - 3 band EQ - low shelf, mid cut/boost, high shelf
@@ -213,9 +205,9 @@ private:
   BiQuadFilter m_toneTreble;   // treble control frequency
 
   // Parameters
-  float m_gain;            // gain before clip functions
-  float m_level;           // Overall level
-  ClipType m_clipType;     // what kind of clipping funciton
+  float m_gain;                     // gain before clip functions
+  float m_level;                    // Overall level
+  SignalBlock::ClipType m_clipType; // what kind of clipping funciton
 
   float m_filterOut[8];
   float m_upsampleBuffer[8];
@@ -253,91 +245,42 @@ private:
 
   float distortionAlgorithm(float inputSample, float distortionGain)
   {
-    
-      // upsample to a vector 8x the size (zero padded) 
-      for (int i = 0; i < 8; i++)
-      {
-        if(i == 0)
-        {
-          m_upsampleBuffer[i] = inputSample;
-        }
-        else
-        {
-          m_upsampleBuffer[i] = 0;
-        }
-      }
-    
-      // filter the vector 
-      for (int i = 0; i < 8; i++)
-      {
-        // filter at upsampled Fs/8 - 8th order filter
-        m_filterOut[i] = m_upsample.getSample(m_upsampleBuffer[i]);
-        m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
-        m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
-        m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
-        
-        // add gain to signal and clip
-        // using either hard, soft, asymmetric or symmetric clipper
-        m_filterOut[i] = 8 * distortionGain * m_filterOut[i];
-        m_clipOut[i] = clipSample(m_filterOut[i]);
-    
-        // filter at upsampled Fs/8 before downsampling - 8th order filter
-        m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
-        m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
-        m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
-        m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
-      }
 
-        // down-sample the vector back to original sample rate
-    return m_clipOut[0];
-  };
-
-  float clipSample(float input)
-  {
-    switch (m_clipType)
+    // upsample to a vector 8x the size (zero padded)
+    for (int i = 0; i < 8; i++)
     {
-    case hard:
-      return hardClipSample(input);
-      break;
-    case soft:
-      return softClipSample(input);
-      break;
-    case asymmetric:
-      return asymmetricClipSample(input);
-      break;
-    case even:
-      return evenClipSample(input);
-      break;
-    };
-    return 0.0;
-  };
+      if (i == 0)
+      {
+        m_upsampleBuffer[i] = inputSample;
+      }
+      else
+      {
+        m_upsampleBuffer[i] = 0;
+      }
+    }
 
-  float hardClipSample(float sampleIn)
-  {
-    if (sampleIn > 0.5)
-      return 0.5;
-    if (sampleIn < -0.5)
-      return -0.5;
-    return sampleIn;
-  };
+    // filter the vector
+    for (int i = 0; i < 8; i++)
+    {
+      // filter at upsampled Fs/8 - 8th order filter
+      m_filterOut[i] = m_upsample.getSample(m_upsampleBuffer[i]);
+      m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
+      m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
+      m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
 
-  float softClipSample(float sampleIn)
-  {
-    return (sampleIn / (1 + fabs(sampleIn)));
-  };
+      // add gain to signal and clip
+      // using either hard, soft, asymmetric or symmetric clipper
+      m_filterOut[i] = 8 * distortionGain * m_filterOut[i];
+      m_clipOut[i] = SignalBlock::clipSample(m_clipType, m_filterOut[i]);
 
-  float evenClipSample(float sampleIn)
-  {
-    return (fabs(sampleIn) / (1 + fabs(sampleIn)));
-  };
-  
-  float asymmetricClipSample(float sampleIn)
-  {
-    float sampleOut;
-    if (sampleIn > 0)
-      sampleOut = sampleIn / (1 + fabs(sampleIn));
-    else if (sampleIn < 0)
-      sampleOut = sampleIn / (1 + fabs(3 * sampleIn));
-    return sampleOut;  
+      // filter at upsampled Fs/8 before downsampling - 8th order filter
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
+    }
+
+    // down-sample the vector back to original sample rate
+    return m_clipOut[0];
   };
 };
