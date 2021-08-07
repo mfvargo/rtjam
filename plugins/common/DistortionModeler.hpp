@@ -7,14 +7,6 @@
 class DistortionModeler : public Effect
 {
 public:
-  enum ClipType
-  {
-    hard,
-    soft,
-    asymmetric,
-    even,
-  };
-
   enum HpfMode
   {
     low,
@@ -48,25 +40,25 @@ public:
         40.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
-    setting.setFloatValue(6.0);
+    setting.setFloatValue(12.0);
     addSetting(setting);
 
     setting.init(
-        "clipType",             // Name
-        EffectSetting::intType, // Type of setting
-        ClipType::hard,         // Min value
-        ClipType::even,         // Max value
-        1,                      // Step Size
+        "clipType",                  // Name
+        EffectSetting::intType,      // Type of setting
+        SignalBlock::ClipType::hard, // Min value
+        SignalBlock::ClipType::even, // Max value
+        1,                           // Step Size
         EffectSetting::selector);
     setting.setLabels({"hard", "tube", "brit", "oct"});
-    setting.setIntValue(ClipType::soft);
+    setting.setIntValue(SignalBlock::ClipType::soft);
     addSetting(setting);
 
     setting.init(
         "bass",                   // Name
         EffectSetting::floatType, // Type of setting
-        -15.0,                    // Min value
-        15.0,                     // Max value
+        -30.0,                    // Min value
+        30.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -76,17 +68,17 @@ public:
         "bassFreq",               // Name
         EffectSetting::floatType, // Type of setting
         30,                       // Min value
-        700,                      // Max value
+        300,                      // Max value
         0.5,                      // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(30.0);
+    setting.setFloatValue(100.0);
     addSetting(setting);
 
     setting.init(
         "mid",                    // Name
         EffectSetting::floatType, // Type of setting
-        -15.0,                    // Min value
-        15.0,                     // Max value
+        -18.0,                    // Min value
+        18.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -96,17 +88,17 @@ public:
         "midFreq",                // Name
         EffectSetting::floatType, // Type of setting
         300,                      // Min value
-        1500,                     // Max value
+        2500,                     // Max value
         0.1,                      // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(300.0);
+    setting.setFloatValue(700.0);
     addSetting(setting);
 
     setting.init(
         "treble",                 // Name
         EffectSetting::floatType, // Type of setting
-        -15.0,                    // Min value
-        15.0,                     // Max value
+        -30.0,                    // Min value
+        30.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -119,7 +111,7 @@ public:
         7000,                     // Max value
         0.5,                      // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(1000.0);
+    setting.setFloatValue(4000.0);
     addSetting(setting);
 
     setting.init(
@@ -129,14 +121,14 @@ public:
         6.0,                      // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
-    setting.setFloatValue(-6.0);
+    setting.setFloatValue(-12.0);
     addSetting(setting);
 
     setting.init(
         "dryLevel",               // Name
         EffectSetting::floatType, // Type of setting
         -100.0,                   // Min value
-        0,                        // Max value
+        24,                       // Max value
         1,                        // Step Size
         EffectSetting::dB);
     setting.setFloatValue(-100.0);
@@ -152,7 +144,7 @@ public:
 
     m_hpfFreq = getSettingByName("lowCut").getFloatValue();
     m_gain = getSettingByName("drive").getFloatValue();
-    m_clipType = (ClipType)getSettingByName("clipType").getIntValue();
+    m_clipType = (SignalBlock::ClipType)getSettingByName("clipType").getIntValue();
     m_toneBassCutBoost = getSettingByName("bass").getFloatValue();
     m_toneBassFreq = getSettingByName("bassFreq").getFloatValue();
     m_toneMidrangeCutBoost = getSettingByName("mid").getFloatValue();
@@ -174,11 +166,11 @@ public:
       float value = m_hpf.getSample(input[i]);
 
       // Stage 1 - first clipper (set to emulate op-amp clipping before diodes)
-      value = clipSample(value * m_gain); // clip signal
-      value = m_lpf1.getSample(value);    // filter out higher-order harmonics
+      value = SignalBlock::clipSample(m_clipType, value * m_gain); // clip signal
+      value = m_lpf1.getSample(value);                             // filter out higher-order harmonics
 
       // Stage 2 - diode clipper
-      value = clipSample(value * m_gain);
+      value = SignalBlock::clipSample(m_clipType, value * m_gain);
       value = m_lpf2.getSample(value); // filter out higher-order harmonics
 
       // Stage 3 - Tone control - 3 band EQ - low shelf, mid cut/boost, high shelf
@@ -190,14 +182,13 @@ public:
       // this is 3 band eq with series cascade structure and the freq and cut/boost will be varied by
       // just recalculating the filter coeffs vs a gain constant like in TS
       //
-      // value = m_toneBass.getSample(value);
+      value = m_toneBass.getSample(value);
       value = m_toneMidrange.getSample(value);
-      // value = m_toneTreble.getSample(value);
+      value = m_toneTreble.getSample(value);
 
       // sum in some dry level for detail (to model Klon and similar pedals)
-      value = value + (m_dryLevel * input[i]);
 
-      output[i] = value * m_level;
+      output[i] = (value * m_level) + (m_dryLevel * input[i]);
     }
   };
 
@@ -214,9 +205,14 @@ private:
   BiQuadFilter m_toneTreble;   // treble control frequency
 
   // Parameters
-  float m_gain;            // gain before clip functions
-  float m_level;           // Overall level
-  ClipType m_clipType;     // what kind of clipping funciton
+  float m_gain;                     // gain before clip functions
+  float m_level;                    // Overall level
+  SignalBlock::ClipType m_clipType; // what kind of clipping funciton
+
+  float m_filterOut[8];
+  float m_upsampleBuffer[8];
+  float m_clipOut[8];
+
   float m_lpf1Freq = 5000; // frequency of the first clip block lpf (fixed filter)
   float m_lpf2Freq = 5000; // frequency of the first clip block lpf (fixed filter)
   float m_hpfFreq = 250;   // high-pass filter mode - low or mid
@@ -247,99 +243,44 @@ private:
     m_toneTreble.init(BiQuadFilter::FilterType::HighShelf, m_toneTrebleFreq, m_toneTrebleCutBoost, 0.707, 48000);
   };
 
-  float distortionAlgorithm(float inputSample)
+  float distortionAlgorithm(float inputSample, float distortionGain)
   {
-    int i = 0;
-    float filterOut[8];
-    float upsampleBuffer[8];
-    float clipOut[8];
-    /* upsample to a vector 8x the size (zero padded) */
-    for (i = 0; i < 8; i++)
+
+    // upsample to a vector 8x the size (zero padded)
+    for (int i = 0; i < 8; i++)
     {
-      int j = 0;
-      upsampleBuffer[j] = inputSample;
-      for (int k = 1; k < 7; k++)
+      if (i == 0)
       {
-        upsampleBuffer[k] = 0;
+        m_upsampleBuffer[i] = inputSample;
+      }
+      else
+      {
+        m_upsampleBuffer[i] = 0;
       }
     }
-    // TODO: All three of these for loops could be combined into one...
 
-    /* filter the vector */
-    for (i = 0; i < 8; i++)
+    // filter the vector
+    for (int i = 0; i < 8; i++)
     {
       // filter at upsampled Fs/8 - 8th order filter
-      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
-      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
-      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
-      filterOut[i] = m_upsample.getSample(upsampleBuffer[i]);
-    }
-    // add gain to signal and clip
-    // using either hard, soft, asymmetric or symmetric clipper
-    for (i = 0; i < 8; i++)
-    {
-      filterOut[i] = 8 * m_gain * filterOut[i];
-      clipOut[i] = clipSample(filterOut[i]);
-    }
+      m_filterOut[i] = m_upsample.getSample(m_upsampleBuffer[i]);
+      m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
+      m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
+      m_filterOut[i] = m_upsample.getSample(m_filterOut[i]);
 
-    // filter at upsampled Fs/8 before downsampling - 8th order filter
-    for (i = 0; i < 8; i++)
-    {
-      clipOut[i] = m_downsample.getSample(clipOut[i]);
-      clipOut[i] = m_downsample.getSample(clipOut[i]);
-      clipOut[i] = m_downsample.getSample(clipOut[i]);
-      clipOut[i] = m_downsample.getSample(clipOut[i]);
+      // add gain to signal and clip
+      // using either hard, soft, asymmetric or symmetric clipper
+      m_filterOut[i] = 8 * distortionGain * m_filterOut[i];
+      m_clipOut[i] = SignalBlock::clipSample(m_clipType, m_filterOut[i]);
+
+      // filter at upsampled Fs/8 before downsampling - 8th order filter
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
+      m_clipOut[i] = m_downsample.getSample(m_clipOut[i]);
     }
 
     // down-sample the vector back to original sample rate
-    return clipOut[0];
-  };
-
-  float clipSample(float input)
-  {
-    switch (m_clipType)
-    {
-    case hard:
-      return hardClipSample(input);
-      break;
-    case soft:
-      return softClipSample(input);
-      break;
-    case asymmetric:
-      return asymmetricClipSample(input);
-      break;
-    case even:
-      return evenClipSample(input);
-      break;
-    };
-    return 0.0;
-  }
-
-  float hardClipSample(float sampleIn)
-  {
-    if (sampleIn > 0.5)
-      return 0.5;
-    if (sampleIn < -0.5)
-      return -0.5;
-    return sampleIn;
-  };
-
-  float softClipSample(float sampleIn)
-  {
-    return (sampleIn / (1 + fabs(sampleIn)));
-  };
-
-  float evenClipSample(float sampleIn)
-  {
-    return (fabs(sampleIn) / (1 + fabs(sampleIn)));
-  };
-  float asymmetricClipSample(float sampleIn)
-  {
-    float sampleOut;
-    if (sampleIn > 0)
-      sampleOut = sampleIn / (1 + fabs(sampleIn));
-    else if (sampleIn < 0)
-      sampleOut = sampleIn / (1 + fabs(3 * sampleIn));
-    return sampleOut;
+    return m_clipOut[0];
   };
 };

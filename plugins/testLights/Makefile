@@ -1,10 +1,4 @@
-GIT_HASH=`git rev-parse HEAD`
-COMPILE_TIME=`date -u +'%Y-%m-%d %H:%M:%S UTC'`
-GIT_BRANCH=`git branch | grep "^\*" | sed 's/^..//'`
-export VERSION_FLAGS=-DGIT_HASH="\"$(GIT_HASH)\"" -DCOMPILE_TIME="\"$(COMPILE_TIME)\"" -DGIT_BRANCH="\"$(GIT_BRANCH)\""
-
-
-TARGET ?= ../../bin/rtjam-status
+TARGET ?= ../../bin/testLights
 SRC_DIRS ?= ./src ../common
 
 CC = gcc
@@ -12,19 +6,19 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
-	./src/CodecControl.cpp\
-	./src/StatusLight.cpp \
+	../rtjam-status/src/StatusLight.cpp \
 	../common/LightData.cpp \
-	../common/SharedMemory.cpp \
+	../common/SharedMemory.cpp
+
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread -lrt -lgpiod
+LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lgpiod
 
-CPPFLAGS ?= $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP -g -Wno-psabi
+CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -Wno-psabi
 
 all:	$(TARGET)
 

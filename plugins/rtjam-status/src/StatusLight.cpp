@@ -1,26 +1,25 @@
 #include "StatusLight.hpp"
 
+struct gpiod_chip *GpioPin::s_chip;
+
 void StatusLight::init(StatusLight::StatusFunction func)
 {
   // see https://pinout.xyz/pinout/wiringpi for mappings
   switch (func)
   {
   case inputOne:
-    m_redPin = 22;   // GPIO 6
-    m_greenPin = 21; // GPIO 5
+    m_redPin.init(6, "inputOneRed");
+    m_greenPin.init(5, "inputOneGreen");
     break;
   case inputTwo:
-    m_redPin = 10;   // GPIO 8
-    m_greenPin = 11; // GPIO 7
+    m_redPin.init(8, "inputTwoRed");
+    m_greenPin.init(7, "inputTwoGreen");
     break;
   case status:
-    m_redPin = 4;   // GPIO 23
-    m_greenPin = 5; // GPIO 24
+    m_redPin.init(23, "statusRed");
+    m_greenPin.init(24, "statusGreen");
     break;
   }
-  pinMode(m_redPin, OUTPUT);
-  pinMode(m_greenPin, OUTPUT);
-  m_bFlash = false;
 }
 
 void StatusLight::set(LightColors color)
@@ -28,20 +27,20 @@ void StatusLight::set(LightColors color)
   switch (color)
   {
   case black:
-    digitalWrite(m_redPin, LOW);
-    digitalWrite(m_greenPin, LOW);
+    m_redPin.set(false);
+    m_greenPin.set(false);
     break;
   case green:
-    digitalWrite(m_redPin, LOW);
-    digitalWrite(m_greenPin, HIGH);
+    m_redPin.set(false);
+    m_greenPin.set(true);
     break;
   case orange:
-    digitalWrite(m_redPin, HIGH);
-    digitalWrite(m_greenPin, HIGH);
+    m_redPin.set(true);
+    m_greenPin.set(true);
     break;
   case red:
-    digitalWrite(m_redPin, HIGH);
-    digitalWrite(m_greenPin, LOW);
+    m_redPin.set(true);
+    m_greenPin.set(false);
     break;
   }
 }
