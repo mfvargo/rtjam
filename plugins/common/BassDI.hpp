@@ -24,8 +24,8 @@ public:
     setting.init(
         "Bass",                   // Name
         EffectSetting::floatType, // Type of setting
-        -10.0,                    // Min value
-        10.0,                     // Max value
+        -35.0,                    // Min value
+        35.0,                     // Max value
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -33,8 +33,8 @@ public:
     setting.init(
         "Mid",                    // Name
         EffectSetting::floatType, // Type of setting
-        -10.0,                    // Min value
-        10.0,                     // Max value
+        -35.0,                    // Min value
+        35.0,                     // Max value
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -42,8 +42,8 @@ public:
     setting.init(
         "Treble",                 // Name
         EffectSetting::floatType, // Type of setting
-        -10.0,                    // Min value
-        10.0,                     // Max value
+        -35.0,                    // Min value
+        35.0,                     // Max value
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -69,6 +69,7 @@ public:
       float value = m_fBass.getSample(input[i]);
       value = m_fMid.getSample(value);
       value = m_fTreble.getSample(value);
+      value = SignalBlock::clipSample(SignalBlock::ClipType::soft, value);
       output[i] = m_volume * value;
     }
   };
@@ -79,8 +80,8 @@ private:
 
   void setParams()
   {
-    m_fBass.init(BiQuadFilter::FilterType::LowShelf, 100, m_bass, 0.707, 48000);
-    m_fMid.init(BiQuadFilter::FilterType::Peaking, 400, m_mid, 0.707, 48000);
-    m_fTreble.init(BiQuadFilter::FilterType::HighShelf, 1000, m_treble, 0.707, 48000);
+    m_fBass.init(BiQuadFilter::FilterType::LowShelf, 70, m_bass, 0.707, 48000);
+    m_fMid.init(BiQuadFilter::FilterType::Peaking, 180, m_mid, 0.707, 48000);
+    m_fTreble.init(BiQuadFilter::FilterType::HighShelf, 350, m_treble, 0.707, 48000);
   };
 };
