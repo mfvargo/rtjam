@@ -74,21 +74,24 @@ public:
     //
     for (int sample = 0; sample < framesize; sample++)
     {
-        m_magnitude = abs(input[sample]);    // calculate magnitude of incoming signal
-        if(m_magnitude >= m_noiseGateThreshold)     // check if > threshold
+        float triggerOut;   // attack/release trigger 1=attack, 0=release   
+        
+        float value  = abs(input[sample]);    // calculate magnitude of incoming signal
+        
+        if(value >= m_noiseGateThreshold)     // check if > threshold
         {
-            m_thresholdOut = 1;
+            triggerOut = 1;
         }
         else
         {
-            m_thresholdOut = 0;
+            triggerOut = 0;
         }
 
         // generate gain control waveform (fast attack, slow release)
-        m_noiseGateGain = m_noiseGateAttackRelease.getSample(m_thresholdOut);
+        value = m_noiseGateAttackRelease.getSample(triggerOut);
        
         // apply gain to input 
-        output[sample] = input[sample] * m_noiseGateGain;
+        output[sample] = input[sample] * value;
 
     }
   };
@@ -99,11 +102,6 @@ private:
     float m_noiseGateThreshold; 
     float m_noiseGateAttack;
     float m_noiseGateRelease;
-
-    float m_noiseGateGain;
-
-    float m_magnitude;
-    float m_thresholdOut;
-  
+      
   
 };

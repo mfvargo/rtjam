@@ -71,51 +71,53 @@ public:
     //
     for (int sample = 0; sample < framesize; sample++)
     {
-        m_reverbIn = 0.2 * input[sample];   // scale by .2 to match FV-1 impementations
+        float reverbIn = 0.2 * input[sample];   // scale by .2 to match FV-1 impementations
 
         // read samples from end of each delay line
         m_delay1Out = m_delay1[m_delay1Index];
         m_delay2Out = m_delay2[m_delay2Index];
 
         // process first allpass chain - lap1->lap4
-        m_value = m_lap1.getSample(m_reverbIn);
-        m_value = m_lap2.getSample(m_value);
-        m_value = m_lap3.getSample(m_value);
-        m_value = m_lap4.getSample(m_value);
+        float value = m_lap1.getSample(reverbIn);
+        value = m_lap2.getSample(value);
+        value = m_lap3.getSample(value);
+        value = m_lap4.getSample(value);
  
-       	m_sum1Out = m_value + (m_delay2Out * m_reverbTime);
+       	float sum1Out = value + (m_delay2Out * m_reverbTime);
 
     	  // process stretched all-pass Chain 2 - AP1->AP1B  	  
-        m_value = m_ap1.getSample(m_sum1Out);
-        m_value = m_ap1b.getSample(m_value);
+        value = m_ap1.getSample(sum1Out);
+        value = m_ap1b.getSample(value);
 
         // write result to delay line 1
-        m_delay1[m_delay1Index++] = m_value;
+        m_delay1[m_delay1Index++] = value;
         if(m_delay1Index >= 10000)  // cicular buffer 
         {                           // wrap if > len
           m_delay1Index = 0;        
         }
 
         // read from end of delay line 1
-        m_value = m_delay1Out * m_reverbLevel; 
+        value = m_delay1Out * m_reverbLevel; 
 
         // process streched all-pass Chain 3 - AP2->AP2B  	  
     	  // input to Chain 3 is delay 1 output * reverb time
-        m_value = m_ap2.getSample(m_value);
-        m_value = m_ap2b.getSample(m_value);
+        value = m_ap2.getSample(value);
+        value = m_ap2b.getSample(value);
+
+        // TODO - add lpf/hpf here 
 
         // write result to delay line 2
-        m_delay2[m_delay2Index++] = m_value;
+        m_delay2[m_delay2Index++] = value;
         if(m_delay2Index >= 12000)  // cicular buffer 
         {                           // wrap if > len
           m_delay2Index = 0;        
         }
 
         // reverb output = sum of two delay taps
-        m_value = m_delay1[2500] + m_delay2[3900];
+        value = m_delay1[2500] + m_delay2[3900];
 
         // add in reverb to dry signal
-        output[sample] = input[sample] + m_value * m_reverbLevel;
+        output[sample] = input[sample] + value * m_reverbLevel;
 
     }
   };
@@ -131,15 +133,10 @@ private:
     float m_delay2[12000];  // delay line 2
     unsigned int m_delay2Index;
 
-    float m_reverbIn;   // input to reverb 
     float m_reverbTime; // reverb time - 0-1 = 0-inf
     float m_reverbLevel;  // output level (dry + reverb * 0-1)
 
     float m_delay1Out,  m_delay2Out;  // temp storage for end of delay line read
-    float m_sum1Out, m_sum2Out;       // temp storage for intermediate signal nodes
-    float m_value;  // temp storage for series signal chain nodes 
-   
-    
-
+  
   
 };
