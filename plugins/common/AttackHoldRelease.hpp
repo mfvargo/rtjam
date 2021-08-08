@@ -20,9 +20,9 @@ public:
   {
  
     // calculate coeff for attack and release time (in secs)  
-    m_attackCoeff = exp(-0.95424251 /  (sampleRate * attackTime));
-    m_releaseCoeff = exp(-0.95424251 / (sampleRate * releaseTime));
-    
+    m_attackCoeff = 27*(1 - exp(-1*(1/(6.28*attackTime*sampleRate))));
+    m_releaseCoeff = 27*(1 - exp(-1*(1/(6.28*releaseTime*sampleRate))));
+   
     // calculate number of samples to hold based on hold time in secs
     maxHoldTimeCount = (int)(48000*holdTime);
 
@@ -38,7 +38,7 @@ public:
     // 
      if(triggerIn == 1)
      {
-         m_attackHoldReleaseOut = m_attackCoeff * lastTrigger + (1 - m_attackCoeff) * triggerIn;
+         m_attackHoldReleaseOut = m_attackCoeff * triggerIn + (1 - m_attackCoeff) * m_lastOut;
          holdTimeCount = 0; // reset hold time
      }
      else
@@ -47,12 +47,12 @@ public:
          {  
             // release if hold time expired     
             holdTimeCount = maxHoldTimeCount; // hold count reset when re-triggered
-            m_attackHoldReleaseOut = m_releaseCoeff * lastTrigger + (1 - m_releaseCoeff) * triggerIn;
+            m_attackHoldReleaseOut = m_releaseCoeff * triggerIn + (1 - m_releaseCoeff) * m_lastOut;
          }
 
      }
     
-     lastTrigger = triggerIn; // trigger(n-1) = trigger(n)
+     m_lastOut = m_attackHoldReleaseOut; // trigger(n-1) = trigger(n)
 
 
     return m_attackHoldReleaseOut;
@@ -64,7 +64,7 @@ private:
   float m_attackCoeff, m_releaseCoeff, m_holdTime;
   float m_attackHoldReleaseOut;
 
-  float lastTrigger;  // last trigger state
+  float m_lastOut;  // last trigger state
   int holdTimeCount;   // hold time, in samples
   int maxHoldTimeCount; //
 
