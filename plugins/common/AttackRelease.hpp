@@ -20,8 +20,8 @@ public:
   {
  
     // calculate coeff for attack and release time (in secs)  
-    m_attackCoeff = exp(-1*log(9) /  (sampleRate * attackTime));
-    m_releaseCoeff = exp(-1*log(9) / (sampleRate * releaseTime));
+    m_attackCoeff = 27*(1 - exp(-1*(1/(6.28*attackTime*sampleRate))));
+    m_releaseCoeff = 27*(1 - exp(-1*(1/(6.28*releaseTime*sampleRate))));
 
   };
   
@@ -35,16 +35,16 @@ public:
     // 
      if(triggerIn == 1)
      {
-         m_attackReleaseOut = m_attackCoeff * m_lastTrigger + (1 - m_attackCoeff) * triggerIn;
+         m_attackReleaseOut = m_attackCoeff * triggerIn + (1 - m_attackCoeff) * m_lastOut;
         
      }
      else
      {
-         m_attackReleaseOut = m_releaseCoeff * m_lastTrigger + (1 - m_releaseCoeff) * triggerIn;
+         m_attackReleaseOut = m_releaseCoeff * triggerIn + (1 - m_releaseCoeff) * m_lastOut;
 
      }
     
-     m_lastTrigger = triggerIn; // trigger(n-1) - trigger(n)
+     m_lastOut = m_attackReleaseOut; // last output state
 
 
     return m_attackReleaseOut;
@@ -53,7 +53,7 @@ public:
   };
 
 private:
-  bool m_lastTrigger;
+  bool m_lastOut;
   float m_attackCoeff, m_releaseCoeff;
   float m_attackReleaseOut;
 

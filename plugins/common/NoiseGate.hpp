@@ -50,8 +50,8 @@ public:
     setting.init(
         "release",                  // Name
         EffectSetting::floatType, // Type of setting
-        20,                      // Min value
-        350,                      // Max value
+        10,                      // Min value
+        450,                      // Max value
         1,                     // Step Size
         EffectSetting::linear);
     setting.setFloatValue(100);
@@ -67,9 +67,9 @@ public:
     Effect::loadFromConfig();
 
     m_noiseGateThreshold = getSettingByName("threshold").getFloatValue();
-    m_noiseGateAttack = getSettingByName("attack").getFloatValue()/1000;
-    m_noiseGateHold = getSettingByName("hold").getFloatValue()/1000;
-    m_noiseGateRelease = getSettingByName("release").getFloatValue()/1000;
+    m_noiseGateAttack = (getSettingByName("attack").getFloatValue())/1000;
+    m_noiseGateHold = (getSettingByName("hold").getFloatValue())/1000;
+    m_noiseGateRelease = (getSettingByName("release").getFloatValue())/1000;
  
         // init the attack/release signal block
     m_noiseGateAttackHoldRelease.init(m_noiseGateAttack, m_noiseGateHold, m_noiseGateRelease, 48000);
