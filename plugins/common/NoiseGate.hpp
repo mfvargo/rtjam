@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Effect.hpp"
-#include "attackRelease.hpp"
+#include "AttackHoldRelease.hpp"
 
 
 class NoiseGate : public Effect
@@ -21,36 +21,43 @@ public:
         "threshold",               // Name
         EffectSetting::floatType, // Type of setting
         .001,                        // Min value
-        .1,                    // Max value
+        .05,                    // Max value
         .001,                        // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(.001); 
+    setting.setFloatValue(.004); 
     addSetting(setting);
 
     setting.init(
         "attack",               // Name
         EffectSetting::floatType, // Type of setting
-        0.0,                      // Min value
-        1,                        // Max value
-        0.01,                     // Step Size
+        2,                      // Min value
+        100,                        // Max value
+        1,                     // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(0.01);
+    setting.setFloatValue(10);
+    addSetting(setting);
+
+    setting.init(
+        "hold",               // Name
+        EffectSetting::floatType, // Type of setting
+        20,                      // Min value
+        250,                        // Max value
+        1,                     // Step Size
+        EffectSetting::linear);
+    setting.setFloatValue(40);
     addSetting(setting);
 
     setting.init(
         "release",                  // Name
         EffectSetting::floatType, // Type of setting
-        0.0,                      // Min value
-        1.0,                      // Max value
-        0.01,                     // Step Size
+        20,                      // Min value
+        350,                      // Max value
+        1,                     // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(0.1);
+    setting.setFloatValue(100);
     addSetting(setting);
 
     loadFromConfig();
-
-    // init the attack/release signal block
-    m_noiseGateAttackRelease.init(m_noiseGateAttack, m_noiseGateRelease, 48000);
 
   };
 
@@ -60,9 +67,13 @@ public:
     Effect::loadFromConfig();
 
     m_noiseGateThreshold = getSettingByName("threshold").getFloatValue();
-    m_noiseGateAttack = getSettingByName("attack").getFloatValue();
-    m_noiseGateRelease = getSettingByName("release").getFloatValue();
+    m_noiseGateAttack = getSettingByName("attack").getFloatValue()/1000;
+    m_noiseGateHold = getSettingByName("hold").getFloatValue()/1000;
+    m_noiseGateRelease = getSettingByName("release").getFloatValue()/1000;
  
+        // init the attack/release signal block
+    m_noiseGateAttackHoldRelease.init(m_noiseGateAttack, m_noiseGateHold, m_noiseGateRelease, 48000);
+
   };
 
   //  TODO - add block diagram here...
@@ -87,9 +98,9 @@ public:
             triggerOut = 0;
         }
 
-        // generate gain control waveform (fast attack, slow release)
-        value = m_noiseGateAttackRelease.getSample(triggerOut);
-       
+        // generate gain control waveform (fast attack, variable hold, slow release)
+        value = m_noiseGateAttackHoldRelease.getSample(triggerOut);
+
         // apply gain to input 
         output[sample] = input[sample] * value;
 
@@ -97,11 +108,14 @@ public:
   };
 
 private:
-    AttackRelease m_noiseGateAttackRelease;
+    AttackHoldRelease m_noiseGateAttackHoldRelease;
   
     float m_noiseGateThreshold; 
     float m_noiseGateAttack;
+    float m_noiseGateHold;
     float m_noiseGateRelease;
+    float m_envelopeSample;
+
       
   
 };

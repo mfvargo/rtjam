@@ -9,6 +9,8 @@
 #include "ToneStack.hpp"
 #include "Chorus.hpp"
 #include "BassDI.hpp"
+#include "NoiseGate.hpp"
+#include "SigmaReverb.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -22,7 +24,10 @@ const static json s_PedalTypes = {
     {"Reverb", "Reverb"},
     {"Tremelo", "Tremelo ala Fender"},
     {"Tone Stack", "Tone controls (3 band)"},
-    {"DC Offset HighPass", "DC removal Filter"}};
+    {"DC Offset HighPass", "DC removal Filter"},
+    {"NoiseGate", "Noise Gate"},
+    {"SigmaReverb", "Sigma Reverb"}
+    };
 
 class EffectFactory
 {
@@ -68,6 +73,14 @@ public:
       else if (effect["name"] == "DC Offset HighPass")
       {
         rval = new HighPassFilter();
+      }
+      else if (effect["name"] == "Noise Gate")
+      {
+        rval = new NoiseGate();
+      }
+      else if (effect["name"] == "Sigma Reverb")
+      {
+        rval = new SigmaReverb();
       }
       else
       {

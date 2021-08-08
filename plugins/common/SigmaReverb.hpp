@@ -77,17 +77,20 @@ public:
         m_delay1Out = m_delay1[m_delay1Index];
         m_delay2Out = m_delay2[m_delay2Index];
 
+        // TODO - commets/mods for test only
         // process first allpass chain - lap1->lap4
-        float value = m_lap1.getSample(reverbIn);
-        value = m_lap2.getSample(value);
-        value = m_lap3.getSample(value);
-        value = m_lap4.getSample(value);
+       // float value = m_lap1.getSample(reverbIn);
+       // value = m_lap2.getSample(value);
+       // value = m_lap3.getSample(value);
+       // value = m_lap4.getSample(value);
  
-       	float sum1Out = value + (m_delay2Out * m_reverbTime);
+       	//float sum1Out = value + (m_delay2Out * m_reverbTime);
+        float value = input[sample] + (m_delay2Out * m_reverbTime);
+
 
     	  // process stretched all-pass Chain 2 - AP1->AP1B  	  
-        value = m_ap1.getSample(sum1Out);
-        value = m_ap1b.getSample(value);
+       // value = m_ap1.getSample(sum1Out);
+       // value = m_ap1b.getSample(value);
 
         // write result to delay line 1
         m_delay1[m_delay1Index++] = value;
@@ -101,8 +104,8 @@ public:
 
         // process streched all-pass Chain 3 - AP2->AP2B  	  
     	  // input to Chain 3 is delay 1 output * reverb time
-        value = m_ap2.getSample(value);
-        value = m_ap2b.getSample(value);
+       // value = m_ap2.getSample(value);
+       // value = m_ap2b.getSample(value);
 
         // TODO - add lpf/hpf here 
 
