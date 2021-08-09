@@ -25,8 +25,8 @@ const static json s_PedalTypes = {
     {"Tremelo", "Tremelo ala Fender"},
     {"Tone Stack", "Tone controls (3 band)"},
     {"DC Offset HighPass", "DC removal Filter"},
-    {"NoiseGate", "Noise Gate"},
-    {"SigmaReverb", "Sigma Reverb"}
+    {"Noise Gate", "Noise Gate"},
+    {"Sigma Reverb", "Sigma Reverb"}
     };
 
 class EffectFactory

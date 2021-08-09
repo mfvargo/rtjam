@@ -18,7 +18,7 @@ public:
     // What settings can we receive?
     EffectSetting setting;
     setting.init(
-        "reverb level",               // Name
+        "level",               // Name
         EffectSetting::floatType, // Type of setting
         0,                        // Min value
         1,                    // Max value
@@ -28,7 +28,7 @@ public:
     addSetting(setting);
 
     setting.init(
-        "reverb time",               // Name
+        "time",               // Name
         EffectSetting::floatType, // Type of setting
         0,                      // Min value
         1,                        // Max value
@@ -57,8 +57,8 @@ public:
     // Read the settings from the map and apply them to our copy of the data.
     Effect::loadFromConfig();
 
-    m_reverbTime = getSettingByName("reverb time").getFloatValue();
-    m_reverbLevel = getSettingByName("reverb level").getFloatValue();
+    m_reverbTime = getSettingByName("time").getFloatValue();
+    m_reverbLevel = getSettingByName("level").getFloatValue();
     
   };
 
@@ -79,18 +79,18 @@ public:
 
         // TODO - commets/mods for test only
         // process first allpass chain - lap1->lap4
-       // float value = m_lap1.getSample(reverbIn);
-       // value = m_lap2.getSample(value);
-       // value = m_lap3.getSample(value);
-       // value = m_lap4.getSample(value);
+        float value = m_lap1.getSample(reverbIn);
+        value = m_lap2.getSample(value);
+        value = m_lap3.getSample(value);
+        value = m_lap4.getSample(value);
  
-       	//float sum1Out = value + (m_delay2Out * m_reverbTime);
-        float value = input[sample] + (m_delay2Out * m_reverbTime);
+       	float sum1Out = value + (m_delay2Out * m_reverbTime);
+        //float value = input[sample] + (m_delay2Out * m_reverbTime);
 
 
     	  // process stretched all-pass Chain 2 - AP1->AP1B  	  
-       // value = m_ap1.getSample(sum1Out);
-       // value = m_ap1b.getSample(value);
+        value = m_ap1.getSample(sum1Out);
+        value = m_ap1b.getSample(value);
 
         // write result to delay line 1
         m_delay1[m_delay1Index++] = value;
@@ -104,8 +104,8 @@ public:
 
         // process streched all-pass Chain 3 - AP2->AP2B  	  
     	  // input to Chain 3 is delay 1 output * reverb time
-       // value = m_ap2.getSample(value);
-       // value = m_ap2b.getSample(value);
+        value = m_ap2.getSample(value);
+        value = m_ap2b.getSample(value);
 
         // TODO - add lpf/hpf here 
 
@@ -117,7 +117,7 @@ public:
         }
 
         // reverb output = sum of two delay taps
-        value = m_delay1[2500] + m_delay2[3900];
+        value = m_delay1Out;
 
         // add in reverb to dry signal
         output[sample] = input[sample] + value * m_reverbLevel;
