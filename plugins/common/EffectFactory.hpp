@@ -9,10 +9,14 @@
 #include "ToneStack.hpp"
 #include "Chorus.hpp"
 #include "BassDI.hpp"
+<<<<<<< HEAD
 #include "NoiseGate.hpp"
 #include "SigmaReverb.hpp"
+=======
+#include "SpeakerSimIIR.hpp"
+>>>>>>> master
 
-using json = nlohmann::json;
+    using json = nlohmann::json;
 using namespace std;
 
 const static json s_PedalTypes = {
@@ -25,9 +29,13 @@ const static json s_PedalTypes = {
     {"Tremelo", "Tremelo ala Fender"},
     {"Tone Stack", "Tone controls (3 band)"},
     {"DC Offset HighPass", "DC removal Filter"},
+<<<<<<< HEAD
     {"Noise Gate", "Noise Gate"},
     {"Sigma Reverb", "Sigma Reverb"}
-    };
+=======
+    {"Speaker Sim", "Speaker Cabinet Simulator"}
+>>>>>>> master
+};
 
 class EffectFactory
 {
@@ -82,6 +90,11 @@ public:
       {
         rval = new SigmaReverb();
       }
+      else if (effect["name"] == "Speaker Sim")
+      {
+        rval = new SpeakerSimIIR();
+      }
+
       else
       {
         return rval;
