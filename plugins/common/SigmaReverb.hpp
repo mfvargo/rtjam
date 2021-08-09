@@ -88,8 +88,8 @@ public:
       value = m_ap1b.getSample(value);
 
       // write result to delay line 1
-      m_delay1[m_delay1Index++] = value;
-      m_delay1Index %= 10000;
+      m_delay1[m_delay1Index] = value;
+      ++m_delay1Index %= 10000;
 
       // read from end of delay line 1
       value = delay1Out * m_reverbLevel;
@@ -102,11 +102,11 @@ public:
       // TODO - add lpf/hpf here
 
       // write result to delay line 2
-      m_delay2[m_delay2Index++] = value;
-      m_delay2Index %= 12000;
+      m_delay2[m_delay2Index] = value;
+      ++m_delay2Index %= 12000;
 
       // reverb output = sum of two delay taps
-      value = delay1Out;
+      value = delay1Out + delay2Out;
 
       // add in reverb to dry signal
       output[sample] = input[sample] + value * m_reverbLevel;
