@@ -6,7 +6,7 @@
 class AllpassDelay : public SignalBlock
 {
 public:
-    void init(float delayLength, int apGain)
+    void init(float delayLength, float apGain)
     {
         // initialize the delay line and coeffs
         m_apGain = apGain;
