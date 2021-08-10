@@ -24,7 +24,7 @@ public:
         -80.0,                        // Min value
         20.0,                        // Max value
         .5,                      // Step Size
-        EffectSetting::dB);
+        EffectSetting::linear);
     setting.setFloatValue(-20.0);
     addSetting(setting);
 
@@ -54,7 +54,7 @@ setting.init(
         2,                        // Min value
         200,                        // Max value
         0.5,                     // Step Size
-        EffectSetting::linear);
+        EffectSetting::msec);
     setting.setFloatValue(20);
     addSetting(setting);
 
@@ -64,7 +64,7 @@ setting.init(
         50,                        // Min value
         1000,                        // Max value
         0.5,                     // Step Size
-        EffectSetting::linear);
+        EffectSetting::msec);
     setting.setFloatValue(120);
     addSetting(setting);
 
@@ -82,8 +82,8 @@ setting.init(
     m_compRatio = getSettingByName("ratio").getFloatValue();
     m_compLevel = getSettingByName("level").getFloatValue();
 
-    m_compAttackTime = (getSettingByName("attack").getFloatValue())/1000; // convert ms to secs
-    m_compReleaseTime = (getSettingByName("release").getFloatValue())/1000; // convert ms to secs
+    m_compAttackTime = getSettingByName("attack").getFloatValue(); // convert ms to secs
+    m_compReleaseTime = getSettingByName("release").getFloatValue(); // convert ms to secs
     
     m_compSlope = (1-(1/m_compRatio));
 
@@ -107,19 +107,20 @@ setting.init(
       // input signal goes to peak detector sidechain
       float value = m_compPeakDetector.getSample(input[sample]);
 
-      // convert level to dB (all gain computations are in dB)
-      inputLevel = 20 * log10(value);
+      // convert level to dB (all gain computations are in log space)
+      inputLevel = SignalBlock::linearToDb(value);
 
       // set gain to 0dB 
       compGain = 0;
-      // if signal is above threshold, calculate new gain 
+      // if signal is above threshold, calculate new gain based on level 
+      // above threshold and ratio
       if(inputLevel > m_compThreshold);
       {          
           compGain = m_compSlope*(m_compThreshold - inputLevel);
       }
 
       // convert gain in dB to linear value
-      compGain = pow(10, (compGain / 20.0) );
+      compGain = SignalBlock::dbToLinear(compGain);
 
       // multiply incoming signal by gain computer output (dynamic) 
       // and level (make-up gain)
@@ -127,7 +128,7 @@ setting.init(
 
     }
     
-    if(i++ > 1000)
+    if(i++ > 100)
     {
       i=0;
       std::cout << "Threshold = " << m_compThreshold << "  Level = " << inputLevel << "  Gain = " << compGain << std::endl;
@@ -138,9 +139,9 @@ setting.init(
 private:
     
     PeakDetector m_compPeakDetector;
-
+    
     float m_compThreshold, m_compRatio, m_compSlope, m_compLevel; 
     float m_compAttackTime, m_compReleaseTime;
-
     int i;
+
 };

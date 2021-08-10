@@ -24,7 +24,7 @@ public:
     m_currentDelayTime = 0.250;
     m_feedback = 0.1;
     m_level = 0.5;
-    m_drift = SignalBlock::dbToFloat(-42.0);
+    m_drift = SignalBlock::dbToLinear(-42.0);
     m_rate = 1.4;
     m_delayMode = DelayMode::digital;
     m_writePointerIndex = 0;
@@ -49,7 +49,7 @@ public:
       break;
     }
     m_osc.init(LowFreqOsc::WaveShape::sineWave, m_rate, m_drift, 48000);
-    m_bufferDepth = (1.0 + SignalBlock::dbToFloat(m_drift)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
+    m_bufferDepth = (1.0 + SignalBlock::dbToLinear(m_drift)) * m_currentDelayTime * m_sampleRate; // max delay based on depth
   }
 
   //  Digital Delay Effect - Signal Flow Diagram

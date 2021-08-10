@@ -84,8 +84,8 @@ void PluginRTJam::switchRoom(int roomParam) {
         break;
     }
     jamMixer.reset();
-    jamMixer.gains[0] = dbToFloat(6.0);
-    jamMixer.gains[1] = dbToFloat(6.0);
+    jamMixer.gains[0] = dbToLinear(6.0);
+    jamMixer.gains[1] = dbToLinear(6.0);
 
     jamSocket.initClient(serverName.c_str(), port, clientId);
 
@@ -320,10 +320,10 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
             if (value < -29.9) {
                 value = -60.0;
             }
-            jamMixer.gains[index - paramChanGain1] = dbToFloat(value);
+            jamMixer.gains[index - paramChanGain1] = dbToLinear(value);
             break;
         case paramMasterVol:
-            jamMixer.masterVol = dbToFloat(value);
+            jamMixer.masterVol = dbToLinear(value);
             break;
         case paramInputMonitor:
             monitorInput = (value > 0.5f);
@@ -347,7 +347,7 @@ void PluginRTJam::setParameterValue(uint32_t index, float value) {
     }
 }
 
-float PluginRTJam::dbToFloat(float value) {
+float PluginRTJam::dbToLinear(float value) {
     if (value < -59.5) {
         return 0.0f;
     }
@@ -387,8 +387,8 @@ void PluginRTJam::loadProgram(uint32_t index) {
 
 void PluginRTJam::activate() {
     jamMixer.reset();
-    jamMixer.gains[0] = dbToFloat(6.0);
-    jamMixer.gains[1] = dbToFloat(6.0);
+    jamMixer.gains[0] = dbToLinear(6.0);
+    jamMixer.gains[1] = dbToLinear(6.0);
     jamSocket.isActivated = true;
     fVerb.reset();
 }

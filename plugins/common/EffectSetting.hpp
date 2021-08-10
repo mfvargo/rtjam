@@ -114,7 +114,7 @@ public:
   {
     float rval = m_setting["value"];
     if (m_units == dB)
-      rval = SignalBlock::dbToFloat(rval);
+      rval = SignalBlock::dbToLinear(rval);
     if (m_units == msec)
       rval /= 1000;
     return rval;
