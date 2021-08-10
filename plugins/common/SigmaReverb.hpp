@@ -2,6 +2,7 @@
 
 #include "Effect.hpp"
 #include "AllpassDelay.hpp"
+#include "BiQuad.hpp"
 
 class SigmaReverb : public Effect
 {
@@ -36,7 +37,7 @@ public:
     addSetting(setting);
 
     setting.init(
-        "lowFreq",                 // Name
+        "lowFreq",                // Name
         EffectSetting::floatType, // Type of setting
         10,                       // Min value
         250,                      // Max value
@@ -45,16 +46,15 @@ public:
     setting.setFloatValue(10.0);
     addSetting(setting);
 
-setting.init(
-        "highFreq",                 // Name
+    setting.init(
+        "highFreq",               // Name
         EffectSetting::floatType, // Type of setting
-        400,                       // Min value
-        8000,                      // Max value
+        400,                      // Min value
+        8000,                     // Max value
         5,                        // Step Size
         EffectSetting::linear);
     setting.setFloatValue(8000);
     addSetting(setting);
-
 
     loadFromConfig();
 
@@ -82,7 +82,6 @@ setting.init(
 
     m_lfFilter.init(BiQuadFilter::FilterType::HighPass, m_lowFreqCut, 1.0, 1.0, 48000);
     m_hfFilter.init(BiQuadFilter::FilterType::LowPass, m_highFreqCut, 1.0, 1.0, 48000);
-
   };
 
   //  TODO - add block diagram here...
@@ -108,7 +107,7 @@ setting.init(
       value = m_lap4.getSample(value);
 
       float sum1Out = value + (delay2Out * m_reverbTime);
-      
+
       // process stretched all-pass Chain 2 - AP1->AP1B
       value = m_ap1.getSample(sum1Out);
       value = m_ap1b.getSample(value);
@@ -147,9 +146,8 @@ private:
 
   BiQuadFilter m_lfFilter, m_hfFilter;
 
-  float m_lowFreqCut;    // reverb low freq cutoff
-  float m_highFreqCut;   // reverb ring high freq cutoff (damping)
-
+  float m_lowFreqCut;  // reverb low freq cutoff
+  float m_highFreqCut; // reverb ring high freq cutoff (damping)
 
   float m_delay1[4853]; // delay line 1
   unsigned int m_delay1Index;
@@ -159,5 +157,4 @@ private:
 
   float m_reverbTime;  // reverb time - 0-1 = 0-inf
   float m_reverbLevel; // output level (dry + reverb * 0-1)
-
 };
