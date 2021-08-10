@@ -127,13 +127,6 @@ setting.init(
       output[sample] = input[sample] * compGain * m_compLevel;
 
     }
-    
-    if(i++ > 100)
-    {
-      i=0;
-      std::cout << "Threshold = " << m_compThreshold << "  Level = " << inputLevel << "  Gain = " << compGain << std::endl;
-    }
-
   };
 
 private:
@@ -142,6 +135,5 @@ private:
     
     float m_compThreshold, m_compRatio, m_compSlope, m_compLevel; 
     float m_compAttackTime, m_compReleaseTime;
-    int i;
-
+    
 };
