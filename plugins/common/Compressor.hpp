@@ -114,7 +114,7 @@ setting.init(
       compGain = 0;
       // if signal is above threshold, calculate new gain based on level 
       // above threshold and ratio
-      if(inputLevel > m_compThreshold);
+      if(inputLevel > m_compThreshold)
       {          
           compGain = m_compSlope*(m_compThreshold - inputLevel);
       }
@@ -127,6 +127,7 @@ setting.init(
       output[sample] = input[sample] * compGain * m_compLevel;
 
     }
+
   };
 
 private:
