@@ -19,16 +19,12 @@ public:
     }
   }
 
-  static float dbToFloat(float valueInDB)
+  static float dbToLinear(float valueInDB)
   {
-    if (valueInDB < -59.5)
-    {
-      return 0.0f;
-    }
-    return std::exp((valueInDB / 72.0f) * 72.0f / 8.656170245f);
+    return std::pow(10, (valueInDB / 20.0) );
   }
 
-  static float FloatToDb(float value)
+  static float linearToDb(float value)
   {
     return (20 * std::log10(value));
   }

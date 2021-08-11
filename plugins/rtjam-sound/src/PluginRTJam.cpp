@@ -89,10 +89,10 @@ void PluginRTJam::getParams()
     {
       m_param.fValue = -60.0;
     }
-    m_jamMixer.gains[m_param.param - paramChanGain1] = SignalBlock::dbToFloat(m_param.fValue);
+    m_jamMixer.gains[m_param.param - paramChanGain1] = SignalBlock::dbToLinear(m_param.fValue);
     break;
   case paramMasterVol:
-    m_jamMixer.masterVol = SignalBlock::dbToFloat(m_param.fValue);
+    m_jamMixer.masterVol = SignalBlock::dbToLinear(m_param.fValue);
     break;
   case paramReverbMix:
     // Legacy param when we just had one reverb

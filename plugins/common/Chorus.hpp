@@ -58,7 +58,7 @@ public:
     m_feedback = depth;
     m_level = depth;
     m_overallGain = 1 - (depth / 2); // Do this to prevent chorus from doubling the volume
-    m_drift = SignalBlock::dbToFloat((depth * 45.0) - 60);
+    m_drift = SignalBlock::dbToLinear((depth * 45.0) - 60);
     m_rate = getSettingByName("rate").getFloatValue();
 
     // Activate the config in the base class

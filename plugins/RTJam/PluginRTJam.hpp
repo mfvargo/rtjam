@@ -176,7 +176,7 @@ private:
 
     bool monitorInput;
 
-    float dbToFloat(float value);
+    float dbToLinear(float value);
     int frameCount;
 
     bool reverbOnInputOne;
