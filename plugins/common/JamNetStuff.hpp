@@ -229,6 +229,8 @@ namespace JamNetStuff
     void dumpOut();
     // reset to default values
     void reset();
+    // clear other player volumes (used when changing rooms)
+    void clearPlayerVolumes();
     /* get some data for the output */
     void getMix(float **outputs, uint32_t frames);
     /* write a jamPacket */

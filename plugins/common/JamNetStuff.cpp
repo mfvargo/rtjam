@@ -382,7 +382,7 @@ namespace JamNetStuff
         {
             nBytes = readData();
             // check if we got any data and if this is from the current server (ignore residual packets from previous room)
-            if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port)
+            if (nBytes > 0 && senderAddr.sin_port == serverAddr.sin_port && senderAddr.sin_addr.s_addr == serverAddr.sin_addr.s_addr)
             {
                 if (jamMixer)
                 {

@@ -174,11 +174,12 @@ void PluginRTJam::getParams()
 
 void PluginRTJam::connect(const char *host, int port, uint32_t id)
 {
-  // m_jamMixer.reset();
+  // Turn on the socket
   m_jamSocket.isActivated = true;
+  // Reset all the other player volumes in the mixer and flush all the jitterBuffers
+  m_jamMixer.clearPlayerVolumes();
+  // set the host endpoint
   m_jamSocket.initClient(host, port, id);
-  // Need to flush out any residual data in the socket from end of last session
-  m_jamSocket.readPackets(NULL);
 }
 
 void PluginRTJam::disconnect()
