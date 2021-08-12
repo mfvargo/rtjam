@@ -42,6 +42,17 @@ namespace JamNetStuff
         masterPeak = 0.0f;
     }
 
+    void JamMixer::clearPlayerVolumes()
+    {
+        for (int i = 2; i < MIX_CHANNELS; i++)
+        {
+            gains[i] = 1.0;
+            channelLevels[i] = 0;
+            bufferDepths[i] = 0.0;
+            jitterBuffers[i].flush();
+        }
+    }
+
     /* print out some stats */
     void JamMixer::dumpOut()
     {
