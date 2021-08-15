@@ -1,7 +1,6 @@
 #include "json.hpp"
 #include "Effect.hpp"
 #include "Delay.hpp"
-#include "HighPassFilter.hpp"
 #include "MonoVerb.hpp"
 #include "Distortion.hpp"
 #include "DistortionModeler.hpp"
@@ -26,13 +25,10 @@ const static json s_PedalTypes = {
     {"Reverb", "Reverb"},
     {"Tremelo", "Tremelo ala Fender"},
     {"Tone Stack", "Tone controls (3 band)"},
-    {"DC Offset HighPass", "DC removal Filter"},
     {"Noise Gate", "Noise Gate"},
     {"Sigma Reverb", "Sigma Reverb"},
     {"Speaker Sim", "Speaker Cabinet Simulator"},
     {"Compressor", "Compressor Pedal"}};
-
-
 
 class EffectFactory
 {
@@ -74,10 +70,6 @@ public:
       else if (effect["name"] == "Tone Stack")
       {
         rval = new ToneStack();
-      }
-      else if (effect["name"] == "DC Offset HighPass")
-      {
-        rval = new HighPassFilter();
       }
       else if (effect["name"] == "Noise Gate")
       {
