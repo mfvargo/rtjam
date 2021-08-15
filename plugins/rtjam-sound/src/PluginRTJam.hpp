@@ -40,6 +40,7 @@ private:
   std::vector<std::thread> m_threads;
   LevelData m_levelData;
   ParamData m_paramData;
+  BiQuadFilter m_inputDCremoval[2];
 };
 
 #endif

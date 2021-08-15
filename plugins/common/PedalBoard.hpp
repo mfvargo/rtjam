@@ -8,7 +8,6 @@ class PedalBoard
 public:
   PedalBoard()
   {
-    m_inputDCremoval.init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
     m_outputDCremoval.init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
   }
   // Initialize the pedal board. config should be a json::array() of pedals to construct
@@ -103,7 +102,7 @@ public:
     if (m_stable)
       processBlock(input, output, framesize);
     else
-      memcpy(output, input, sizeof(float) * framesize);
+      memmove(output, input, sizeof(float) * framesize);
   }
 
   // this will dump out the json for all the pedasl
@@ -167,7 +166,7 @@ private:
     float *outBuff = pong;
 
     // Copy channel 1 into local buffer
-    m_inputDCremoval.getBlock(input, inBuff, framesize);
+    memcpy(inBuff, input, framesize * sizeof(float));
 
     // Loop through all the effects for channel 1 and process them
     for (int i = 0; i < m_chain.size(); i++)
@@ -188,6 +187,5 @@ private:
 private:
   bool m_stable;
   std::vector<Effect *> m_chain;
-  BiQuadFilter m_inputDCremoval;
   BiQuadFilter m_outputDCremoval;
 };
