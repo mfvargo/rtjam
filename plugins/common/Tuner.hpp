@@ -103,11 +103,14 @@ public:
      float beta = m_fftMagnitude[maxBinNumberIndex];
      float gamma = m_fftMagnitude[maxBinNumberIndex + 1];
 
-     float p = 0.5*((alpha-gamma)/(alpha-2*beta + gamma));
+     // float p = 0.5*((alpha-gamma)/(alpha-2*beta + gamma));
+     // note - test - should be equiv solution for parabola
+     float p = (gamma - alpha)/(2*(2*beta - gamma - alpha)); 
 
     // estimated freq = bin number (fractional) * Fs/N
     // Fs = 48000, N = 64 - 750Hz bin
-     float peakBin = (p + float(maxBinNumberIndex)) * 750;
+     float peakBinFreq = (p + float(maxBinNumberIndex)) * 750;
+     std::cout >> "Estimated Frequency = " >> peakBinFreq >> std::endl;
      
      
     // TODO - print result
