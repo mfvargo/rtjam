@@ -26,6 +26,8 @@ PluginRTJam::PluginRTJam()
   {
     m_outputs[i] = new float[MAX_FIFO_FRAME_SIZE];
   }
+  m_inputDCremoval[0].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
+  m_inputDCremoval[1].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
 }
 
 PluginRTJam::~PluginRTJam()
@@ -198,14 +200,22 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   tempOut[0] = oneBuffOut;
   tempOut[1] = twoBuffOut;
 
+  // Remove DC offset from samples
+  m_inputDCremoval[0].getBlock(inputs[0], oneBuffOut, frames);
+  m_inputDCremoval[1].getBlock(inputs[1], twoBuffOut, frames);
+
+  // Call the tuners with the data
+  m_tuners[0].getBlock(oneBuffOut, oneBuffOut, frames);
+  m_tuners[1].getBlock(twoBuffOut, twoBuffOut, frames);
+
   // Save the input power levels
   // Get input levels  (from tempOut which is what we sent to the room.)
-  m_leftInput.addSample(SignalBlock::getFramePower(inputs[0], frames));
-  m_rightInput.addSample(SignalBlock::getFramePower(inputs[1], frames));
+  m_leftInput.addSample(SignalBlock::getFramePower(oneBuffOut, frames));
+  m_rightInput.addSample(SignalBlock::getFramePower(twoBuffOut, frames));
 
   // run the effect chains
-  m_pedalBoards[0].process(inputs[0], oneBuffOut, frames);
-  m_pedalBoards[1].process(inputs[1], twoBuffOut, frames);
+  m_pedalBoards[0].process(oneBuffOut, oneBuffOut, frames);
+  m_pedalBoards[1].process(twoBuffOut, twoBuffOut, frames);
 
   // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
@@ -253,6 +263,8 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   m_levels.roomPeakRight = m_rightRoomInput.peak;
   m_levels.beat = m_jamMixer.getBeat();
   m_levels.isConnected = m_jamSocket.isActivated;
+  m_levels.inputLeftFreq = m_tuners[0].getFrequency();
+  m_levels.inputRightFreq = m_tuners[1].getFrequency();
 
   this->syncLevels();
 
