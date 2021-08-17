@@ -13,7 +13,7 @@ DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt
+LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lfftw3
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -Wno-psabi
 

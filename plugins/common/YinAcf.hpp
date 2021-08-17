@@ -344,11 +344,12 @@ public:
     *
     *   @returns the requested solution's calculated frequency.
     */
-    // - DFM - changed - inline const getFrequency(int offset = 0) const {
-    inline const getFrequency(int offset) {
+    inline Solution* getFrequency(int offset = 0) const {
+   // inline const getFrequency(int offset) {
         return getSolution(offset)->freq;
     }
 
+    
     /**
     *   returns the treshold used by getDip().
     *
@@ -356,8 +357,8 @@ public:
     *
     *   @returns the treshold used by getDip().
     */
-   // DFM - inline Sample getThreshold() const {
-    inline Sample getThreshold() {
+   inline Sample getThreshold() const {
+   // inline Sample getThreshold() {
         return THRESHOLD;
     }
 
