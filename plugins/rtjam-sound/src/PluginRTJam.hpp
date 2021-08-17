@@ -8,6 +8,8 @@
 #include <thread>
 #include <vector>
 #include "PedalBoard.hpp"
+#include "TunerBlock.hpp"
+
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
 class PluginRTJam
@@ -41,6 +43,7 @@ private:
   LevelData m_levelData;
   ParamData m_paramData;
   BiQuadFilter m_inputDCremoval[2];
+  TunerBlock m_tuners[2];
 };
 
 #endif

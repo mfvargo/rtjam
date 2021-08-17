@@ -21,6 +21,8 @@ struct RTJamLevels
   float roomPeakLeft;
   float roomLevelRight;
   float roomPeakRight;
+  float inputLeftFreq;
+  float inputRightFreq;
 };
 
 struct JsonInfo

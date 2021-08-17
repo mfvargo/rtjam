@@ -60,6 +60,8 @@ private:
         {"roomInputRight", m_jamLevels.roomLevelRight},
         {"roomPeakLeft", m_jamLevels.roomPeakLeft},
         {"roomPeakRight", m_jamLevels.roomPeakRight},
+        {"inputLeftFreq", m_jamLevels.inputLeftFreq},
+        {"inputRightFreq", m_jamLevels.inputRightFreq},
         {"beat", m_jamLevels.beat},
         {"connected", m_jamLevels.isConnected},
         {"players", json::array()},
