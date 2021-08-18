@@ -28,6 +28,9 @@ PluginRTJam::PluginRTJam()
   }
   m_inputDCremoval[0].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
   m_inputDCremoval[1].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
+
+  m_tuners[0].init();
+  m_tuners[1].init();
 }
 
 PluginRTJam::~PluginRTJam()
