@@ -13,8 +13,9 @@ DEPS := $(OBJS:.o=.d)
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
-LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt
-LOADLIBES := -lfftw3
+LDLIBS := -Bdynamic -lm -lstdc++ -lpthread -ljack -lrt 
+LOADLIBES := -Bstatic -lfftw3
+LDFLAGS := -L../lib
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -Wno-psabi
 
