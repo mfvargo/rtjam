@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <math.h>
 #include <fftw3.h>
 #include "SignalBlock.hpp"
@@ -16,16 +17,17 @@ public:
     // generate hann (raised cosine) filter
     for (int i = 0; i < s_fftSize; i++) 
     {
-        m_window[i] = 0.5 * (1 - cos(2*M_PI*i/63));
+        m_window[i] = 0.5 * (1 - cos(2*M_PI*i/(s_fftSize - 1) ) );
     }
 
     // generate fftw plan for real->complex FFT
      m_fftPlan = fftw_plan_dft_r2c_1d(s_fftSize, m_fftIn, m_fftOut, FFTW_ESTIMATE);
-    
+     
      // init freq reading averaging filter
-     m_freqAvgFilter.init(10, 1000);
-
-    setParams();
+     m_freqAvgFilter.init(100, 1000);
+     
+     // init tuner pre-filter 
+     m_tunerFilter.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
   
   };
 
@@ -38,17 +40,24 @@ public:
     value = m_tunerFilter.getSample(value);
     value = m_tunerFilter.getSample(value);
     value = m_tunerFilter.getSample(value);
+    
     value *= 48;  // add gain before downsampling
-    if((++m_downSampleCount % 48) == 0)
+    if((++m_downSampleCount %= 48) == 0)
     {
        m_fftIn[m_fftBin++] = value * m_window[m_fftBin];                
     }
 
    // check if fft input buffer is full 
-   if( (m_fftBin % s_fftSize) == 0)
+   if( (m_fftBin %= s_fftSize) == 0)
     {
-      m_fftBin = 0;   // reset fft bin index for next fft
-     fftw_execute(m_fftPlan);
+      
+      // Start measuring time
+      auto begin = std::chrono::high_resolution_clock::now();
+      fftw_execute(m_fftPlan);
+      // Stop measuring time and calculate the elapsed time
+      auto end = std::chrono::high_resolution_clock::now();
+      auto elapsed = std::chrono::duration_cast<std::chrono::nanoseconds>(end - begin);
+    //  std::cout << "fftw execution time: " << elapsed.count() * 1.0e-9 << std::endl;
 
       for(int i = 0; i < s_fftSize/2; i++)
       {
@@ -108,7 +117,7 @@ private:
   
   int m_downSampleCount;
 
-  static const int s_fftSize = 128;
+  static const int s_fftSize = 512;
   
   float m_window[s_fftSize];
   
@@ -120,8 +129,5 @@ private:
 
   float m_detectedFrequency;
 
-  void setParams()
-  {
-    m_tunerFilter.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
-  };
+
 };

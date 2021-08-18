@@ -18,14 +18,15 @@ public:
 
   float getSample(float input) override
   {
-    
-    // recursive exponential moving average routing
-    // out = alpha*x_n + (1-alpha)*y_n_1,
-    m_EmaOut = m_alpha*input + (1 - m_alpha) * m_lastOutputSample;
-    m_lastOutputSample = m_EmaOut;
-
+    if(input == input)  // check for NaN
+    {
+      // recursive exponential moving average routing
+      // out = alpha*x_n + (1-alpha)*y_n_1,
+      m_EmaOut = m_alpha*input + (1 - m_alpha) * m_lastOutputSample;
+      m_lastOutputSample = m_EmaOut;
+    }
     return m_EmaOut;
-  
+
   };
 
 public:
@@ -33,7 +34,8 @@ public:
   
 
 private:
-    float m_EmaOut, m_lastOutputSample;
+    float m_EmaOut = 0;
+    float m_lastOutputSample = 0;
 
 
 };
