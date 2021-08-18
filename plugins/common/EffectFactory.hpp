@@ -28,7 +28,8 @@ const static json s_PedalTypes = {
     {"Noise Gate", "Noise Gate"},
     {"Sigma Reverb", "Sigma Reverb"},
     {"Speaker Sim", "Speaker Cabinet Simulator"},
-    {"Compressor", "Compressor Pedal"}};
+    {"Compressor", "Compressor Pedal"}
+    };
 
 class EffectFactory
 {
