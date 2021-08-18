@@ -12,7 +12,6 @@
 #include "SigmaReverb.hpp"
 #include "SpeakerSimIIR.hpp"
 #include "Compressor.hpp"
-#include "Tuner.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -29,9 +28,7 @@ const static json s_PedalTypes = {
     {"Noise Gate", "Noise Gate"},
     {"Sigma Reverb", "Sigma Reverb"},
     {"Speaker Sim", "Speaker Cabinet Simulator"},
-    {"Compressor", "Compressor Pedal"},
-    {"Tuner", "Tuner"}
-    
+    {"Compressor", "Compressor Pedal"}
     };
 
 class EffectFactory
@@ -90,10 +87,6 @@ public:
       else if (effect["name"] == "Compressor")
       {
         rval = new Compressor();
-      }
-      else if (effect["name"] == "Tuner")
-      {
-        rval = new Tuner();
       }
       else
       {

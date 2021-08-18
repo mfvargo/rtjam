@@ -4,6 +4,7 @@
 #include <fftw3.h>
 #include "SignalBlock.hpp"
 #include "BiQuad.hpp"
+#include "EmaFilter.hpp"
 
 
 class TunerBlock : public SignalBlock
@@ -18,7 +19,11 @@ public:
         m_window[i] = 0.5 * (1 - cos(2*M_PI*i/63));
     }
 
+    // generate fftw plan for real->complex FFT
      m_fftPlan = fftw_plan_dft_r2c_1d(s_fftSize, m_fftIn, m_fftOut, FFTW_ESTIMATE);
+    
+     // init freq reading averaging filter
+     m_freqAvgFilter.init(10, 1000);
 
     setParams();
   
@@ -45,7 +50,7 @@ public:
       m_fftBin = 0;   // reset fft bin index for next fft
      fftw_execute(m_fftPlan);
 
-      for(int i = 0; i < s_fftSize; i++)
+      for(int i = 0; i < s_fftSize/2; i++)
       {
         // calculate magitude of result
         // Mag(fft) = sqrt(real^2 + imaginary^2)
@@ -79,10 +84,14 @@ public:
      // note - test - should be equiv solution for parabola
      float p = (gamma - alpha)/(2*(2*beta - gamma - alpha)); 
 
+     
     // estimated freq = bin number (fractional) * Fs/N
     // Fs = 48000/48=1000, N = 128 - 7.8125 Hz/bin
-     m_detectedFrequency = (p + float(maxBinNumberIndex)) * 1000/s_fftSize;
-    
+     p = (p + float(maxBinNumberIndex)) * 1000/s_fftSize;
+     m_detectedFrequency = m_freqAvgFilter.getSample(p);
+
+
+
     }
     
     return input;
@@ -95,6 +104,7 @@ public:
 
 private:
   BiQuadFilter m_tunerFilter;
+  EmaFilter m_freqAvgFilter;
   
   int m_downSampleCount;
 
@@ -112,6 +122,6 @@ private:
 
   void setParams()
   {
-    m_tunerFilter.init(BiQuadFilter::FilterType::LowPass, 450, 1.0, 0.707, 48000);
+    m_tunerFilter.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
   };
 };
