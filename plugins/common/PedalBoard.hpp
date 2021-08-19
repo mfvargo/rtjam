@@ -2,6 +2,7 @@
 
 #include "EffectFactory.hpp"
 #include <thread>
+#include "TunerBlock.hpp"
 
 class PedalBoard
 {
@@ -9,6 +10,7 @@ public:
   PedalBoard()
   {
     m_outputDCremoval.init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
+    m_tuner.init();
   }
   // Initialize the pedal board. config should be a json::array() of pedals to construct
   // For an empty pedalboard, just pass in json::array()
@@ -146,6 +148,21 @@ public:
     }
   }
 
+  void tuner(bool isTuning)
+  {
+    m_tuning = isTuning;
+  }
+
+  bool isTuning()
+  {
+    return m_tuning;
+  }
+
+  float getFrequency()
+  {
+    return m_tuner.getFrequency();
+  }
+
 private:
   void markUnstable()
   {
@@ -159,6 +176,14 @@ private:
 
   void processBlock(const float *input, float *output, int framesize)
   {
+    // check if we are muted.
+    if (m_tuning)
+    {
+      m_tuner.getBlock(input, output, framesize);
+      memset(output, 0, framesize * sizeof(float));
+      return;
+    }
+
     float ping[framesize];
     float pong[framesize];
 
@@ -186,6 +211,8 @@ private:
 
 private:
   bool m_stable;
+  bool m_tuning = false;
+  TunerBlock m_tuner;
   std::vector<Effect *> m_chain;
   BiQuadFilter m_outputDCremoval;
 };

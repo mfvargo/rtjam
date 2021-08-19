@@ -28,9 +28,6 @@ PluginRTJam::PluginRTJam()
   }
   m_inputDCremoval[0].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
   m_inputDCremoval[1].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
-
-  m_tuners[0].init();
-  m_tuners[1].init();
 }
 
 PluginRTJam::~PluginRTJam()
@@ -174,6 +171,13 @@ void PluginRTJam::getParams()
       cerr << "failed to parse json!" << endl;
     }
     break;
+  case paramTuneChannel:
+    // Mute the channel
+    if (m_param.iValue >= 0 && m_param.iValue < 2)
+    {
+      m_pedalBoards[m_param.iValue].tuner(m_param.iValue2 == 1);
+    }
+    break;
   }
 }
 
@@ -206,10 +210,6 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   // Remove DC offset from samples
   m_inputDCremoval[0].getBlock(inputs[0], oneBuffOut, frames);
   m_inputDCremoval[1].getBlock(inputs[1], twoBuffOut, frames);
-
-  // Call the tuners with the data
-  m_tuners[0].getBlock(oneBuffOut, oneBuffOut, frames);
-  m_tuners[1].getBlock(twoBuffOut, twoBuffOut, frames);
 
   // Save the input power levels
   // Get input levels  (from tempOut which is what we sent to the room.)
@@ -266,9 +266,10 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   m_levels.roomPeakRight = m_rightRoomInput.peak;
   m_levels.beat = m_jamMixer.getBeat();
   m_levels.isConnected = m_jamSocket.isActivated;
-  m_levels.inputLeftFreq = m_tuners[0].getFrequency();
-  m_levels.inputRightFreq = m_tuners[1].getFrequency();
-
+  m_levels.inputLeftFreq = m_pedalBoards[0].getFrequency();
+  m_levels.inputRightFreq = m_pedalBoards[1].getFrequency();
+  m_levels.leftTunerOn = m_pedalBoards[0].isTuning();
+  m_levels.rightTunerOn = m_pedalBoards[1].isTuning();
   this->syncLevels();
 
   for (int i = 0; i < 2; i++)

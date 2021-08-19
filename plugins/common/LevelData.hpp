@@ -23,6 +23,8 @@ struct RTJamLevels
   float roomPeakRight;
   float inputLeftFreq;
   float inputRightFreq;
+  bool leftTunerOn;
+  bool rightTunerOn;
 };
 
 struct JsonInfo
