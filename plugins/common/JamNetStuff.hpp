@@ -26,6 +26,7 @@
 #include "../common/jamrtime.h"
 #include <mutex>
 #include <vector>
+#include "MetroNome.hpp"
 
 #define EMPTY_SLOT 40000
 
@@ -260,6 +261,7 @@ namespace JamNetStuff
     float cBuf0[MAX_FRAME_SIZE];
     float cBuf1[MAX_FRAME_SIZE];
     float *conversionBuf[2];
+    MetroNome m_metronome;
   };
 
   class JamSocket
