@@ -273,7 +273,7 @@ namespace JamNetStuff
 
     void initServer(short port);
     void initClient(const char *servername, int port, uint32_t clientId);
-    void setTempo(int newTempo) { tempo = newTempo; };
+    void setTempo(int newTempo) { m_tempo = newTempo; };
     void getClientIds(uint32_t *ids) { packet.getClientIds(ids); };
     ::std::string getMacAddress();
 
@@ -288,7 +288,7 @@ namespace JamNetStuff
     int sendData(struct sockaddr_in *to_addr);
     uint64_t beatCount;
     uint64_t lastClickTime;
-    int tempo;
+    int m_tempo;
   };
 };
 

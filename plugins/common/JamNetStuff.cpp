@@ -341,7 +341,7 @@ namespace JamNetStuff
         // Set the packet to server mode
         packet.setIsClient(false);
         // Set the default tempo
-        tempo = 120;
+        m_tempo = 120;
         /*Configure settings in address struct*/
         memset(&serverAddr, 0, sizeof(struct sockaddr_in));
         serverAddr.sin_family = AF_INET;
@@ -416,13 +416,14 @@ namespace JamNetStuff
         }
         packet.setServerChannel(serverChannel);
         // TODO: Put back in the beat count
-        //         uint64_t deltaT = packet.getServerTime() - lastClickTime;
-        //         if (deltaT > (60 * 1e6 / tempo )) {  // 120BPM
-        //             // We have passed a click boundary
-        //             lastClickTime = packet.getServerTime();
-        //             beatCount++;
-        //         }
-        //         packet.setBeatCount(beatCount%4);
+        uint64_t deltaT = packet.getServerTime() - lastClickTime;
+        if (deltaT > (60 * 1e6 / m_tempo))
+        { // 120BPM
+            // We have passed a click boundary
+            lastClickTime = packet.getServerTime();
+            ++beatCount %= 4; // 4 beats per measure
+        }
+        packet.setBeatCount(beatCount);
         packet.encodeHeader();
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {
