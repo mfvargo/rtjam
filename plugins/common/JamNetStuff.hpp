@@ -238,6 +238,11 @@ namespace JamNetStuff
     void addData(JamPacket *packet);
     /* write local monitoring data */
     void addLocalMonitor(const float **inputs, uint32_t frames);
+    /* set the metronome config */
+    void setMetronomeConfig(int soundType, float volume)
+    {
+      m_metronome.init((MetroNome::SoundType)soundType, volume);
+    }
 
     float masterVol;
     float gains[MIX_CHANNELS];

@@ -40,7 +40,7 @@ namespace JamNetStuff
         masterVol = 1.0;
         masterLevel = 0.0f;
         masterPeak = 0.0f;
-        m_metronome.init(MetroNome::SoundType::clave, 0.25);
+        m_metronome.init(MetroNome::SoundType::clave, 0.00);
     }
 
     void JamMixer::clearPlayerVolumes()
