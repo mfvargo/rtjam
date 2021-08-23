@@ -342,6 +342,18 @@ namespace JamNetStuff
         packet.setIsClient(false);
         // Set the default tempo
         m_tempo = 120;
+        switch (port)
+        {
+        case 7891:
+            m_tempo = 85;
+            break;
+        case 7892:
+            m_tempo = 95;
+            break;
+        case 7893:
+            m_tempo = 105;
+            break;
+        }
         /*Configure settings in address struct*/
         memset(&serverAddr, 0, sizeof(struct sockaddr_in));
         serverAddr.sin_family = AF_INET;
