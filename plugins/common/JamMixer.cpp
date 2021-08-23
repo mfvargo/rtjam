@@ -40,6 +40,7 @@ namespace JamNetStuff
         masterVol = 1.0;
         masterLevel = 0.0f;
         masterPeak = 0.0f;
+        m_metronome.init(MetroNome::SoundType::clave, 0.25);
     }
 
     void JamMixer::clearPlayerVolumes()
@@ -71,6 +72,9 @@ namespace JamNetStuff
         {
             jitterBuffers[i].getOut(mixBuffers[i], frames);
         }
+        // Add in the metronome
+        float beatBuffer[frames];
+        m_metronome.getBlock(beat, beatBuffer, frames);
         // sum all the buffers.
         for (uint32_t i = 0; i < frames; i++)
         {
@@ -82,6 +86,7 @@ namespace JamNetStuff
                 // this is going to sum all the channels into one one
                 sum += masterVol * gains[j] * mixBuffers[j][i];
             }
+            sum += beatBuffer[i];
             if (sum > 1.0)
                 sum = 1.0;
             if (sum < -1.0)
