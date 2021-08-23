@@ -178,6 +178,9 @@ void PluginRTJam::getParams()
       m_pedalBoards[m_param.iValue].tuner(m_param.iValue2 == 1);
     }
     break;
+  case paramMetronomeVolume:
+    // set the metronome sound type and volume
+    m_jamMixer.setMetronomeConfig(m_param.iValue, m_param.fValue);
   }
 }
 

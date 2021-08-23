@@ -39,6 +39,7 @@ enum RTJamParameters
   paramMovePedal,
   paramLoadBoard,
   paramTuneChannel,
+  paramMetronomeVolume,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,

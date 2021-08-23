@@ -29,7 +29,6 @@ CMessageQueue::~CMessageQueue()
 void CMessageQueue::flush()
 {
   char flushBuf[m_attrs.mq_msgsize];
-  printf("flushing\n");
   timespec currentTime;
   clock_gettime(CLOCK_REALTIME, &currentTime);
   while (mq_timedreceive(m_queueID, flushBuf, m_attrs.mq_msgsize, NULL, &currentTime) > 0)

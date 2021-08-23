@@ -26,6 +26,7 @@
 #include "../common/jamrtime.h"
 #include <mutex>
 #include <vector>
+#include "MetroNome.hpp"
 
 #define EMPTY_SLOT 40000
 
@@ -237,6 +238,11 @@ namespace JamNetStuff
     void addData(JamPacket *packet);
     /* write local monitoring data */
     void addLocalMonitor(const float **inputs, uint32_t frames);
+    /* set the metronome config */
+    void setMetronomeConfig(int soundType, float volume)
+    {
+      m_metronome.init((MetroNome::SoundType)soundType, volume);
+    }
 
     float masterVol;
     float gains[MIX_CHANNELS];
@@ -260,6 +266,7 @@ namespace JamNetStuff
     float cBuf0[MAX_FRAME_SIZE];
     float cBuf1[MAX_FRAME_SIZE];
     float *conversionBuf[2];
+    MetroNome m_metronome;
   };
 
   class JamSocket
