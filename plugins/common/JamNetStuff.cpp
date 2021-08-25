@@ -364,6 +364,7 @@ namespace JamNetStuff
         {
             printf("port address bind failed. %d\n", h_errno);
         }
+        m_tempoStart = getMicroTime();
     }
 
     int JamSocket::sendPacket(const float **buffer, int frames)
@@ -427,14 +428,7 @@ namespace JamNetStuff
             jamMixer->addData(&packet);
         }
         packet.setServerChannel(serverChannel);
-        // TODO: Put back in the beat count
-        uint64_t deltaT = packet.getServerTime() - lastClickTime;
-        if (deltaT > (60 * 1e6 / m_tempo))
-        { // 120BPM
-            // We have passed a click boundary
-            lastClickTime = packet.getServerTime();
-            ++beatCount %= 4; // 4 beats per measure
-        }
+        char beatCount = ((getMicroTime() - m_tempoStart) / (60 * 1000000 / m_tempo)) % 4;
         packet.setBeatCount(beatCount);
         packet.encodeHeader();
         for (int i = 0; i < m_playerList.numPlayers(); i++)

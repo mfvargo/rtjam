@@ -296,6 +296,7 @@ namespace JamNetStuff
     uint64_t beatCount;
     uint64_t lastClickTime;
     int m_tempo;
+    uint64_t m_tempoStart;
   };
 };
 
