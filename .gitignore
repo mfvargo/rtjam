@@ -3,6 +3,7 @@
 *.o
 settings.json
 
+a.out
 *.exe
 *.dll
 *.dylib
