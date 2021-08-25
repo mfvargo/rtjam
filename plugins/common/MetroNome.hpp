@@ -1,6 +1,9 @@
 #pragma once
 #include <iostream>
 #include <math.h>
+#include "ClaveBeat1.hpp"
+#include "ClaveBeat2.hpp"
+#include <string.h>
 
 class MetroNome
 {
@@ -47,17 +50,26 @@ public:
 private:
   void fillBeep(float *output, float freq, int numSamps)
   {
-    float phase = 0;
-    float phaseIncrement = 2 * M_PI * freq / 48000;
-    for (int i = 0; i < numSamps; i++)
+    switch (m_soundType)
     {
-      // windowed sin wave
-      output[i] = 0.5 * (1 - cos(2 * M_PI * i / (numSamps))) * std::sin(phase);
-      phase += phaseIncrement;
-      if (phase >= 2 * M_PI)
+    case clave:
+      memcpy(m_beep, clave_beat1_bin, 2400 * sizeof(float));
+      memcpy(m_boop, clave_beat1_bin, 2400 * sizeof(float));
+      break;
+    default:
+      float phase = 0;
+      float phaseIncrement = 2 * M_PI * freq / 48000;
+      for (int i = 0; i < numSamps; i++)
       {
-        phase -= 2 * M_PI;
+        // windowed sin wave
+        output[i] = 0.5 * (1 - cos(2 * M_PI * i / (numSamps))) * std::sin(phase);
+        phase += phaseIncrement;
+        if (phase >= 2 * M_PI)
+        {
+          phase -= 2 * M_PI;
+        }
       }
+      break;
     }
   }
 
