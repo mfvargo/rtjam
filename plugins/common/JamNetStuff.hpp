@@ -241,7 +241,8 @@ namespace JamNetStuff
     /* set the metronome config */
     void setMetronomeConfig(int soundType, float volume)
     {
-      m_metronome.init((MetroNome::SoundType)soundType, volume);
+      m_metronome.setVolume(volume);
+      // m_metronome.init((MetroNome::SoundType)soundType, volume);
     }
 
     float masterVol;
