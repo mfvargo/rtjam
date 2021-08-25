@@ -25,6 +25,11 @@ public:
     fillBeep(m_boop, 220, 2400);
   };
 
+  void setVolume(float amplitude)
+  {
+    m_amplitude = amplitude;
+  }
+
   void getBlock(int thisBeat, float *output, int framesize)
   {
     for (int i = 0; i < framesize; i++)
@@ -54,7 +59,7 @@ private:
     {
     case clave:
       memcpy(m_beep, clave_beat1_bin, 2400 * sizeof(float));
-      memcpy(m_boop, clave_beat1_bin, 2400 * sizeof(float));
+      memcpy(m_boop, clave_beat2_bin, 2400 * sizeof(float));
       break;
     default:
       float phase = 0;
