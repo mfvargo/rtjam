@@ -97,7 +97,7 @@ void packet_thread(short port)
     jamMixer.setBufferSmoothness(i, 0.5);
   }
   // Start a thread to write the mix to the FIFO
-  std::thread fifoThread = std::thread(fifo_thread, port, &jamMixer);
+  // std::thread fifoThread = std::thread(fifo_thread, port, &jamMixer);
 
   // Loop and broadcast data
   while (1)

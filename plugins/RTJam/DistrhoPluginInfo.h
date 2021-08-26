@@ -28,16 +28,16 @@
 #define DISTRHO_PLUGIN_INFO_H
 
 #define DISTRHO_PLUGIN_BRAND "basscleftech.com"
-#define DISTRHO_PLUGIN_NAME  "RTJam"
-#define DISTRHO_PLUGIN_URI   "http://music.basscleftech.com/"
+#define DISTRHO_PLUGIN_NAME "RTJam"
+#define DISTRHO_PLUGIN_URI "http://music.basscleftech.com/"
 
-#define DISTRHO_PLUGIN_HAS_UI        1
+#define DISTRHO_PLUGIN_HAS_UI 1
 // #define DISTRHO_UI_USE_NANOVG        1
 
-#define DISTRHO_PLUGIN_IS_RT_SAFE       1
-#define DISTRHO_PLUGIN_NUM_INPUTS       2
-#define DISTRHO_PLUGIN_NUM_OUTPUTS      16
-#define DISTRHO_PLUGIN_WANT_PROGRAMS    1
+#define DISTRHO_PLUGIN_IS_RT_SAFE 1
+#define DISTRHO_PLUGIN_NUM_INPUTS 2
+#define DISTRHO_PLUGIN_NUM_OUTPUTS 26
+#define DISTRHO_PLUGIN_WANT_PROGRAMS 1
 #define DISTRHO_PLUGIN_WANT_DIRECT_ACCESS 1
 
 #endif // DISTRHO_PLUGIN_INFO_H
