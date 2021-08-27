@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
     jack_options_t options = JackNoStartServer;
     jack_status_t status;
 
-    PluginRTJam pluginRTJam;
-    pluginRTJam.init();
+    PluginRTJam *pPluginRTJam = new PluginRTJam();
+    pPluginRTJam->init();
     // Auto connect for Kevin Kirkpatrick
     Settings settings;
     settings.loadFromFile();
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     clientId = settings.getOrSetValue("clientId", clientId);
     if (settings.getOrSetValue("autoconnect", 0) != 0)
     {
-        pluginRTJam.connect(serverName.c_str(), port, clientId);
+        pPluginRTJam->connect(serverName.c_str(), port, clientId);
     }
     settings.saveToFile();
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "unique name `%s' assigned\n", client_name);
     }
 
-    jack_set_process_callback(client, process, &pluginRTJam);
+    jack_set_process_callback(client, process, pPluginRTJam);
 
     jack_on_shutdown(client, jack_shutdown, 0);
 

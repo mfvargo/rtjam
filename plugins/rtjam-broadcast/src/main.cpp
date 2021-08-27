@@ -87,23 +87,23 @@ void fifo_thread(short port, JamNetStuff::JamMixer *jamMixer)
 
 void packet_thread(short port)
 {
-  JamNetStuff::JamSocket jamSocket;
-  // JamNetStuff::JamMixer jamMixer;
-  jamSocket.initServer(port);
-  jamSocket.isActivated = true;
+  JamNetStuff::JamSocket *pJamSocket = new JamNetStuff::JamSocket();
+  JamNetStuff::JamMixer *pJamMixer = new JamNetStuff::JamMixer();
+  pJamSocket->initServer(port);
+  pJamSocket->isActivated = true;
   // Max out the buffers on the mixer
-  // for (int i = 0; i < MAX_JAMMERS; i++)
-  // {
-  //   jamMixer.setBufferSmoothness(i, 0.5);
-  // }
-  // // Start a thread to write the mix to the FIFO
-  // std::thread fifoThread = std::thread(fifo_thread, port, &jamMixer);
+  for (int i = 0; i < MAX_JAMMERS; i++)
+  {
+    pJamMixer->setBufferSmoothness(i, 0.5);
+  }
+  // Start a thread to write the mix to the FIFO
+  // std::thread fifoThread = std::thread(fifo_thread, port, pJamMixer);
 
   // Loop and broadcast data
   while (1)
   {
-    // jamSocket.doPacket(&jamMixer);
-    jamSocket.doPacket(NULL);
+    // pJamSocket->doPacket(pJamMixer);
+    pJamSocket->doPacket(NULL);
   }
 }
 
