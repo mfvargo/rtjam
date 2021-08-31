@@ -14,6 +14,7 @@ public:
     HighShelf,
     AllPass,
     Notch,
+    BandPass,
     MAX_FILTER_TYPES
   };
 
@@ -79,6 +80,58 @@ public:
     y1 = value;
     return value;
   };
+
+
+void updateCoeffs(FilterType filterType, float cutoffFreq, float cutBoost, float q, int sampleRate)
+  {
+    m_sampleRate = sampleRate;
+    m_type = filterType;
+    m_cutoffFreq = cutoffFreq;
+    m_cutBoost = cutBoost;
+    m_q = q;
+
+    switch (filterType)
+    {
+    case LowPass:
+      calcLowPassCoefficients();
+      break;
+
+    case HighPass:
+      calcHighPassCoefficients();
+      break;
+
+    case Peaking:
+      calcPeakingCoefficients();
+      break;
+
+    case LowShelf:
+      calcLowShelfCoefficients();
+      break;
+
+    case HighShelf:
+      calcHighShelfCoefficients();
+      break;
+
+    case AllPass:
+      calcAllPassCoefficients();
+      break;
+
+    case Notch:
+      calcNotchFilterCoefficients();
+      break;
+
+    case BandPass:
+      calcBandPassFilterCoefficients();
+      break;
+
+    default:
+      break;
+    }
+
+  };
+
+
+
 
 public:
   float m_cutoffFreq, m_cutBoost, m_q, m_sampleRate;
@@ -173,6 +226,19 @@ private:
     b0 = 1.0;
     b1 = -2.0 * cos_omega;
     b2 = 1.0;
+    a0 = 1.0 + alpha;
+    a1 = -2.0 * cos_omega;
+    a2 = 1.0 - alpha;
+    normalizeCoefficients();
+  };
+
+    void calcBandPassFilterCoefficients()
+  {
+    calcIntermediateVariables(m_cutBoost, m_q);
+    alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
+    b0 = alpha;
+    b1 = 0.0;
+    b2 = -1*alpha;
     a0 = 1.0 + alpha;
     a1 = -2.0 * cos_omega;
     a2 = 1.0 - alpha;
