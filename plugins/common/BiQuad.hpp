@@ -144,7 +144,7 @@ private:
 
   void calcHighPassCoefficients()
   {
-    calcIntermediateVariables(1.0, M_SQRT1_2);
+    calcIntermediateVariables(1.0, m_q);
     b0 = (1.0 + cos_omega) / 2.0;
     b1 = -1.0 * (1.0 + cos_omega);
     b2 = (1.0 + cos_omega) / 2.0;
@@ -169,7 +169,7 @@ private:
 
   void calcLowPassCoefficients()
   {
-    calcIntermediateVariables(1.0, M_SQRT1_2);
+    calcIntermediateVariables(1.0, m_q);
     b0 = (1.0 - cos_omega) / 2.0;
     b1 = 1.0 - cos_omega;
     b2 = (1.0 - cos_omega) / 2.0;
@@ -236,9 +236,9 @@ private:
   {
     calcIntermediateVariables(m_cutBoost, m_q);
     alpha = sin_omega / (2.0 * m_q * A); // special case: alpha has term for cut/boost (not in LPF/HPF)
-    b0 = alpha;
+    b0 = alpha; // *m_q;
     b1 = 0.0;
-    b2 = -1*alpha;
+    b2 = -1*alpha; // *m_q;
     a0 = 1.0 + alpha;
     a1 = -2.0 * cos_omega;
     a2 = 1.0 - alpha;
