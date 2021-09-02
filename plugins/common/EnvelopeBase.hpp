@@ -84,7 +84,7 @@ public:
     {
 
       float value = m_envelopeOut.getSample(input[sample]); // calculate magnitude of incoming signal
-      value = (value * m_envSensitivity * 20) + m_envFreq;  // apply gain to envelope, add in freq knob (start freq)
+      value = (value * m_envSensitivity * 200) + m_envFreq;  // apply gain to envelope, add in freq knob (start freq)
 
       if (++m_envelopeSample %= s_updateRate)
       {
