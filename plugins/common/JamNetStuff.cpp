@@ -212,13 +212,14 @@ namespace JamNetStuff
 
     void PlayerList::dump(std::string msg)
     {
-        printf("%s clients: [ ", msg.c_str());
+        std::cout << msg << " clients: [";
         for (Player p : m_players)
         {
-            printf("%u-%lu, ", p.clientId, p.KeepAlive);
+            std::cout << p.clientId << "-" << p.KeepAlive;
         }
-        printf("]\n");
+        std::cout << "]" << std::endl;
     }
+
     void PlayerList::Prune()
     {
         // See if any of the clients have disappeared
