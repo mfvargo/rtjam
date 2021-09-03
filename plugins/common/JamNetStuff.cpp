@@ -195,7 +195,7 @@ namespace JamNetStuff
 
     PlayerList::PlayerList()
     {
-        m_roomSize = 7;
+        m_roomSize = MAX_JAMMERS;
         m_allowedClientIds.clear();
     }
 
@@ -295,7 +295,7 @@ namespace JamNetStuff
         // Set socket to non-blocking
         fcntl(jamSocket, F_SETFL, fcntl(jamSocket, F_GETFL) | O_NONBLOCK);
         // Clear out the channelMap on the socket
-        packet.setClientId(clientId);
+        m_packet.setClientId(clientId);
         // Set that bad boy up.
         char ip[100];
         struct hostent *he;
@@ -318,8 +318,8 @@ namespace JamNetStuff
         addr_size = sizeof(serverAddr);
 
         // Set the packet to client mode
-        packet.setIsClient(true);
-        packet.clearChannelMap();
+        m_packet.setIsClient(true);
+        m_packet.clearChannelMap();
     }
 
     void JamSocket::initServer(short port)
@@ -339,7 +339,7 @@ namespace JamNetStuff
             printf("set SO_RCVTIMEO failed\n");
         }
         // Set the packet to server mode
-        packet.setIsClient(false);
+        m_packet.setIsClient(false);
         // Set the default tempo
         m_tempo = 120;
         switch (port)
@@ -374,15 +374,15 @@ namespace JamNetStuff
             return 0;
         }
         // Send a packet to the server!
-        packet.encodeAudio(buffer, frames);
-        packet.encodeHeader();
+        m_packet.encodeAudio(buffer, frames);
+        m_packet.encodeHeader();
         return sendData(&serverAddr);
     }
 
     int JamSocket::readPackets(JamMixer *jamMixer)
     {
         // Stale out any channels
-        packet.checkChannelTimeouts();
+        m_packet.checkChannelTimeouts();
         if (!isActivated)
         {
             return 0;
@@ -399,7 +399,7 @@ namespace JamNetStuff
             {
                 if (jamMixer)
                 {
-                    jamMixer->addData(&packet);
+                    jamMixer->addData(&m_packet);
                 }
             }
         } while (isActivated && nBytes > 0);
@@ -413,7 +413,7 @@ namespace JamNetStuff
         m_playerList.Prune();
         if (nBytes < 0)
             return nBytes;
-        uint32_t clientId = packet.getClientIdFromPacket();
+        uint32_t clientId = m_packet.getClientIdFromPacket();
         // Check if that client is an allowed person in the room
         if (!m_playerList.isAllowed(clientId))
             return 0;
@@ -425,12 +425,12 @@ namespace JamNetStuff
         // If we get here, we have a valid player and need to broadcast them
         if (jamMixer != NULL)
         {
-            jamMixer->addData(&packet);
+            jamMixer->addData(&m_packet);
         }
-        packet.setServerChannel(serverChannel);
+        m_packet.setServerChannel(serverChannel);
         char beatCount = ((getMicroTime() - m_tempoStart) / (60 * 1000000 / m_tempo)) % 4;
-        packet.setBeatCount(beatCount);
-        packet.encodeHeader();
+        m_packet.setBeatCount(beatCount);
+        m_packet.encodeHeader();
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {
             Player player = m_playerList.get(i);
@@ -448,7 +448,7 @@ namespace JamNetStuff
         addr_size = sizeof(serverAddr);
         int nBytes = recvfrom(
             jamSocket,
-            packet.getPacket(),
+            m_packet.getPacket(),
             sizeof(struct JamMessage),
             0,
             (struct sockaddr *)&senderAddr,
@@ -459,7 +459,7 @@ namespace JamNetStuff
         }
         if (nBytes > 0)
         {
-            packet.decodeHeader(nBytes);
+            m_packet.decodeHeader(nBytes);
         }
         return nBytes;
     }
@@ -467,8 +467,8 @@ namespace JamNetStuff
     {
         int rval = sendto(
             jamSocket,
-            packet.getPacket(),
-            packet.getSize(),
+            m_packet.getPacket(),
+            m_packet.getSize(),
             0,
             (struct sockaddr *)to_addr,
             sizeof(struct sockaddr));

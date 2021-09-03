@@ -239,7 +239,7 @@ namespace JamNetStuff
     /* write local monitoring data */
     void addLocalMonitor(const float **inputs, uint32_t frames);
     /* set the metronome config */
-    void setMetronomeConfig(int soundType, float volume)
+    void setMetronomeConfig(int /*soundType*/, float volume)
     {
       m_metronome.setVolume(volume);
       // m_metronome.init((MetroNome::SoundType)soundType, volume);
@@ -282,12 +282,12 @@ namespace JamNetStuff
     void initServer(short port);
     void initClient(const char *servername, int port, uint32_t clientId);
     void setTempo(int newTempo) { m_tempo = newTempo; };
-    void getClientIds(uint32_t *ids) { packet.getClientIds(ids); };
+    void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
     ::std::string getMacAddress();
 
   private:
     PlayerList m_playerList;
-    JamPacket packet;
+    JamPacket m_packet;
     int jamSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_in senderAddr;
