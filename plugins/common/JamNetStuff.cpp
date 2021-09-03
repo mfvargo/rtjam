@@ -222,10 +222,10 @@ namespace JamNetStuff
     void PlayerList::Prune()
     {
         // See if any of the clients have disappeared
-        time_t now = time(NULL);
+        uint64_t now = getMicroTime();
         for (auto it = m_players.begin(); it != m_players.end();)
         {
-            if ((now - (*it).KeepAlive) > EXPIRATION_IN_SECONDS)
+            if ((now - (*it).KeepAlive) > SERVER_EXPIRATION_IN_MICROSECONDS)
             {
                 m_players.erase(it);
                 dump("prune");
@@ -239,7 +239,7 @@ namespace JamNetStuff
 
     int PlayerList::updateChannel(unsigned clientId, sockaddr_in *addr)
     {
-        time_t now = time(NULL);
+        uint64_t now = getMicroTime();
         int i = 0;
         // Do we know about this guy?
         for (auto it = m_players.begin(); it != m_players.end(); ++it)
@@ -379,16 +379,17 @@ namespace JamNetStuff
         return sendData(&serverAddr);
     }
 
-    int JamSocket::readPackets(JamMixer *jamMixer)
+    // Client side function to read incoming packets and shove them into the mixer.
+    // Socket api is blocking so it will read until there is no data and then return
+    void JamSocket::readPackets(JamMixer *jamMixer)
     {
         // Stale out any channels
         m_packet.checkChannelTimeouts();
         if (!isActivated)
         {
-            return 0;
+            return;
         }
 
-        int rval = 0;
         int nBytes;
 
         do
@@ -403,12 +404,13 @@ namespace JamNetStuff
                 }
             }
         } while (isActivated && nBytes > 0);
-        return rval;
     }
 
-    int JamSocket::doPacket(JamMixer *jamMixer)
+    // Broadcast server function to read the socket (blocking) and
+    // send that data to people in the room (as per the PlayerList object)
+    void JamSocket::sendDataToRoomMembers(JamMixer *jamMixer)
     {
-        int nBytes = readData();
+        int nBytes = readData(); // server socket is blocking so it will wait here
         // If there was an error, just bail out here.
         m_playerList.Prune();
         if (nBytes < 0)

@@ -103,7 +103,7 @@ void packet_thread(short port)
   while (1)
   {
     // pJamSocket->doPacket(pJamMixer);
-    pJamSocket->doPacket(NULL);
+    pJamSocket->sendDataToRoomMembers(NULL);
   }
 }
 

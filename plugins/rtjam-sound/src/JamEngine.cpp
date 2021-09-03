@@ -226,11 +226,11 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
 
-  // Send to the room
-  m_jamSocket.sendPacket((const float **)tempOut, frames);
-
   // read any data from the network
   m_jamSocket.readPackets(&m_jamMixer);
+
+  // Send to the room
+  m_jamSocket.sendPacket((const float **)tempOut, frames);
 
   // Get the mix
   m_jamMixer.getMix(m_outputs, frames);

@@ -36,20 +36,7 @@ namespace JamNetStuff
   void decodeJamMessage(struct JamMessage *packet);
   uint64_t getMicroTime();
 
-  // Class to represent an sockaddr_in
-  // class MySockaddr {
-  //   public:
-  //     MySockaddr(sockaddr_in const & addr) {
-  //       m_sockaddr_in = addr;
-  //       // memcpy(&m_sockaddr_in, &addr, sizeof(m_sockaddr_in));
-  //     }
-  //     bool operator==( sockaddr_in const & o ) const {
-  //       return m_sockaddr_in.sin_addr.s_addr == o.sin_addr.s_addr && m_sockaddr_in.sin_port == o.sin_port;
-  //     }
-  //   private:
-  //     sockaddr_in m_sockaddr_in;
-  // };
-  // // Class to measure microsecond timers
+  // StopWatch in microseconds
   class MicroTimer
   {
   public:
@@ -78,7 +65,8 @@ namespace JamNetStuff
     void addSample(float sample);
   };
 
-  // Class to map network channels into local channels
+  // Class to map network channels into local channels. Used on the client side
+  // to track who is in the room.
   class ChannelMap
   {
   public:
@@ -110,10 +98,11 @@ namespace JamNetStuff
   struct Player
   {
     uint32_t clientId;
-    time_t KeepAlive;
+    uint64_t KeepAlive;
     sockaddr_in Address;
   };
 
+  // Class to hold the list of players currently in the room on the server side.
   class PlayerList
   {
   public:
@@ -130,7 +119,6 @@ namespace JamNetStuff
     ::std::vector<unsigned> m_allowedClientIds;
     ::std::vector<Player> m_players;
     int m_roomSize;
-    ::std::mutex m_mutex;
   };
 
 #define JITTER_SAMPLES 96000
@@ -275,8 +263,8 @@ namespace JamNetStuff
   public:
     JamSocket();
     int sendPacket(const float **buffer, int frames);
-    int readPackets(JamMixer *);
-    int doPacket(JamMixer *);
+    void readPackets(JamMixer *);
+    void sendDataToRoomMembers(JamMixer *);
     bool isActivated;
 
     void initServer(short port);
