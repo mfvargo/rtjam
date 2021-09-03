@@ -414,16 +414,16 @@ namespace JamNetStuff
         // If there was an error, just bail out here.
         m_playerList.Prune();
         if (nBytes < 0)
-            return nBytes;
+            return;
         uint32_t clientId = m_packet.getClientIdFromPacket();
         // Check if that client is an allowed person in the room
         if (!m_playerList.isAllowed(clientId))
-            return 0;
+            return;
         // Get server assigned channel
         int serverChannel = m_playerList.updateChannel(clientId, &senderAddr);
-        // Check for full room,  a negative serverChannel means we can handle them
+        // Check for full room,  a negative serverChannel means there is no room for them
         if (serverChannel < 0)
-            return 0;
+            return;
         // If we get here, we have a valid player and need to broadcast them
         if (jamMixer != NULL)
         {
@@ -442,7 +442,6 @@ namespace JamNetStuff
                 sendData(&player.Address);
             }
         }
-        return nBytes;
     }
 
     int JamSocket::readData()
