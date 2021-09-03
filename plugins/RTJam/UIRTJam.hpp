@@ -30,12 +30,12 @@
 #include "DistrhoUI.hpp"
 #include "NanoVG.hpp"
 #include "ImageWidgets.hpp"
-#include "../common/PartialImage.hpp"
+#include "PartialImage.hpp"
 #include "RTJamArt.hpp"
 #include "levelMeters.hpp"
-#include "../common/MeterBar.hpp"
-#include "../common/JamDirectory.hpp"
-// #include "../common/LabelBox.hpp"
+#include "MeterBar.hpp"
+#include "JamDirectory.hpp"
+// #include "LabelBox.hpp"
 
 #define MAX_ROOMS 3
 
@@ -63,47 +63,47 @@ protected:
     // -------------------------------------------------------------------
     // Widget Callbacks
 
-    void imageButtonClicked(ImageButton* button, int) override;
-    void imageSwitchClicked(ImageSwitch* button, bool down) override;
-    void imageSliderDragStarted(ImageSlider* slider) override;
-    void imageSliderDragFinished(ImageSlider* slider) override;
-    void imageSliderValueChanged(ImageSlider* slider, float value) override;
-    void imageKnobDragStarted(ImageKnob* knob) override;
-    void imageKnobDragFinished(ImageKnob* knob) override;
-    void imageKnobValueChanged(ImageKnob* knob, float value) override;
+    void imageButtonClicked(ImageButton *button, int) override;
+    void imageSwitchClicked(ImageSwitch *button, bool down) override;
+    void imageSliderDragStarted(ImageSlider *slider) override;
+    void imageSliderDragFinished(ImageSlider *slider) override;
+    void imageSliderValueChanged(ImageSlider *slider, float value) override;
+    void imageKnobDragStarted(ImageKnob *knob) override;
+    void imageKnobDragFinished(ImageKnob *knob) override;
+    void imageKnobValueChanged(ImageKnob *knob, float value) override;
 
     // void onNanoDisplay() override;
     void onDisplay() override;
 
-    bool onKeyboard(const KeyboardEvent& ev) override;
-    bool onSpecial(const SpecialEvent& ev) override;
-    bool onMouse(const MouseEvent& ev) override;
-    bool onMotion(const MotionEvent& ev) override;
-    bool onScroll(const ScrollEvent& ev) override;
+    bool onKeyboard(const KeyboardEvent &ev) override;
+    bool onSpecial(const SpecialEvent &ev) override;
+    bool onMouse(const MouseEvent &ev) override;
+    bool onMotion(const MotionEvent &ev) override;
+    bool onScroll(const ScrollEvent &ev) override;
 
     // Draw a channels u/x
     void drawChannel(int channel);
-    void drawText(int x, int y, const char* strBuf);
+    void drawText(int x, int y, const char *strBuf);
 
 private:
     Image fImgBackground;
     PartialImage fSlideLine;
     Image fSmoothButtonNormal, fsmoothButtonPressed;
-    ImageSlider* fVol[MIX_CHANNELS];
-    ImageSwitch* fRooms[MAX_ROOMS];
-    ImageSwitch* fReverb;
+    ImageSlider *fVol[MIX_CHANNELS];
+    ImageSwitch *fRooms[MAX_ROOMS];
+    ImageSwitch *fReverb;
     JamNetStuff::JamMeterBar fMeterBar;
-    ScopedPointer<ImageSlider>  fSliderMaster;
+    ScopedPointer<ImageSlider> fSliderMaster;
     ScopedPointer<ImageSwitch> fMonitorInputButton;
     RTJamState fState;
     bool clickOn;
-    Point<int> Corners[MAX_JAMMERS-1];
+    Point<int> Corners[MAX_JAMMERS - 1];
 
     NanoVG fNanoText;
     NanoVG::FontId fNanoFont;
 
     JamNetStuff::JamDirectory jamDirectory;
-    std::vector<ImageKnob*> fKnobs;
+    std::vector<ImageKnob *> fKnobs;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)
 };

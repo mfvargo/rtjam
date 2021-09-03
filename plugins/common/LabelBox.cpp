@@ -1,7 +1,7 @@
 #include "LabelBox.hpp"
 // #include "Mathf.hpp"
 
-#include "../common/NotoSans_Regular.ttf.hpp"
+#include "NotoSans_Regular.ttf.hpp"
 
 START_NAMESPACE_DISTRHO
 
@@ -15,10 +15,11 @@ LabelBox::LabelBox(NanoWidget *widget, Size<uint> size) noexcept : NanoWidget(wi
 
 void LabelBox::onNanoDisplay()
 {
-  drawMe();
+    drawMe();
 }
 
-void LabelBox::drawMe() {
+void LabelBox::drawMe()
+{
     const float width = getWidth();
     const float height = getHeight();
     const float verticalMargin = 6.0f;
@@ -40,7 +41,7 @@ void LabelBox::drawMe() {
     //Shadow at top of box
     beginPath();
 
-    strokeColor(0,0,0,255);
+    strokeColor(0, 0, 0, 255);
     strokeWidth(boxOutlineWidth);
 
     moveTo(boxOutlineWidth, boxOutlineWidth);
@@ -61,7 +62,6 @@ void LabelBox::drawMe() {
     text(std::round(width / 2.0f), std::round(height / 2.0f + verticalMargin / 2.0f - 2), fText, NULL);
 
     closePath();
-
 }
 
 void LabelBox::setFontSize(float fontSize)

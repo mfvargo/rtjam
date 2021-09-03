@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string.h>
-#include "../../common/JamNetStuff.hpp"
+#include "JamNetStuff.hpp"
 #include <vector>
 #include <thread>
 #include <cmath>

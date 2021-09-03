@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include "../common/jamrtime.h"
+#include "jamrtime.h"
 #include <mutex>
 #include <vector>
 #include "MetroNome.hpp"

@@ -10,7 +10,7 @@
  *
  */
 
-#include "../common/JamNetStuff.hpp"
+#include "JamNetStuff.hpp"
 #include <time.h>
 #include <string.h>
 

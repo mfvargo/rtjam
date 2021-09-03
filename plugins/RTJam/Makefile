@@ -40,7 +40,7 @@ include ../../dpf/Makefile.plugins.mk
 # Extra flags
 
 LINK_FLAGS += -lpthread -lcurl
-CXXFLAGS += -Wno-psabi
+CXXFLAGS += -Wno-psabi -I../common -I../common/DSP
 
 # --------------------------------------------------------------
 # Enable all selected plugin types

@@ -11,11 +11,11 @@
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
-class PluginRTJam
+class JamEngine
 {
 public:
-  PluginRTJam();
-  ~PluginRTJam();
+  JamEngine();
+  ~JamEngine();
   void init();
   void syncLevels();
   void syncConfigData();

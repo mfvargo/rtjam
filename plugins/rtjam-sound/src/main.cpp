@@ -8,7 +8,7 @@
 #include <unistd.h>
 #endif
 #include <jack/jack.h>
-#include "PluginRTJam.hpp"
+#include "JamEngine.hpp"
 #include "Settings.hpp"
 
 jack_port_t **input_ports;
@@ -29,7 +29,7 @@ static void signal_handler(int sig)
 
 int process(jack_nframes_t nframes, void *arg)
 {
-    PluginRTJam *p_pluginRTJam = (PluginRTJam *)arg;
+    JamEngine *pJamEngine = (JamEngine *)arg;
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
@@ -37,7 +37,7 @@ int process(jack_nframes_t nframes, void *arg)
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
     // Call the run function
-    p_pluginRTJam->run((const float **)inputs, outputs, nframes);
+    pJamEngine->run((const float **)inputs, outputs, nframes);
     return 0;
 }
 
@@ -61,8 +61,8 @@ int main(int argc, char *argv[])
     jack_options_t options = JackNoStartServer;
     jack_status_t status;
 
-    PluginRTJam *pPluginRTJam = new PluginRTJam();
-    pPluginRTJam->init();
+    JamEngine *pJamEngine = new JamEngine();
+    pJamEngine->init();
     // Auto connect for Kevin Kirkpatrick
     Settings settings;
     settings.loadFromFile();
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     clientId = settings.getOrSetValue("clientId", clientId);
     if (settings.getOrSetValue("autoconnect", 0) != 0)
     {
-        pPluginRTJam->connect(serverName.c_str(), port, clientId);
+        pJamEngine->connect(serverName.c_str(), port, clientId);
     }
     settings.saveToFile();
 
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "unique name `%s' assigned\n", client_name);
     }
 
-    jack_set_process_callback(client, process, pPluginRTJam);
+    jack_set_process_callback(client, process, pJamEngine);
 
     jack_on_shutdown(client, jack_shutdown, 0);
 

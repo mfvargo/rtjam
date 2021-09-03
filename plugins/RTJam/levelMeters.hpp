@@ -1,9 +1,9 @@
-#ifndef LEVEL_METERS_STATE_INCLUDED
-#define LEVEL_METERS_STATE_INCLUDED
+#pragma once
 
-#include "../common/jamrtime.h"
+#include "jamrtime.h"
 
-struct RTJamState {
+struct RTJamState
+{
   float channelLevels[MIX_CHANNELS];
   float bufferDepths[MIX_CHANNELS];
   uint32_t clientIds[MAX_JAMMERS];
@@ -12,8 +12,10 @@ struct RTJamState {
   float inputRight;
   char beat;
 
-  RTJamState() {
-    for (int i=0; i<MIX_CHANNELS; i++) {
+  RTJamState()
+  {
+    for (int i = 0; i < MIX_CHANNELS; i++)
+    {
       channelLevels[i] = -60.0f;
     }
     masterLevel = -60.0f;
@@ -22,19 +24,20 @@ struct RTJamState {
     beat = 0;
   }
 
-  void clientIdsUpdate(uint32_t* ids) {
-    for (int i=0; i<MAX_JAMMERS; i++) {
+  void clientIdsUpdate(uint32_t *ids)
+  {
+    for (int i = 0; i < MAX_JAMMERS; i++)
+    {
       clientIds[i] = ids[i];
     }
   }
-  
-  void levelUpdate(float* channels, float* depths) {
-    for (int i=0; i<MIX_CHANNELS; i++) {
+
+  void levelUpdate(float *channels, float *depths)
+  {
+    for (int i = 0; i < MIX_CHANNELS; i++)
+    {
       channelLevels[i] = channels[i];
       bufferDepths[i] = depths[i];
     }
   }
 };
-
-
-#endif // LEVEL_METERS_STATE_INCLUDED
