@@ -215,7 +215,7 @@ namespace JamNetStuff
         std::cout << msg << " clients: [";
         for (Player p : m_players)
         {
-            std::cout << p.clientId << "-" << p.KeepAlive;
+            std::cout << p.clientId << ", ";
         }
         std::cout << "]" << std::endl;
     }
