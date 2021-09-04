@@ -457,7 +457,7 @@ namespace JamNetStuff
             {
                 // rising edge of ping window
                 m_playerList.startPing();
-                m_playerList.dump("click");
+                // m_playerList.dump("click");
             }
             m_pinging = true;
         }
