@@ -95,11 +95,14 @@ namespace JamNetStuff
     Channel channels[MAX_JAMMERS];
   };
 
-  struct Player
+  class Player
   {
+  public:
     uint32_t clientId;
     uint64_t KeepAlive;
+    bool bPinging;
     sockaddr_in Address;
+    StreamTimeStats networkTime;
   };
 
   // Class to hold the list of players currently in the room on the server side.
@@ -109,9 +112,10 @@ namespace JamNetStuff
     PlayerList();
     void setAllowedClientIds(::std::vector<unsigned> &ids);
     bool isAllowed(unsigned clientId);
-    int updateChannel(unsigned clientId, sockaddr_in *addr);
+    int updateChannel(unsigned clientId, sockaddr_in *addr, uint64_t pingTime);
     int numPlayers();
     Player get(int i);
+    void startPing();
     void Prune();
     void dump(::std::string msg);
 
@@ -185,6 +189,7 @@ namespace JamNetStuff
     void setBeatCount(char beat) { jamMessage.Beat = beat; };
     char getBeatCount() { return jamMessage.Beat; };
     uint64_t getServerTime() { return jamMessage.ServerTime; };
+    void setServerTime(uint64_t serverTime) { jamMessage.ServerTime = serverTime; };
     void getClientIds(uint32_t *ids) { channelMap.getClientIds(ids); };
     void setClientId(uint32_t id)
     {
@@ -283,9 +288,10 @@ namespace JamNetStuff
     int readData();
     int sendData(struct sockaddr_in *to_addr);
     uint64_t beatCount;
-    uint64_t lastClickTime;
+    uint64_t lastPingTime;
     int m_tempo;
     uint64_t m_tempoStart;
+    bool m_pinging;
   };
 };
 
