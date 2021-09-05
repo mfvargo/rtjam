@@ -141,7 +141,6 @@ namespace JamNetStuff
     void JamPacket::setServerChannel(int channel)
     {
         jamMessage.Channel = channel;
-        jamMessage.ServerTime = getMicroTime();
         clientId = jamMessage.ClientId;
     }
 
@@ -195,7 +194,7 @@ namespace JamNetStuff
 
     PlayerList::PlayerList()
     {
-        m_roomSize = 7;
+        m_roomSize = MAX_JAMMERS;
         m_allowedClientIds.clear();
     }
 
@@ -212,20 +211,21 @@ namespace JamNetStuff
 
     void PlayerList::dump(std::string msg)
     {
-        printf("%s clients: [ ", msg.c_str());
+        std::cout << msg << " clients: [";
         for (Player p : m_players)
         {
-            printf("%u-%lu, ", p.clientId, p.KeepAlive);
+            std::cout << p.clientId << "-" << p.networkTime.mean << ", ";
         }
-        printf("]\n");
+        std::cout << "]" << std::endl;
     }
+
     void PlayerList::Prune()
     {
         // See if any of the clients have disappeared
-        time_t now = time(NULL);
+        uint64_t now = getMicroTime();
         for (auto it = m_players.begin(); it != m_players.end();)
         {
-            if ((now - (*it).KeepAlive) > EXPIRATION_IN_SECONDS)
+            if ((now - (*it).KeepAlive) > SERVER_EXPIRATION_IN_MICROSECONDS)
             {
                 m_players.erase(it);
                 dump("prune");
@@ -237,15 +237,20 @@ namespace JamNetStuff
         }
     }
 
-    int PlayerList::updateChannel(unsigned clientId, sockaddr_in *addr)
+    int PlayerList::updateChannel(unsigned clientId, sockaddr_in *addr, uint64_t pingTime)
     {
-        time_t now = time(NULL);
+        uint64_t now = getMicroTime();
         int i = 0;
         // Do we know about this guy?
         for (auto it = m_players.begin(); it != m_players.end(); ++it)
         {
             if ((*it).clientId == clientId)
             {
+                if ((*it).bPinging && pingTime != 0)
+                {
+                    (*it).networkTime.addSample(now - pingTime);
+                    (*it).bPinging = false;
+                }
                 (*it).KeepAlive = now;
                 return i;
             }
@@ -258,6 +263,7 @@ namespace JamNetStuff
             p.clientId = clientId;
             p.KeepAlive = now;
             p.Address = *addr;
+            p.bPinging = false;
             m_players.push_back(p);
             dump("add");
         }
@@ -275,11 +281,19 @@ namespace JamNetStuff
         return m_players.at(i);
     }
 
+    void PlayerList::startPing()
+    {
+        for (int i = 0; i < m_players.size(); i++)
+        {
+            m_players.at(i).bPinging = true;
+        }
+    }
+
     JamSocket::JamSocket()
     {
         isActivated = false;
         beatCount = 0;
-        lastClickTime = 0;
+        lastPingTime = 0;
         jamSocket = socket(PF_INET, SOCK_DGRAM, 0);
         printf("socket is %d\n", jamSocket);
     }
@@ -295,7 +309,7 @@ namespace JamNetStuff
         // Set socket to non-blocking
         fcntl(jamSocket, F_SETFL, fcntl(jamSocket, F_GETFL) | O_NONBLOCK);
         // Clear out the channelMap on the socket
-        packet.setClientId(clientId);
+        m_packet.setClientId(clientId);
         // Set that bad boy up.
         char ip[100];
         struct hostent *he;
@@ -318,8 +332,8 @@ namespace JamNetStuff
         addr_size = sizeof(serverAddr);
 
         // Set the packet to client mode
-        packet.setIsClient(true);
-        packet.clearChannelMap();
+        m_packet.setIsClient(true);
+        m_packet.clearChannelMap();
     }
 
     void JamSocket::initServer(short port)
@@ -339,7 +353,7 @@ namespace JamNetStuff
             printf("set SO_RCVTIMEO failed\n");
         }
         // Set the packet to server mode
-        packet.setIsClient(false);
+        m_packet.setIsClient(false);
         // Set the default tempo
         m_tempo = 120;
         switch (port)
@@ -364,7 +378,8 @@ namespace JamNetStuff
         {
             printf("port address bind failed. %d\n", h_errno);
         }
-        m_tempoStart = getMicroTime();
+        m_tempoStart = lastPingTime = getMicroTime();
+        m_pinging = true;
     }
 
     int JamSocket::sendPacket(const float **buffer, int frames)
@@ -374,21 +389,22 @@ namespace JamNetStuff
             return 0;
         }
         // Send a packet to the server!
-        packet.encodeAudio(buffer, frames);
-        packet.encodeHeader();
+        m_packet.encodeAudio(buffer, frames);
+        m_packet.encodeHeader();
         return sendData(&serverAddr);
     }
 
-    int JamSocket::readPackets(JamMixer *jamMixer)
+    // Client side function to read incoming packets and shove them into the mixer.
+    // Socket api is blocking so it will read until there is no data and then return
+    void JamSocket::readPackets(JamMixer *jamMixer)
     {
         // Stale out any channels
-        packet.checkChannelTimeouts();
+        m_packet.checkChannelTimeouts();
         if (!isActivated)
         {
-            return 0;
+            return;
         }
 
-        int rval = 0;
         int nBytes;
 
         do
@@ -399,38 +415,62 @@ namespace JamNetStuff
             {
                 if (jamMixer)
                 {
-                    jamMixer->addData(&packet);
+                    jamMixer->addData(&m_packet);
                 }
             }
         } while (isActivated && nBytes > 0);
-        return rval;
     }
 
-    int JamSocket::doPacket(JamMixer *jamMixer)
+    // Broadcast server function to read the socket (blocking) and
+    // send that data to people in the room (as per the PlayerList object)
+    void JamSocket::sendDataToRoomMembers(JamMixer *jamMixer)
     {
-        int nBytes = readData();
+        int nBytes = readData(); // server socket is blocking so it will wait here
         // If there was an error, just bail out here.
         m_playerList.Prune();
         if (nBytes < 0)
-            return nBytes;
-        uint32_t clientId = packet.getClientIdFromPacket();
+            return;
+        uint32_t clientId = m_packet.getClientIdFromPacket();
         // Check if that client is an allowed person in the room
         if (!m_playerList.isAllowed(clientId))
-            return 0;
+            return;
         // Get server assigned channel
-        int serverChannel = m_playerList.updateChannel(clientId, &senderAddr);
-        // Check for full room,  a negative serverChannel means we can handle them
+        int serverChannel = m_playerList.updateChannel(clientId, &senderAddr, m_packet.getServerTime());
+        // Check for full room,  a negative serverChannel means there is no room for them
         if (serverChannel < 0)
-            return 0;
+            return;
         // If we get here, we have a valid player and need to broadcast them
         if (jamMixer != NULL)
         {
-            jamMixer->addData(&packet);
+            jamMixer->addData(&m_packet);
         }
-        packet.setServerChannel(serverChannel);
-        char beatCount = ((getMicroTime() - m_tempoStart) / (60 * 1000000 / m_tempo)) % 4;
-        packet.setBeatCount(beatCount);
-        packet.encodeHeader();
+        m_packet.setServerChannel(serverChannel);
+        // Time calculations for beat tempo and ping timing
+        uint64_t nowTime = getMicroTime();
+        char beatCount = ((nowTime - m_tempoStart) / (60 * 1000000 / m_tempo)) % 4;
+        m_packet.setBeatCount(beatCount);
+        uint64_t deltaT = nowTime - lastPingTime;
+        // We send pings in 10 msec windows every 100msec
+        if (deltaT < 10000)
+        {
+            if (!m_pinging)
+            {
+                // rising edge of ping window
+                m_playerList.startPing();
+                // m_playerList.dump("click");
+            }
+            m_pinging = true;
+        }
+        if (deltaT > 10000)
+        {
+            m_pinging = false;
+        }
+        if (deltaT > 100000)
+        {
+            lastPingTime = nowTime;
+        }
+        m_packet.setServerTime(m_pinging ? nowTime : 0);
+        m_packet.encodeHeader();
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {
             Player player = m_playerList.get(i);
@@ -440,7 +480,6 @@ namespace JamNetStuff
                 sendData(&player.Address);
             }
         }
-        return nBytes;
     }
 
     int JamSocket::readData()
@@ -448,7 +487,7 @@ namespace JamNetStuff
         addr_size = sizeof(serverAddr);
         int nBytes = recvfrom(
             jamSocket,
-            packet.getPacket(),
+            m_packet.getPacket(),
             sizeof(struct JamMessage),
             0,
             (struct sockaddr *)&senderAddr,
@@ -459,7 +498,7 @@ namespace JamNetStuff
         }
         if (nBytes > 0)
         {
-            packet.decodeHeader(nBytes);
+            m_packet.decodeHeader(nBytes);
         }
         return nBytes;
     }
@@ -467,8 +506,8 @@ namespace JamNetStuff
     {
         int rval = sendto(
             jamSocket,
-            packet.getPacket(),
-            packet.getSize(),
+            m_packet.getPacket(),
+            m_packet.getSize(),
             0,
             (struct sockaddr *)to_addr,
             sizeof(struct sockaddr));

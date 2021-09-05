@@ -29,10 +29,10 @@
 
 #include "DistrhoPlugin.hpp"
 #include "extra/Mutex.hpp"
-#include "../common/JamNetStuff.hpp"
-#include "../common/JamDirectory.hpp"
-#include "../common/Settings.hpp"
-#include "../common/MVerb.h"
+#include "JamNetStuff.hpp"
+#include "JamDirectory.hpp"
+#include "Settings.hpp"
+#include "MVerb.h"
 
 class UIRTJam;
 struct RTJamState;

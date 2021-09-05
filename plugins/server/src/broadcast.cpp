@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string.h>
-#include "../../common/JamNetStuff.hpp"
+#include "JamNetStuff.hpp"
 #include <vector>
 #include <thread>
 #include <cmath>
@@ -78,7 +78,7 @@ void packet_thread(short port)
   // Loop and broadcast data
   while (1)
   {
-    jamSocket.doPacket(&jamMixer);
+    jamSocket.sendDataToRoomMembers(&jamMixer);
   }
 }
 

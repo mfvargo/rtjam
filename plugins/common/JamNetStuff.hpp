@@ -23,7 +23,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include "../common/jamrtime.h"
+#include "jamrtime.h"
 #include <mutex>
 #include <vector>
 #include "MetroNome.hpp"
@@ -36,20 +36,7 @@ namespace JamNetStuff
   void decodeJamMessage(struct JamMessage *packet);
   uint64_t getMicroTime();
 
-  // Class to represent an sockaddr_in
-  // class MySockaddr {
-  //   public:
-  //     MySockaddr(sockaddr_in const & addr) {
-  //       m_sockaddr_in = addr;
-  //       // memcpy(&m_sockaddr_in, &addr, sizeof(m_sockaddr_in));
-  //     }
-  //     bool operator==( sockaddr_in const & o ) const {
-  //       return m_sockaddr_in.sin_addr.s_addr == o.sin_addr.s_addr && m_sockaddr_in.sin_port == o.sin_port;
-  //     }
-  //   private:
-  //     sockaddr_in m_sockaddr_in;
-  // };
-  // // Class to measure microsecond timers
+  // StopWatch in microseconds
   class MicroTimer
   {
   public:
@@ -78,7 +65,8 @@ namespace JamNetStuff
     void addSample(float sample);
   };
 
-  // Class to map network channels into local channels
+  // Class to map network channels into local channels. Used on the client side
+  // to track who is in the room.
   class ChannelMap
   {
   public:
@@ -107,22 +95,27 @@ namespace JamNetStuff
     Channel channels[MAX_JAMMERS];
   };
 
-  struct Player
+  class Player
   {
+  public:
     uint32_t clientId;
-    time_t KeepAlive;
+    uint64_t KeepAlive;
+    bool bPinging;
     sockaddr_in Address;
+    StreamTimeStats networkTime;
   };
 
+  // Class to hold the list of players currently in the room on the server side.
   class PlayerList
   {
   public:
     PlayerList();
     void setAllowedClientIds(::std::vector<unsigned> &ids);
     bool isAllowed(unsigned clientId);
-    int updateChannel(unsigned clientId, sockaddr_in *addr);
+    int updateChannel(unsigned clientId, sockaddr_in *addr, uint64_t pingTime);
     int numPlayers();
     Player get(int i);
+    void startPing();
     void Prune();
     void dump(::std::string msg);
 
@@ -130,7 +123,6 @@ namespace JamNetStuff
     ::std::vector<unsigned> m_allowedClientIds;
     ::std::vector<Player> m_players;
     int m_roomSize;
-    ::std::mutex m_mutex;
   };
 
 #define JITTER_SAMPLES 96000
@@ -197,6 +189,7 @@ namespace JamNetStuff
     void setBeatCount(char beat) { jamMessage.Beat = beat; };
     char getBeatCount() { return jamMessage.Beat; };
     uint64_t getServerTime() { return jamMessage.ServerTime; };
+    void setServerTime(uint64_t serverTime) { jamMessage.ServerTime = serverTime; };
     void getClientIds(uint32_t *ids) { channelMap.getClientIds(ids); };
     void setClientId(uint32_t id)
     {
@@ -239,7 +232,7 @@ namespace JamNetStuff
     /* write local monitoring data */
     void addLocalMonitor(const float **inputs, uint32_t frames);
     /* set the metronome config */
-    void setMetronomeConfig(int soundType, float volume)
+    void setMetronomeConfig(int /*soundType*/, float volume)
     {
       m_metronome.setVolume(volume);
       // m_metronome.init((MetroNome::SoundType)soundType, volume);
@@ -275,19 +268,19 @@ namespace JamNetStuff
   public:
     JamSocket();
     int sendPacket(const float **buffer, int frames);
-    int readPackets(JamMixer *);
-    int doPacket(JamMixer *);
+    void readPackets(JamMixer *);
+    void sendDataToRoomMembers(JamMixer *);
     bool isActivated;
 
     void initServer(short port);
     void initClient(const char *servername, int port, uint32_t clientId);
     void setTempo(int newTempo) { m_tempo = newTempo; };
-    void getClientIds(uint32_t *ids) { packet.getClientIds(ids); };
+    void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
     ::std::string getMacAddress();
 
   private:
     PlayerList m_playerList;
-    JamPacket packet;
+    JamPacket m_packet;
     int jamSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_in senderAddr;
@@ -295,9 +288,10 @@ namespace JamNetStuff
     int readData();
     int sendData(struct sockaddr_in *to_addr);
     uint64_t beatCount;
-    uint64_t lastClickTime;
+    uint64_t lastPingTime;
     int m_tempo;
     uint64_t m_tempoStart;
+    bool m_pinging;
   };
 };
 

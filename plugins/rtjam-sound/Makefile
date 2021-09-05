@@ -12,7 +12,7 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
-	./src/PluginRTJam.cpp \
+	./src/JamEngine.cpp \
 	../common/JamNetStuff.cpp \
 	../common/TimersAndStats.cpp \
 	../common/JamMixer.cpp \

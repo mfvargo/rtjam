@@ -1,4 +1,4 @@
-#include "PluginRTJam.hpp"
+#include "JamEngine.hpp"
 #include <iostream>
 #include <fstream>
 
@@ -11,7 +11,7 @@ static const float kAMP_DB = 8.656170245f;
 
 bool isRunning = true;
 
-void paramFetch(PluginRTJam *pJamPlugin)
+void paramFetch(JamEngine *pJamPlugin)
 {
   while (1)
   {
@@ -19,7 +19,7 @@ void paramFetch(PluginRTJam *pJamPlugin)
   }
 }
 
-PluginRTJam::PluginRTJam()
+JamEngine::JamEngine()
 {
   m_framecount = 0;
   for (int i = 0; i < NUM_OUTPUTS; i++)
@@ -30,7 +30,7 @@ PluginRTJam::PluginRTJam()
   m_inputDCremoval[1].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
 }
 
-PluginRTJam::~PluginRTJam()
+JamEngine::~JamEngine()
 {
   for (int i = 0; i < NUM_OUTPUTS; i++)
   {
@@ -38,7 +38,7 @@ PluginRTJam::~PluginRTJam()
   }
 }
 
-void PluginRTJam::init()
+void JamEngine::init()
 {
   for (int i = 0; i < 2; i++)
   {
@@ -49,13 +49,13 @@ void PluginRTJam::init()
   m_threads.push_back(std::thread(paramFetch, this));
 }
 
-void PluginRTJam::syncLevels()
+void JamEngine::syncLevels()
 {
   memcpy(m_levelData.m_pJamLevels, &m_levels, sizeof(RTJamLevels));
   // m_levelData.unlock();
 }
 
-void PluginRTJam::syncConfigData()
+void JamEngine::syncConfigData()
 {
   json config = json::array();
   for (int i = 0; i < 2; i++)
@@ -67,7 +67,7 @@ void PluginRTJam::syncConfigData()
   sprintf(m_levelData.m_pJsonInfo, "%s", config.dump().c_str());
 }
 
-void PluginRTJam::getParams()
+void JamEngine::getParams()
 {
   m_paramData.receive(&m_param);
 
@@ -184,7 +184,7 @@ void PluginRTJam::getParams()
   }
 }
 
-void PluginRTJam::connect(const char *host, int port, uint32_t id)
+void JamEngine::connect(const char *host, int port, uint32_t id)
 {
   // Turn on the socket
   m_jamSocket.isActivated = true;
@@ -194,12 +194,12 @@ void PluginRTJam::connect(const char *host, int port, uint32_t id)
   m_jamSocket.initClient(host, port, id);
 }
 
-void PluginRTJam::disconnect()
+void JamEngine::disconnect()
 {
   m_jamSocket.isActivated = false;
 }
 
-void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
+void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
 {
   m_framecount += frames;
 
@@ -226,11 +226,11 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   // Add to local monitor
   m_jamMixer.addLocalMonitor((const float **)tempOut, frames);
 
-  // Send to the room
-  m_jamSocket.sendPacket((const float **)tempOut, frames);
-
   // read any data from the network
   m_jamSocket.readPackets(&m_jamMixer);
+
+  // Send to the room
+  m_jamSocket.sendPacket((const float **)tempOut, frames);
 
   // Get the mix
   m_jamMixer.getMix(m_outputs, frames);
@@ -281,7 +281,7 @@ void PluginRTJam::run(const float **inputs, float **outputs, uint32_t frames)
   }
 }
 
-LightColors PluginRTJam::dbToColor(float power)
+LightColors JamEngine::dbToColor(float power)
 {
   if (power < -45.0)
   {
