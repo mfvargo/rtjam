@@ -3,6 +3,7 @@
 #include "JamNetStuff.hpp"
 #include "Settings.hpp"
 #include "RTJamNationApi.hpp"
+#include "ChatRobot.hpp"
 #include <vector>
 #include <thread>
 #include <cmath>
@@ -85,7 +86,34 @@ void fifo_thread(short port, JamNetStuff::JamMixer *jamMixer)
   }
 }
 
-void packet_thread(short port)
+using easywsclient::WebSocket;
+
+void websocket_thread(JamNetStuff::JamSocket *pJamSocket, string token)
+{
+  ChatRobot robot;
+  robot.init("ws://rtjam-nation.basscleftech.com/primus", token, pJamSocket);
+  robot.readMessages();
+
+  // json sendMsg;
+  // int msgId = 1;
+  // WebSocket::pointer ws = WebSocket::from_url("ws://rtjam-nation.basscleftech.com/primus");
+  // assert(ws);
+  // sendMsg = {{"event", "roomAdd"}, {"room", "bobK"}, {"messageId", msgId++}};
+  // ws->send(sendMsg.dump());
+  // sendMsg = {{"event", "say"}, {"room", "bobK"}, {"message", "Room Talking"}, {"messageId", msgId++}};
+  // ws->send(sendMsg.dump());
+  // while (ws->getReadyState() != WebSocket::CLOSED)
+  // {
+  //   ws->poll(1000);
+  //   cout << "back from poll" << endl;
+  //   ws->dispatch(handle_message);
+  //   // sendMsg = {{"event", "say"}, {"room", "bobK"}, {"message", "Room Talking"}, {"messageId", msgId++}};
+  //   // ws->send(sendMsg.dump());
+  // }
+  // delete ws;
+}
+
+void packet_thread(short port, string token)
 {
   JamNetStuff::JamSocket *pJamSocket = new JamNetStuff::JamSocket();
   JamNetStuff::JamMixer *pJamMixer = new JamNetStuff::JamMixer();
@@ -98,6 +126,9 @@ void packet_thread(short port)
   }
   // Start a thread to write the mix to the FIFO
   // std::thread fifoThread = std::thread(fifo_thread, port, pJamMixer);
+
+  // Start a thread to connect each room to a server chat room
+  std::thread websocketThread = std::thread(websocket_thread, pJamSocket, token);
 
   // Loop and broadcast data
   while (1)
@@ -118,15 +149,10 @@ int main(int argc, char **argv)
   settings.saveToFile();
   RTJamNationApi api(urlBase);
 
-  for (short port = 7891; port < 7894; port++)
-  {
-    // Start up the room thread with their attributes
-    roomThreads.push_back(std::thread(packet_thread, port));
-  }
+  bool bFirstTime = true;
 
   while (1)
   {
-    sleep(10);
     if (token == "")
     {
       // We don't have a token.  Re-register the device.
@@ -136,12 +162,17 @@ int main(int argc, char **argv)
         token = api.m_resultBody["broadcastUnit"]["token"];
         broadcastUnitName = api.m_resultBody["broadcastUnit"]["name"];
         clog << "got a new token: " << token << endl;
-        for (short port = 7891; port < 7894; port++)
+        for (short port = 7891; port < 7892; port++)
         {
           char roomName[100];
           sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);
           api.activateRoom(token, roomName, port);
+          if (bFirstTime)
+          {
+            roomThreads.push_back(std::thread(packet_thread, port, api.m_resultBody["room"]["token"]));
+          }
         }
+        bFirstTime = false;
       }
     }
     else
@@ -152,6 +183,7 @@ int main(int argc, char **argv)
         token = "";
       };
     }
+    sleep(10);
   }
   // Now wait for the threads to exit
   for (auto &element : roomThreads)

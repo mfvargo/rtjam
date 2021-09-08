@@ -11,6 +11,7 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
+	./src/easywsclient.cpp \
 	../common/JamNetStuff.cpp \
 	../common/JamMixer.cpp \
 	../common/JitterBuffer.cpp \
