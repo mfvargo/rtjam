@@ -26,21 +26,27 @@ public:
     joinRoom();
   };
 
+  // The operator () lets me pass a ChatRobot to the websocket dispatch function
+  // So this is the callback when a message comes in on the websocket
   void operator()(const std::string &message)
   {
     try
     {
+      // Handle primus protocol messages
       if (message.find("primus:") != string::npos)
       {
         return doPrimus(message);
       }
+      // Action hero chat are json encoded
       json msg = json::parse(message);
-      cout << msg.dump(2) << endl;
+      // cout << msg.dump(2) << endl;
       string command = msg["message"];
+
+      // See if this message is a command for the robot
       int idx = command.find("!tempo");
       if (idx != string::npos)
       {
-        // tempo command
+        // tempo command to change the room tempo
         cout << "Tempo command" << endl;
         if (command.size() > strlen("!tempo"))
         {
@@ -59,6 +65,7 @@ public:
       {
         string resp = m_pJamSocket->getLatency();
         sendMessage("say", resp);
+        return;
       }
     }
     catch (...)
@@ -76,16 +83,16 @@ public:
                        {"action", "createChatRoom"},
                    }},
         {"messageId", m_msgId++}};
-    cout << "createRoom:" << endl
-         << msg.dump(2) << endl;
+    // cout << "createRoom:" << endl
+    //      << msg.dump(2) << endl;
     ws->send(msg.dump());
   }
 
   void joinRoom()
   {
     json msg = {{"event", "roomAdd"}, {"room", m_token}, {"messageId", m_msgId++}};
-    cout << "joinRoom:" << endl
-         << msg.dump(2) << endl;
+    // cout << "joinRoom:" << endl
+    //      << msg.dump(2) << endl;
     ws->send(msg.dump());
   }
 
