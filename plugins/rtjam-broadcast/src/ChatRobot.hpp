@@ -39,7 +39,11 @@ public:
       }
       // Action hero chat are json encoded
       json msg = json::parse(message);
-      // cout << msg.dump(2) << endl;
+      cout << msg.dump(2) << endl;
+      if (msg["message"].size() == 0)
+      {
+        return;
+      }
       string command = msg["message"];
 
       // See if this message is a command for the robot
@@ -67,6 +71,10 @@ public:
         sendMessage("say", resp);
         return;
       }
+    }
+    catch (json::exception &e)
+    {
+      cerr << e.what() << endl;
     }
     catch (...)
     {
