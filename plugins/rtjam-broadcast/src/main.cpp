@@ -98,24 +98,6 @@ void websocket_thread(JamNetStuff::JamSocket *pJamSocket, string token)
     cout << "Room lost" << endl;
     sleep(5);
   }
-
-  // json sendMsg;
-  // int msgId = 1;
-  // WebSocket::pointer ws = WebSocket::from_url("ws://rtjam-nation.basscleftech.com/primus");
-  // assert(ws);
-  // sendMsg = {{"event", "roomAdd"}, {"room", "bobK"}, {"messageId", msgId++}};
-  // ws->send(sendMsg.dump());
-  // sendMsg = {{"event", "say"}, {"room", "bobK"}, {"message", "Room Talking"}, {"messageId", msgId++}};
-  // ws->send(sendMsg.dump());
-  // while (ws->getReadyState() != WebSocket::CLOSED)
-  // {
-  //   ws->poll(1000);
-  //   cout << "back from poll" << endl;
-  //   ws->dispatch(handle_message);
-  //   // sendMsg = {{"event", "say"}, {"room", "bobK"}, {"message", "Room Talking"}, {"messageId", msgId++}};
-  //   // ws->send(sendMsg.dump());
-  // }
-  // delete ws;
 }
 
 void packet_thread(short port, string token)
