@@ -118,6 +118,7 @@ namespace JamNetStuff
     void startPing();
     void Prune();
     void dump(::std::string msg);
+    std::string getLatency();
 
   private:
     ::std::vector<unsigned> m_allowedClientIds;
@@ -275,6 +276,8 @@ namespace JamNetStuff
     void initServer(short port);
     void initClient(const char *servername, int port, uint32_t clientId);
     void setTempo(int newTempo) { m_tempo = newTempo; };
+    int getTempo() { return m_tempo; };
+    std::string getLatency() { return m_playerList.getLatency(); };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
     ::std::string getMacAddress();
 

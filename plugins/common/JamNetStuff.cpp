@@ -209,6 +209,19 @@ namespace JamNetStuff
         return true;
     }
 
+    std::string PlayerList::getLatency()
+    {
+        std::string rval = "latency: ";
+        for (Player p : m_players)
+        {
+            rval += std::to_string(p.clientId);
+            rval += " - ";
+            rval += std::to_string(p.networkTime.mean);
+            rval += ", ";
+        }
+        return rval;
+    }
+
     void PlayerList::dump(std::string msg)
     {
         std::cout << msg << " clients: [";
@@ -283,7 +296,7 @@ namespace JamNetStuff
 
     void PlayerList::startPing()
     {
-        for (int i = 0; i < m_players.size(); i++)
+        for (unsigned int i = 0; i < m_players.size(); i++)
         {
             m_players.at(i).bPinging = true;
         }
