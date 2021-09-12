@@ -145,7 +145,7 @@ private:
                 {"message", message},
                 {"room", m_token},
                 {"messageId", m_msgId++}};
-    cout << msg.dump(2) << endl;
+    // cout << msg.dump(2) << endl;
     ws->send(msg.dump());
   }
 

@@ -149,7 +149,7 @@ int main(int argc, char **argv)
         token = api.m_resultBody["broadcastUnit"]["token"];
         broadcastUnitName = api.m_resultBody["broadcastUnit"]["name"];
         clog << "got a new token: " << token << endl;
-        for (short port = 7891; port < 7892; port++)
+        for (short port = 7891; port < 7894; port++)
         {
           char roomName[100];
           sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);
