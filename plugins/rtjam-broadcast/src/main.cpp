@@ -91,8 +91,13 @@ using easywsclient::WebSocket;
 void websocket_thread(JamNetStuff::JamSocket *pJamSocket, string token)
 {
   ChatRobot robot;
-  robot.init("ws://rtjam-nation.basscleftech.com/primus", token, pJamSocket);
-  robot.readMessages();
+  while (true)
+  {
+    robot.init("ws://rtjam-nation.basscleftech.com/primus", token, pJamSocket);
+    robot.readMessages();
+    cout << "Room lost" << endl;
+    sleep(5);
+  }
 
   // json sendMsg;
   // int msgId = 1;
