@@ -77,7 +77,7 @@ public:
       }
       // Action hero chat are json encoded
       json msg = json::parse(message);
-      cout << msg.dump(2) << endl;
+      // cout << msg.dump(2) << endl;
       if (msg["context"].size() == 0)
       {
         return;
@@ -189,7 +189,7 @@ private:
     if (idx != string::npos)
     {
       // tempo command to change the room tempo
-      cout << "Tempo command" << endl;
+      // cout << "Tempo command" << endl;
       if (command.size() > strlen("!tempo"))
       {
         int tempo = atoi(command.substr(7).c_str());
