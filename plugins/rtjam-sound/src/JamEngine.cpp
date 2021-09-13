@@ -196,7 +196,7 @@ void JamEngine::connect(const char *host, int port, uint32_t id)
 
 void JamEngine::disconnect()
 {
-  m_jamSocket.isActivated = false;
+  m_jamSocket.disconnect();
 }
 
 void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)

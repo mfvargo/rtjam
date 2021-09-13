@@ -55,10 +55,9 @@ public:
       // object and it will call it's operator ().
       ws->dispatch(*this);
       // see if we need to update latency to room
-      if (JamNetStuff::getMicroTime() - m_lastLatencyUpdate > 5000000)
+      if (JamNetStuff::getMicroTime() - m_lastLatencyUpdate > 2000000)
       {
-        string resp = m_pJamSocket->getLatency();
-        sendMessage("say", resp);
+        sendLatencyReport();
         m_lastLatencyUpdate = JamNetStuff::getMicroTime();
       }
     }
@@ -70,6 +69,7 @@ public:
   {
     try
     {
+      // cout << message << endl;
       // Handle primus protocol messages
       if (message.find("primus:") != string::npos)
       {
@@ -198,16 +198,21 @@ private:
           m_pJamSocket->setTempo(tempo);
         }
       }
-      string resp = "tempo: ";
-      resp += std::to_string(m_pJamSocket->getTempo());
-      sendMessage("say", resp);
+      json resp = {{"speaker", "RoomChatRobot"}};
+      resp["tempo"] = m_pJamSocket->getTempo();
+      sendMessage("say", resp.dump());
       return;
     }
-    if (command == "!latency")
+    idx = command.find("!latency");
+    if (idx != string::npos)
     {
-      string resp = m_pJamSocket->getLatency();
-      sendMessage("say", resp);
-      return;
+      sendLatencyReport();
     }
+  }
+  void sendLatencyReport()
+  {
+    json resp = {{"speaker", "RoomChatRobot"}};
+    resp["latency"] = m_pJamSocket->getLatency();
+    sendMessage("say", resp.dump());
   }
 };

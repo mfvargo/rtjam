@@ -26,6 +26,7 @@
 #include "jamrtime.h"
 #include <mutex>
 #include <vector>
+#include <map>
 #include "MetroNome.hpp"
 
 #define EMPTY_SLOT 40000
@@ -118,7 +119,7 @@ namespace JamNetStuff
     void startPing();
     void Prune();
     void dump(::std::string msg);
-    std::string getLatency();
+    std::map<unsigned, float> getLatency();
 
   private:
     ::std::vector<unsigned> m_allowedClientIds;
@@ -275,9 +276,14 @@ namespace JamNetStuff
 
     void initServer(short port);
     void initClient(const char *servername, int port, uint32_t clientId);
+    void disconnect()
+    {
+      isActivated = false;
+      m_packet.clearChannelMap();
+    }
     void setTempo(int newTempo) { m_tempo = newTempo; };
     int getTempo() { return m_tempo; };
-    std::string getLatency() { return m_playerList.getLatency(); };
+    std::map<unsigned, float> getLatency() { return m_playerList.getLatency(); };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
     ::std::string getMacAddress();
 

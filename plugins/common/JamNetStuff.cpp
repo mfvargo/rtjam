@@ -209,15 +209,12 @@ namespace JamNetStuff
         return true;
     }
 
-    std::string PlayerList::getLatency()
+    std::map<unsigned, float> PlayerList::getLatency()
     {
-        std::string rval = "latency: ";
+        std::map<unsigned, float> rval;
         for (Player p : m_players)
         {
-            rval += std::to_string(p.clientId);
-            rval += " - ";
-            rval += std::to_string(p.networkTime.mean);
-            rval += ", ";
+            rval.insert(std::pair<unsigned, float>(p.clientId, p.networkTime.mean / 1000));
         }
         return rval;
     }
@@ -277,6 +274,7 @@ namespace JamNetStuff
             p.KeepAlive = now;
             p.Address = *addr;
             p.bPinging = false;
+            p.networkTime.windowSize = 20;
             m_players.push_back(p);
             dump("add");
         }
