@@ -177,7 +177,7 @@ namespace JamNetStuff
     int decodeJamBuffer(float **outputs);
 
     void *getPacket();
-    int getSize();
+    int getSize(bool headerOnly = false);
     bool isMe();
     uint32_t getSequenceNo();
     void dumpPacket(const char *);
@@ -295,7 +295,7 @@ namespace JamNetStuff
     struct sockaddr_in senderAddr;
     socklen_t addr_size;
     int readData();
-    int sendData(struct sockaddr_in *to_addr);
+    int sendData(struct sockaddr_in *to_addr, bool headerOnly = false);
     uint64_t beatCount;
     uint64_t lastPingTime;
     int m_tempo;
