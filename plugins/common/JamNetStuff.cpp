@@ -177,9 +177,9 @@ namespace JamNetStuff
         return channelMap.getChannel(jamMessage.ClientId);
     }
 
-    int JamPacket::getSize()
+    int JamPacket::getSize(bool headerOnly)
     {
-        return (sizeof(struct JamMessage) - JAM_BUF_SIZE + bufferSize);
+        return (sizeof(struct JamMessage) - JAM_BUF_SIZE + (headerOnly ? 0 : bufferSize));
     }
 
     uint32_t JamPacket::getSequenceNo()
@@ -485,11 +485,8 @@ namespace JamNetStuff
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {
             Player player = m_playerList.get(i);
-            // Get the addresses and send
-            if (player.clientId != clientId)
-            {
-                sendData(&player.Address);
-            }
+            // Get the addresses and send (note: only send the header (for ping) to packet sender)
+            sendData(&player.Address, player.clientId == clientId);
         }
     }
 
@@ -513,12 +510,12 @@ namespace JamNetStuff
         }
         return nBytes;
     }
-    int JamSocket::sendData(struct sockaddr_in *to_addr)
+    int JamSocket::sendData(struct sockaddr_in *to_addr, bool headerOnly)
     {
         int rval = sendto(
             jamSocket,
             m_packet.getPacket(),
-            m_packet.getSize(),
+            m_packet.getSize(headerOnly),
             0,
             (struct sockaddr *)to_addr,
             sizeof(struct sockaddr));
