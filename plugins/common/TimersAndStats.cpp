@@ -76,7 +76,7 @@ namespace JamNetStuff
         }
         mean += sample / windowSize;
         mean *= (windowSize - 1) / windowSize;
-        sigma += std::abs(mean - sample) / windowSize;
+        sigma += std::pow((mean - sample), 2) / windowSize;
         sigma *= (windowSize - 1) / windowSize;
     }
 
