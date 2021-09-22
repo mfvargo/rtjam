@@ -24,7 +24,13 @@ namespace JamNetStuff
     JitterBuffer::JitterBuffer() {
         maxDepth = JITTER_SAMPLES - 512;
         flush();
-        bufferStats.windowSize = 50;
+        bufferStats.windowSize = 20;
+        // Initialize the peak filter for the target depth
+        m_depthFilter.init(
+            0.1,        // 100 msec attack
+            0.5,        // 500msec decay
+            48000/128   // sample rate (frame rate)
+        );
     }
 
     void JitterBuffer::flush() {
@@ -89,16 +95,12 @@ namespace JamNetStuff
         numGets++;
         bufferStats.addSample(depth());
         // dynamic target depth
-        unsigned desiredDepth = nSigma * bufferStats.sigma;
-        if (desiredDepth > targetDepth) {
-            // make the buffer longer
-            if (targetDepth < MAX_DEPTH) {
-                targetDepth += 1;
-            }
-        } else {
-            if (numGets%4 == 0 && targetDepth > MIN_DEPTH) {
-                targetDepth -= 1;
-            }
+        targetDepth = m_depthFilter.getSample(nSigma * bufferStats.sigma);
+        if (targetDepth > MAX_DEPTH) {
+            targetDepth = MAX_DEPTH;
+        }
+        if (targetDepth < MIN_DEPTH) {
+            targetDepth = MIN_DEPTH;
         }
         if (depth() < frames) {
             // Not enough for a frame
@@ -136,6 +138,9 @@ namespace JamNetStuff
         }
         // Save the lastFrame in case we starve
         memcpy(lastFrame, buffer, frames * sizeof(float));
+        // if (numGets%375 == 0) {
+        //     dumpOut();
+        // }
     }
 
     void JitterBuffer::copySamples(float* dst, const float* src, int count) {
@@ -146,10 +151,11 @@ namespace JamNetStuff
 
     void JitterBuffer::dumpOut() {
         printf(
-            "avgDepth: %08.1f\t target: %06d\t under: %05d\7 delta_u:%03.2f\t seq: %d\n",
+            "avgDepth: %08.1f\t target: %06d\t under: %05d\t dropped: %05d\t delta_u:%03.2f\t seq: %d\n",
             bufferStats.mean,
             targetDepth,
             numUnderruns,
+            numDropped,
             bufferStats.sigma,
             lastSequence
         );

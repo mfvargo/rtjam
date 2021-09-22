@@ -258,7 +258,10 @@ namespace JamNetStuff
             {
                 if ((*it).bPinging && pingTime != 0)
                 {
-                    (*it).networkTime.addSample(now - pingTime);
+                    // filter out garbage data
+                    if (now - pingTime > 200000) {
+                        (*it).networkTime.addSample(now - pingTime);
+                    }
                     (*it).bPinging = false;
                 }
                 (*it).KeepAlive = now;
@@ -406,7 +409,7 @@ namespace JamNetStuff
     }
 
     // Client side function to read incoming packets and shove them into the mixer.
-    // Socket api is blocking so it will read until there is no data and then return
+    // Socket api is non-blocking so it will read until there is no data and then return
     void JamSocket::readPackets(JamMixer *jamMixer)
     {
         // Stale out any channels
