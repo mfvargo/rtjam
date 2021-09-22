@@ -259,7 +259,8 @@ namespace JamNetStuff
                 if ((*it).bPinging && pingTime != 0)
                 {
                     // filter out garbage data
-                    if (now - pingTime > 200000) {
+                    if (now - pingTime < 200000)
+                    {
                         (*it).networkTime.addSample(now - pingTime);
                     }
                     (*it).bPinging = false;
