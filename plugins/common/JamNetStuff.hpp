@@ -28,6 +28,7 @@
 #include <vector>
 #include <map>
 #include "MetroNome.hpp"
+#include "PeakDetector.hpp"
 
 #define EMPTY_SLOT 40000
 
@@ -143,6 +144,7 @@ namespace JamNetStuff
     float getAvgDepth();
 
   protected:
+    PeakDetector m_depthFilter;
     float myBuffer[JITTER_SAMPLES];
     float lastFrame[MAX_FRAME_SIZE];
     int readIdx;
