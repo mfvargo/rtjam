@@ -113,14 +113,14 @@ int main(int argc, char *argv[])
     ports = jack_get_ports(client, "a2j", NULL, JackPortIsOutput);
     if (ports == NULL)
     {
-        fprintf(stderr, "no physical capture ports\n");
+        fprintf(stderr, "no a2j ports running.  check a2j_control --status \n");
         exit(1);
     }
     cout << ports[0] << endl;
     if (jack_connect(client, ports[0], jack_port_name(input_port)))
-        fprintf(stderr, "cannot connect input ports\n");
+        fprintf(stderr, "cannot connect to a2j port\n");
 
-    // free(ports);
+    jack_free(ports);
 
     /* install a signal handler to properly quits jack client */
     signal(SIGQUIT, signal_handler);
