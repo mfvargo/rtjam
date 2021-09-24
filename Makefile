@@ -81,9 +81,9 @@ install-pi: pi-embed
 
 stop-pi:
 	systemctl stop rtjam-box
-	systemctl stop rtjam-jack
 	systemctl stop rtjam-sound
 	systemctl stop rtjam-status
+	systemctl stop rtjam-jack
 	rm -f /dev/mqueue/rtjamParams
 	rm -f /dev/shm/rtjamValues
 	rm -f /dev/shm/sem.rtjamValues
