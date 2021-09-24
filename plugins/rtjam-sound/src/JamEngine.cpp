@@ -181,6 +181,11 @@ void JamEngine::getParams()
   case paramMetronomeVolume:
     // set the metronome sound type and volume
     m_jamMixer.setMetronomeConfig(m_param.iValue, m_param.fValue);
+    break;
+  case paramMidiMessage:
+    // we got a midi message
+    cout << "Midi message!" << endl;
+    break;
   }
 }
 

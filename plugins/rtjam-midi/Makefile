@@ -12,6 +12,7 @@ SRCS = \
 	../common/ChannelMap.cpp \
 	../common/TimersAndStats.cpp \
 	../common/Settings.cpp \
+	../common/MessageQueue.cpp \
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)

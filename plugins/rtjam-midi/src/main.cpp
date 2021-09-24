@@ -16,9 +16,12 @@
 
 #include "JamNetStuff.hpp"
 #include "MidiEvent.hpp"
+#include "ParamData.hpp"
 
 jack_port_t *input_port;
 jack_client_t *client;
+
+ParamData paramQueue;
 
 using namespace std;
 
@@ -43,11 +46,17 @@ int process(jack_nframes_t nframes, void *arg)
     {
         cout << "count: " << event_count << endl;
         jack_midi_event_t in_event;
+        RTJamParam param;
         for (jack_nframes_t i = 0; i < event_count; i++)
         {
             jack_midi_event_get(&in_event, inport_buf, i);
             MidiEvent mEvent(in_event);
             mEvent.dump();
+            param.param = paramMidiMessage;
+            param.iValue = mEvent.m_note;
+            param.iValue2 = mEvent.m_velocity;
+            // param.sValue = mEvent.toJson.dump();
+            paramQueue.send(&param);
         }
     }
     return 0;

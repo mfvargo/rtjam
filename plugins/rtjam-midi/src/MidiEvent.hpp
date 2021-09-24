@@ -66,7 +66,6 @@ public:
     cout << "msg: " << m_type << " chan: " << m_channel << " note: " << m_note << " vel: " << m_velocity << endl;
   }
 
-private:
   MessageType m_type;
   unsigned m_note;
   unsigned m_velocity;
