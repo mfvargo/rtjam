@@ -14,10 +14,10 @@ public:
   // This is called to intialize the ChatRobot and join the room
   void init(string url, string token, JamNetStuff::JamSocket *pJamSocket)
   {
+    m_pJamSocket = pJamSocket;
     ChatRobotBase::init(url, token);
     m_lastLatencyUpdate = JamNetStuff::getMicroTime();
   };
-
 
   void doMessage(const json &msg)
   {
@@ -48,15 +48,17 @@ public:
   {
     if (JamNetStuff::getMicroTime() - m_lastLatencyUpdate > 2000000)
     {
+      cout << "Latency update" << endl;
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["latency"] = m_pJamSocket->getLatency();
-      sendMessage("say", resp.dump());
+      // resp["latency"] =
+      m_pJamSocket->getLatency();
+      // sendMessage("say", resp.dump());
       m_lastLatencyUpdate = JamNetStuff::getMicroTime();
     }
   }
+
 private:
   // member variables
   JamNetStuff::JamSocket *m_pJamSocket;
   uint64_t m_lastLatencyUpdate;
-
 };
