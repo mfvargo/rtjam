@@ -3,7 +3,7 @@
 #include "JamNetStuff.hpp"
 #include "Settings.hpp"
 #include "RTJamNationApi.hpp"
-#include "ChatRobot.hpp"
+#include "RoomChatRobot.hpp"
 #include <vector>
 #include <thread>
 #include <cmath>
@@ -90,7 +90,7 @@ using easywsclient::WebSocket;
 
 void websocket_thread(JamNetStuff::JamSocket *pJamSocket, string token)
 {
-  ChatRobot robot;
+  RoomChatRobot robot;
   while (true)
   {
     robot.init("ws://rtjam-nation.basscleftech.com/primus", token, pJamSocket);
