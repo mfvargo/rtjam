@@ -14,8 +14,7 @@ class ChatRobotBase
 {
 public:
   // derived classes need to implement these
-  virtual void doMessage(const json &msg){};
-  virtual void doInterPollStuff(){};
+  virtual void doMessage(const json &msg) = 0;
 
   enum RoomState
   {
@@ -44,18 +43,6 @@ public:
     createRoom();
   };
 
-  // This loop will drive the chat bot.
-  void readMessages()
-  {
-    while (ws != NULL && ws->getReadyState() != WebSocket::CLOSED)
-    {
-      ws->poll(1000);
-      // This next line uses the crazy C++ functor thing where you can pass in an
-      // object and it will call it's operator ().
-      ws->dispatch(*this);
-      doInterPollStuff();
-    }
-  }
 
   // The operator () lets me pass a ChatRobot to the websocket dispatch function
   // So this is the callback when a message comes in on the websocket

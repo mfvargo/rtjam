@@ -19,7 +19,20 @@ public:
     m_lastLatencyUpdate = JamNetStuff::getMicroTime();
   };
 
-  void doMessage(const json &msg)
+  // This loop will drive the chat bot.
+  void readMessages()
+  {
+    while (ws != NULL && ws->getReadyState() != WebSocket::CLOSED)
+    {
+      ws->poll(1000);
+      // This next line uses the crazy C++ functor thing where you can pass in an
+      // object and it will call it's operator ().
+      ws->dispatch(*this);
+      doInterPollStuff();
+    }
+  }
+
+  void doMessage(const json &msg) override
   {
     // This is a message from the room chat.
     string command = msg["message"];
@@ -48,11 +61,9 @@ public:
   {
     if (JamNetStuff::getMicroTime() - m_lastLatencyUpdate > 2000000)
     {
-      cout << "Latency update" << endl;
       json resp = {{"speaker", "RoomChatRobot"}};
-      // resp["latency"] =
-      m_pJamSocket->getLatency();
-      // sendMessage("say", resp.dump());
+      resp["latency"] = m_pJamSocket->getLatency();
+      sendMessage("say", resp.dump());
       m_lastLatencyUpdate = JamNetStuff::getMicroTime();
     }
   }
