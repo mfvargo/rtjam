@@ -11,7 +11,6 @@ SRCS = \
 	../common/JitterBuffer.cpp \
 	../common/ChannelMap.cpp \
 	../common/TimersAndStats.cpp \
-	../common/Settings.cpp \
 	../common/MessageQueue.cpp \
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
