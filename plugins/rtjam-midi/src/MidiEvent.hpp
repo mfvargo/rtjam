@@ -66,6 +66,17 @@ public:
     cout << "msg: " << m_type << " chan: " << m_channel << " note: " << m_note << " vel: " << m_velocity << endl;
   }
 
+  json toJson(){
+    json resp = {{"speaker", "UnitChatRobot"}};
+    resp["midiEvent"] = {
+      { "type", m_type },
+      { "channel", m_channel },
+      {"note", m_note },
+      {"velocity", m_velocity }
+    };
+    return resp;
+  }
+
   MessageType m_type;
   unsigned m_note;
   unsigned m_velocity;

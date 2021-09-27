@@ -24,6 +24,10 @@ public:
     room_processing
   };
 
+  bool isConnected() {
+    return (ws != NULL && ws->getReadyState() != WebSocket::CLOSED);
+  }
+
   // This is called to intialize the ChatRobot and join the room
   void init(string url, string token)
   {
@@ -83,6 +87,20 @@ public:
     }
   }
 
+  void sendMessage(string event, string message)
+  {
+    if (isConnected()) {
+      json msg = {{"event", event},
+                  {"message", message},
+                  {"room", m_token},
+                  {"messageId", m_msgId++}};
+      // cout << msg.dump(2) << endl;
+      ws->send(msg.dump());
+    }
+  }
+
+
+
 protected:
   // member variables
   WebSocket::pointer ws = NULL;
@@ -114,16 +132,6 @@ protected:
     json msg = {{"event", "roomAdd"}, {"room", m_token}, {"messageId", m_msgId++}};
     // cout << "joinRoom:" << endl
     //      << msg.dump(2) << endl;
-    ws->send(msg.dump());
-  }
-
-  void sendMessage(string event, string message)
-  {
-    json msg = {{"event", event},
-                {"message", message},
-                {"room", m_token},
-                {"messageId", m_msgId++}};
-    // cout << msg.dump(2) << endl;
     ws->send(msg.dump());
   }
 
