@@ -34,18 +34,17 @@ public:
   void doMessage(const json &msg) override
   {
     // This is a message from the room chat.
-    string command = msg["message"];
-    cout << msg.dump(2) << endl;
+    // cout << msg.dump(2) << endl;
     return;
   }
   void doInterPollStuff()
   {
     if (JamNetStuff::getMicroTime() - m_lastPollUpdate > 20000000)
     {
-      cout << "Interpol: " << m_state << endl;
-      json resp = {{"speaker", "UnitChatRobot"}};
-      resp["stuff"] = "I message, therefore I am!";
-      sendMessage("say", resp.dump());
+      // cout << "Interpol: " << m_state << endl;
+      // json resp = {{"speaker", "UnitChatRobot"}};
+      // resp["stuff"] = "I message, therefore I am!";
+      // sendMessage("say", resp.dump());
       m_lastPollUpdate = JamNetStuff::getMicroTime();
     }
   }
