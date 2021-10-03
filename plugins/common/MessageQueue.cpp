@@ -18,7 +18,11 @@ CMessageQueue::CMessageQueue(const string &sName, int msgSize) : m_sName(sName)
   {
     perror("mq_open failed");
   }
-  fchmod(m_queueID, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+  printf("MessageQueue %d\n", m_queueID);
+  if (fchmod(m_queueID, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH) == -1)
+  {
+    perror("fchmod failed");
+  };
 }
 
 CMessageQueue::~CMessageQueue()
@@ -47,10 +51,10 @@ void CMessageQueue::recv(void *msg, int size)
 
 void CMessageQueue::send(void *msg, int size)
 {
-  // printf("sending\n");
-  // mq_attr attrs;
-  // mq_getattr(m_queueID, &attrs);
-  // printf("sending, depth: %ld\n", attrs.mq_curmsgs);
+  printf("sending on %d\n", m_queueID);
+  mq_attr attrs;
+  mq_getattr(m_queueID, &attrs);
+  printf("sending, depth: %ld\n", attrs.mq_curmsgs);
   if (mq_send(m_queueID, (char *)msg, size, 0) == -1)
   {
     perror("CMessageQueue: Not able to send message to client");

@@ -91,7 +91,7 @@ bool CSharedMemory::UnLock()
 
 CSharedMemory::~CSharedMemory()
 {
-   Clear();
+   // Clear();
 }
 
 void CSharedMemory::Clear()
