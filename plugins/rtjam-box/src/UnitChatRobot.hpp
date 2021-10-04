@@ -5,6 +5,7 @@
 #include "JamNetStuff.hpp"
 #include "ParamData.hpp"
 #include "LevelData.hpp"
+#include "EffectFactory.hpp"
 
 using namespace std;
 using easywsclient::WebSocket;
@@ -59,7 +60,14 @@ public:
       if (!msg["fValue"].empty()) {
         param.fValue = msg["fValue"];
       }
-      m_pParamData->send(&param);
+      if (param.param > paramCount)
+      {
+        // This is an api call rtjam-box will handle
+        doLocalCommand(param);
+      } else {
+        // This api call is to be passed to rtjam-sound
+        m_pParamData->send(&param);
+      }
     }
       catch (json::exception &e)
     {
@@ -71,6 +79,22 @@ public:
     }
     return;
   }
+
+  void doLocalCommand(RTJamParam& param) {
+    // This is a command that is to be handled by rtjam-box
+    cout << "rtjam-box command" << endl;
+    switch (param.param)
+    {
+      case paramGetPedalTypes:
+      {
+        json msg = {{"speaker", "UnitChatRobot"}};
+        msg["pedalTypes"] = s_PedalTypes;
+        sendMessage("say", msg.dump());
+        break;
+      }
+    }
+  }
+
   void doInterPollStuff()
   {
     if (JamNetStuff::getMicroTime() - m_lastPollUpdate > m_pollInterval)
@@ -113,8 +137,6 @@ public:
       sendMessage("say", levels.dump());
       if (m_jsonTimeStamp != m_jamLevels.jsonTimeStamp) {
         m_jsonTimeStamp = m_jamLevels.jsonTimeStamp;
-        // cout << "sync at: " << m_jsonTimeStamp << endl;
-
         // We need to forward the pedalboard json data
         json pedals = {{"speaker", "UnitChatRobot"}};
         pedals["pedalInfo"] = json::parse(m_pLevelData->m_pJsonInfo);
