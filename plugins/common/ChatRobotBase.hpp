@@ -4,17 +4,18 @@
 #include <string>
 #include <assert.h>
 #include "json.hpp"
-
 #include "easywsclient.hpp"
-#include "JamNetStuff.hpp"
 
 using namespace std;
 using easywsclient::WebSocket;
 using json = nlohmann::json;
 
-class ChatRobot
+class ChatRobotBase
 {
 public:
+  // derived classes need to implement these
+  virtual void doMessage(const json &msg) = 0;
+
   enum RoomState
   {
     room_init,
@@ -23,8 +24,12 @@ public:
     room_processing
   };
 
+  bool isConnected() {
+    return (ws != NULL && ws->getReadyState() != WebSocket::CLOSED);
+  }
+
   // This is called to intialize the ChatRobot and join the room
-  void init(string url, string token, JamNetStuff::JamSocket *pJamSocket)
+  void init(string url, string token)
   {
     if (ws != NULL)
     {
@@ -37,31 +42,11 @@ public:
       return;
     }
     m_token = token;
-    m_pJamSocket = pJamSocket;
     m_msgId = 1;
-    m_lastLatencyUpdate = JamNetStuff::getMicroTime();
     m_state = room_init;
-    // TODO:  need to wait for responses on these commands
     createRoom();
   };
 
-  // This loop will drive the chat bot.
-  void readMessages()
-  {
-    while (ws != NULL && ws->getReadyState() != WebSocket::CLOSED)
-    {
-      ws->poll(1000);
-      // This next line uses the crazy C++ functor thing where you can pass in an
-      // object and it will call it's operator ().
-      ws->dispatch(*this);
-      // see if we need to update latency to room
-      if (JamNetStuff::getMicroTime() - m_lastLatencyUpdate > 2000000)
-      {
-        sendLatencyReport();
-        m_lastLatencyUpdate = JamNetStuff::getMicroTime();
-      }
-    }
-  }
 
   // The operator () lets me pass a ChatRobot to the websocket dispatch function
   // So this is the callback when a message comes in on the websocket
@@ -102,17 +87,28 @@ public:
     }
   }
 
-private:
+  void sendMessage(string event, string message)
+  {
+    if (isConnected()) {
+      json msg = {{"event", event},
+                  {"message", message},
+                  {"room", m_token},
+                  {"messageId", m_msgId++}};
+      // cout << msg.dump(2) << endl;
+      ws->send(msg.dump());
+    }
+  }
+
+
+
+protected:
   // member variables
   WebSocket::pointer ws = NULL;
   string m_token;
   RoomState m_state;
   int m_msgId;
-  JamNetStuff::JamSocket *m_pJamSocket;
   int m_responseId;
-  uint64_t m_lastLatencyUpdate;
 
-private:
   void createRoom()
   {
     m_state = room_creating;
@@ -139,16 +135,7 @@ private:
     ws->send(msg.dump());
   }
 
-  void sendMessage(string event, string message)
-  {
-    json msg = {{"event", event},
-                {"message", message},
-                {"room", m_token},
-                {"messageId", m_msgId++}};
-    // cout << msg.dump(2) << endl;
-    ws->send(msg.dump());
-  }
-
+  // This is primus protocol stuff
   void doPrimus(const string &message)
   {
     string msg = message;
@@ -162,6 +149,7 @@ private:
     // Additional primus message checks go below as other message.find() calls
     // idx = message.find("::otherThing")...
   }
+  // This runs the state machine to connect to the room.
   void doResponse(const json &msg)
   {
     if (msg["messageId"] == m_responseId)
@@ -178,41 +166,5 @@ private:
         break;
       }
     }
-  }
-  void doMessage(const json &msg)
-  {
-    // This is a message from the room chat.
-    string command = msg["message"];
-
-    // See if this message is a command for the robot
-    int idx = command.find("!tempo");
-    if (idx != string::npos)
-    {
-      // tempo command to change the room tempo
-      // cout << "Tempo command" << endl;
-      if (command.size() > strlen("!tempo"))
-      {
-        int tempo = atoi(command.substr(7).c_str());
-        if (tempo > 0)
-        {
-          m_pJamSocket->setTempo(tempo);
-        }
-      }
-      json resp = {{"speaker", "RoomChatRobot"}};
-      resp["tempo"] = m_pJamSocket->getTempo();
-      sendMessage("say", resp.dump());
-      return;
-    }
-    idx = command.find("!latency");
-    if (idx != string::npos)
-    {
-      sendLatencyReport();
-    }
-  }
-  void sendLatencyReport()
-  {
-    json resp = {{"speaker", "RoomChatRobot"}};
-    resp["latency"] = m_pJamSocket->getLatency();
-    sendMessage("say", resp.dump());
   }
 };
