@@ -20,9 +20,9 @@ public:
   }
   static string s_token;
   static ParamData s_paramData;
+  static LevelData s_levelData;
 
 private:
-  static LevelData s_levelData;
   RTJamLevels m_jamLevels;
 
   void doGet()
