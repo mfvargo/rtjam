@@ -22,6 +22,7 @@ public:
     m_pParamData = pParamData;
     ChatRobotBase::init(url, m_token);
     m_lastPollUpdate = JamNetStuff::getMicroTime();
+    m_jsonTimeStamp = JamNetStuff::getMicroTime();
   };
 
   // This loop will drive the chat bot.
@@ -46,13 +47,18 @@ public:
       RTJamParam param;
       memset(&param, 0x00, sizeof(RTJamParam));
       param.param = msg["param"];
-      // if (msg["sValue"] != NULL) {
-      //   string sValue = msg["sValue"];
-      //   snprintf(param.sValue, sizeof(param.sValue) - 1, "%s", sValue.c_str());
-      // }
-      // if (msg["iValue1"] != NULL) param.iValue = msg["iValue1"];
-      // if (msg["iValue2"] != NULL) param.iValue2 = msg["iValue2"];
-      if (msg["fValue"] != NULL) param.fValue = msg["fValue"];
+      if (!msg["sValue"].empty()) {
+        snprintf(param.sValue, sizeof(param.sValue) - 1, "%s", msg["sValue"].get<string>().c_str());
+      }
+      if (!msg["iValue1"].empty()) {
+        param.iValue = msg["iValue1"];
+      }
+      if (!msg["iValue2"].empty()) {
+        param.iValue2 = msg["iValue2"];
+      }
+      if (!msg["fValue"].empty()) {
+        param.fValue = msg["fValue"];
+      }
       m_pParamData->send(&param);
     }
       catch (json::exception &e)
@@ -69,6 +75,7 @@ public:
   {
     if (JamNetStuff::getMicroTime() - m_lastPollUpdate > m_pollInterval)
     {
+      m_lastPollUpdate = JamNetStuff::getMicroTime();
       memcpy(&m_jamLevels, m_pLevelData->m_pJamLevels, sizeof(RTJamLevels));
       json levels = {{"speaker", "UnitChatRobot"}};
       levels["levelEvent"] = {
@@ -89,6 +96,7 @@ public:
           {"rightTunerOn", m_jamLevels.rightTunerOn},
           {"beat", m_jamLevels.beat},
           {"connected", m_jamLevels.isConnected},
+          {"jsonTimeStamp", m_jamLevels.jsonTimeStamp},
           {"players", json::array()},
       };
       for (int i = 0; i < MAX_JAMMERS; i++)
@@ -103,7 +111,15 @@ public:
         });
       }
       sendMessage("say", levels.dump());
-      m_lastPollUpdate = JamNetStuff::getMicroTime();
+      if (m_jsonTimeStamp != m_jamLevels.jsonTimeStamp) {
+        m_jsonTimeStamp = m_jamLevels.jsonTimeStamp;
+        // cout << "sync at: " << m_jsonTimeStamp << endl;
+
+        // We need to forward the pedalboard json data
+        json pedals = {{"speaker", "UnitChatRobot"}};
+        pedals["pedalInfo"] = json::parse(m_pLevelData->m_pJsonInfo);
+        sendMessage("say", pedals.dump());
+      }
     }
   }
 
@@ -115,4 +131,5 @@ private:
   LevelData* m_pLevelData;
   ParamData* m_pParamData;
   uint64_t m_pollInterval;
+  uint64_t m_jsonTimeStamp;
 };
