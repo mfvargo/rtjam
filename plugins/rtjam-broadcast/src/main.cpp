@@ -112,7 +112,7 @@ void packet_thread(short port, string token)
     pJamMixer->setBufferSmoothness(i, 0.5);
   }
   // Start a thread to write the mix to the FIFO
-  // std::thread fifoThread = std::thread(fifo_thread, port, pJamMixer);
+  std::thread fifoThread = std::thread(fifo_thread, port, pJamMixer);
 
   // Start a thread to connect each room to a server chat room
   std::thread websocketThread = std::thread(websocket_thread, pJamSocket, token);
@@ -120,8 +120,8 @@ void packet_thread(short port, string token)
   // Loop and broadcast data
   while (1)
   {
-    // pJamSocket->doPacket(pJamMixer);
-    pJamSocket->sendDataToRoomMembers(NULL);
+    pJamSocket->sendDataToRoomMembers(pJamMixer);
+    // pJamSocket->sendDataToRoomMembers(NULL);
   }
 }
 
@@ -149,7 +149,7 @@ int main(int argc, char **argv)
         token = api.m_resultBody["broadcastUnit"]["token"];
         broadcastUnitName = api.m_resultBody["broadcastUnit"]["name"];
         clog << "got a new token: " << token << endl;
-        for (short port = 7891; port < 7894; port++)
+        for (short port = 7891; port < 7892; port++)
         {
           char roomName[100];
           sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);
