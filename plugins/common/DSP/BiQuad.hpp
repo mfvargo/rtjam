@@ -73,12 +73,12 @@ public:
 
   float getSample(float input) override
   {
-    float value = b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
+    double value = b0 * input + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2;
     x2 = x1;
-    x1 = input;
+    x1 = (double)input;
     y2 = y1;
     y1 = value;
-    return value;
+    return (float)value;
   };
 
 
@@ -138,9 +138,9 @@ public:
   FilterType m_type;
 
 private:
-  float a0, a1, a2, b0, b1, b2;
-  float A, omega, cos_omega, sin_omega, alpha;
-  float x1, x2, y1, y2;
+  double a0, a1, a2, b0, b1, b2;
+  double A, omega, cos_omega, sin_omega, alpha;
+  double x1, x2, y1, y2;
 
   void calcHighPassCoefficients()
   {
