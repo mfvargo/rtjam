@@ -60,6 +60,8 @@ public:
       if (!msg["fValue"].empty()) {
         param.fValue = msg["fValue"];
       }
+      cout << "sValue: " << param.sValue << endl;
+
       if (param.param > paramCount)
       {
         // This is an api call rtjam-box will handle
@@ -82,17 +84,72 @@ public:
 
   void doLocalCommand(RTJamParam& param) {
     // This is a command that is to be handled by rtjam-box
-    cout << "rtjam-box command" << endl;
+    json msg = {{"speaker", "UnitChatRobot"}};
     switch (param.param)
     {
       case paramGetPedalTypes:
       {
-        json msg = {{"speaker", "UnitChatRobot"}};
         msg["pedalTypes"] = s_PedalTypes;
         sendMessage("say", msg.dump());
         break;
       }
+      case paramSetAudioInput:
+      {
+        std::ofstream outfile("soundin.cfg");
+        outfile << param.sValue;
+      }
+      break;
+      case paramSetAudioOutput:
+      {
+        std::ofstream outfile("soundout.cfg");
+        outfile << param.sValue;
+      }
+      break;
+      case paramListAudioConfig:
+      {
+        msg["audioHardware"] = {
+          { "driver", execMyCommand("cat soundin.cfg")},
+          { "cards", execMyCommand("aplay -l")}
+        };
+        sendMessage("say", msg.dump());
+      }
+        break;
+      case paramCheckForUpdate:
+        msg["cmdOutput"] = execMyCommand("./checkupdate.bash");
+        sendMessage("say", msg.dump());
+        break;
+      case paramRebootDevice:
+        msg["cmdOutput"] = execMyCommand("reboot 0");
+        sendMessage("say", msg.dump());
+        break;
+      case paramShutdownDevice:
+        msg["cmdOutput"] = execMyCommand("shutdown now");
+        sendMessage("say", msg.dump());
+        break;
+      case paramRandomCommand:
+        string result = execMyCommand(param.sValue);
+        cout << "cmd: " << param.sValue << endl;
+        cout << "output: " << result << endl;
+        msg["cmdOutput"] = result;
+        sendMessage("say", msg.dump());
+        break;
     }
+  }
+
+  string execMyCommand(string cmd)
+  {
+    array<char, 128> buffer;
+    string result;
+    unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+    if (!pipe)
+    {
+      return "popen() failed!";
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+    {
+      result += buffer.data();
+    }
+    return result;
   }
 
   void doInterPollStuff()
