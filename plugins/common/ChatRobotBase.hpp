@@ -109,6 +109,7 @@ protected:
   int m_msgId;
   int m_responseId;
 
+
   void createRoom()
   {
     m_state = room_creating;

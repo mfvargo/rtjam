@@ -11,19 +11,24 @@ using namespace std;
 using easywsclient::WebSocket;
 using json = nlohmann::json;
 
+uint64_t g_pollingInterval = 30 * 1000 * 1000; // Default is 30 seconds
+uint64_t g_setIntervalTime = 0;
+uint64_t g_lastPollUpdate = 0;
+
 class UnitChatRobot : public ChatRobotBase
 {
 public:
   // This is called to intialize the ChatRobot and join the room
   void init(string url, string token, LevelData* pLevelData, ParamData* pParamData)
   {
-    m_pollInterval = 200000;
+    cout << "init on UnitChatRobot" << endl;
     m_token = token;
     m_pLevelData = pLevelData;
     m_pParamData = pParamData;
     ChatRobotBase::init(url, m_token);
-    m_lastPollUpdate = JamNetStuff::getMicroTime();
+    g_lastPollUpdate = JamNetStuff::getMicroTime();
     m_jsonTimeStamp = JamNetStuff::getMicroTime();
+    g_setIntervalTime = JamNetStuff::getMicroTime();
   };
 
   // This loop will drive the chat bot.
@@ -93,6 +98,14 @@ public:
         sendMessage("say", msg.dump());
         break;
       }
+      case paramSetUpdateInterval:
+      {
+        if (param.iValue > 50 && param.iValue < 60000) { 
+          g_pollingInterval = param.iValue * 1000;  // Convert to microseconds
+          g_setIntervalTime = JamNetStuff::getMicroTime();
+        } 
+        break;
+      }
       case paramSetAudioInput:
       {
         std::ofstream outfile("soundin.cfg");
@@ -154,9 +167,13 @@ public:
 
   void doInterPollStuff()
   {
-    if (JamNetStuff::getMicroTime() - m_lastPollUpdate > m_pollInterval)
+    if (JamNetStuff::getMicroTime() - g_lastPollUpdate > g_pollingInterval)
     {
-      m_lastPollUpdate = JamNetStuff::getMicroTime();
+      g_lastPollUpdate = JamNetStuff::getMicroTime();
+      // reset poll interval every 3 minutes
+      if ((g_lastPollUpdate - g_setIntervalTime) > 3 * 60 * 1000 * 1000) {
+        g_pollingInterval = 30 * 1000 * 1000;  // switch to 30 second interval
+      }
       memcpy(&m_jamLevels, m_pLevelData->m_pJamLevels, sizeof(RTJamLevels));
       json levels = {{"speaker", "UnitChatRobot"}};
       levels["levelEvent"] = {
@@ -205,10 +222,8 @@ public:
 private:
   // member variables
   string m_token;
-  uint64_t m_lastPollUpdate;
   RTJamLevels m_jamLevels;
   LevelData* m_pLevelData;
   ParamData* m_pParamData;
-  uint64_t m_pollInterval;
   uint64_t m_jsonTimeStamp;
 };
