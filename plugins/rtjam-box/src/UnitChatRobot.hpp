@@ -49,7 +49,6 @@ public:
     try {
       string msgString = msgRaw["message"];
       json msg = json::parse(msgString);
-      cout << msg.dump(2) << endl;
       RTJamParam param;
       memset(&param, 0x00, sizeof(RTJamParam));
       param.param = msg["param"];
@@ -65,8 +64,6 @@ public:
       if (!msg["fValue"].empty()) {
         param.fValue = msg["fValue"];
       }
-      cout << "sValue: " << param.sValue << endl;
-
       if (param.param > paramCount)
       {
         // This is an api call rtjam-box will handle
@@ -141,8 +138,6 @@ public:
         break;
       case paramRandomCommand:
         string result = execMyCommand(param.sValue);
-        cout << "cmd: " << param.sValue << endl;
-        cout << "output: " << result << endl;
         msg["cmdOutput"] = result;
         sendMessage("say", msg.dump());
         break;
