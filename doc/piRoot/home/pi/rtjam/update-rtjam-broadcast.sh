@@ -11,11 +11,13 @@ fi
 cmp -s $WEBVER $LOCALVER
 if [ "$?" -ne "0" ]; then
   echo "Updating rtjam software"
+  /usr/bin/systemctl stop rtjam-livestream
   /usr/bin/systemctl stop rtjam-broadcast
   /usr/bin/mv rtjam-broadcast rtjam-broadcast.old
   /usr/bin/wget localhost/pi/rtjam-broadcast
   /usr/bin/chmod +x rtjam-broadcast
   /usr/bin/systemctl start rtjam-broadcast
+  /usr/bin/systemctl start rtjam-livestream
 else
   echo "No update needed"
 fi
