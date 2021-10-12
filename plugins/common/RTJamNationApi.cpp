@@ -32,6 +32,7 @@ bool RTJamNationApi::jamUnitDeviceRegister()
   json args;
   args["lanIp"] = m_lanIp;
   args["macAddress"] = m_macAddress;
+  args["canTalkOnWebsocket"] = true;
   return post(m_urlBase + "jamUnit", args);
 }
 
