@@ -11,6 +11,8 @@ LevelData BoxAPI::s_levelData;
 string BoxAPI::s_token = "";
 ParamData BoxAPI::s_paramData;
 
+UnitChatRobot robot;
+
 bool isRunning = true;
 
 vector<thread> myThreads;
@@ -18,18 +20,17 @@ vector<thread> myThreads;
 // Thread to keep the unit room websocket alive
 void websocketThread()
 {
-  UnitChatRobot robot;
-  while (true)
-  {
-    if (BoxAPI::s_token != "") {
-        robot.init("ws://rtjam-nation.basscleftech.com/primus", BoxAPI::s_token, &BoxAPI::s_levelData, &BoxAPI::s_paramData);
-        robot.readMessages();
-        cout << "Room lost" << endl;
+    while (isRunning)
+    {
+        if (BoxAPI::s_token != "")
+        {
+            robot.init("ws://rtjam-nation.basscleftech.com/primus", BoxAPI::s_token, &BoxAPI::s_levelData, &BoxAPI::s_paramData);
+            robot.readMessages();
+            cout << "Room lost" << endl;
+        }
+        sleep(5);
     }
-    sleep(5);
-  }
 }
-
 
 int fastCGIStuff()
 {
@@ -39,6 +40,7 @@ int fastCGIStuff()
     manager.start();
     manager.join();
     isRunning = false;
+    robot.isRunning = false;
     return 0;
 }
 

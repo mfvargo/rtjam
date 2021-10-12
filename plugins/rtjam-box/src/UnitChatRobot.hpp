@@ -18,6 +18,8 @@ uint64_t g_lastPollUpdate = 0;
 class UnitChatRobot : public ChatRobotBase
 {
 public:
+  bool isRunning = true;
+
   // This is called to intialize the ChatRobot and join the room
   void init(string url, string token, LevelData *pLevelData, ParamData *pParamData)
   {
@@ -34,7 +36,7 @@ public:
   // This loop will drive the chat bot.
   void readMessages()
   {
-    while (ws != NULL && ws->getReadyState() != WebSocket::CLOSED)
+    while (isRunning && ws != NULL && ws->getReadyState() != WebSocket::CLOSED)
     {
       ws->poll(50);
       // This next line uses the crazy C++ functor thing where you can pass in an
