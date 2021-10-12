@@ -19,7 +19,7 @@ class UnitChatRobot : public ChatRobotBase
 {
 public:
   // This is called to intialize the ChatRobot and join the room
-  void init(string url, string token, LevelData* pLevelData, ParamData* pParamData)
+  void init(string url, string token, LevelData *pLevelData, ParamData *pParamData)
   {
     cout << "init on UnitChatRobot" << endl;
     m_token = token;
@@ -46,101 +46,109 @@ public:
 
   void doMessage(const json &msgRaw) override
   {
-    try {
+    try
+    {
       string msgString = msgRaw["message"];
       json msg = json::parse(msgString);
       RTJamParam param;
       memset(&param, 0x00, sizeof(RTJamParam));
       param.param = msg["param"];
-      if (!msg["sValue"].empty()) {
+      if (!msg["sValue"].empty())
+      {
         snprintf(param.sValue, sizeof(param.sValue) - 1, "%s", msg["sValue"].get<string>().c_str());
       }
-      if (!msg["iValue1"].empty()) {
+      if (!msg["iValue1"].empty())
+      {
         param.iValue = msg["iValue1"];
       }
-      if (!msg["iValue2"].empty()) {
+      if (!msg["iValue2"].empty())
+      {
         param.iValue2 = msg["iValue2"];
       }
-      if (!msg["fValue"].empty()) {
+      if (!msg["fValue"].empty())
+      {
         param.fValue = msg["fValue"];
       }
       if (param.param > paramCount)
       {
         // This is an api call rtjam-box will handle
         doLocalCommand(param);
-      } else {
+      }
+      else
+      {
         // This api call is to be passed to rtjam-sound
         m_pParamData->send(&param);
       }
     }
-      catch (json::exception &e)
+    catch (json::exception &e)
     {
       cerr << e.what() << endl;
     }
-      catch (...)
+    catch (...)
     {
       cerr << "error parsing command" << endl;
     }
     return;
   }
 
-  void doLocalCommand(RTJamParam& param) {
+  void doLocalCommand(RTJamParam &param)
+  {
     // This is a command that is to be handled by rtjam-box
     json msg = {{"speaker", "UnitChatRobot"}};
     switch (param.param)
     {
-      case paramGetPedalTypes:
+    case paramGetPedalTypes:
+    {
+      msg["pedalTypes"] = s_PedalTypes;
+      sendMessage("say", msg.dump());
+      break;
+    }
+    case paramSetUpdateInterval:
+    {
+      if (param.iValue > 50 && param.iValue < 60000)
       {
-        msg["pedalTypes"] = s_PedalTypes;
-        sendMessage("say", msg.dump());
-        break;
-      }
-      case paramSetUpdateInterval:
-      {
-        if (param.iValue > 50 && param.iValue < 60000) { 
-          g_pollingInterval = param.iValue * 1000;  // Convert to microseconds
-          g_setIntervalTime = JamNetStuff::getMicroTime();
-        } 
-        break;
-      }
-      case paramSetAudioInput:
-      {
-        std::ofstream outfile("soundin.cfg");
-        outfile << param.sValue;
+        g_pollingInterval = param.iValue * 1000; // Convert to microseconds
+        g_setIntervalTime = JamNetStuff::getMicroTime();
       }
       break;
-      case paramSetAudioOutput:
-      {
-        std::ofstream outfile("soundout.cfg");
-        outfile << param.sValue;
-      }
+    }
+    case paramSetAudioInput:
+    {
+      std::ofstream outfile("soundin.cfg");
+      outfile << param.sValue;
+    }
+    break;
+    case paramSetAudioOutput:
+    {
+      std::ofstream outfile("soundout.cfg");
+      outfile << param.sValue;
+    }
+    break;
+    case paramListAudioConfig:
+    {
+      msg["audioHardware"] = {
+          {"driver", execMyCommand("cat soundin.cfg")},
+          {"cards", execMyCommand("aplay -l")}};
+      sendMessage("say", msg.dump());
+    }
+    break;
+    case paramCheckForUpdate:
+      msg["cmdOutput"] = execMyCommand("./checkupdate.bash");
+      sendMessage("say", msg.dump());
       break;
-      case paramListAudioConfig:
-      {
-        msg["audioHardware"] = {
-          { "driver", execMyCommand("cat soundin.cfg")},
-          { "cards", execMyCommand("aplay -l")}
-        };
-        sendMessage("say", msg.dump());
-      }
-        break;
-      case paramCheckForUpdate:
-        msg["cmdOutput"] = execMyCommand("./checkupdate.bash");
-        sendMessage("say", msg.dump());
-        break;
-      case paramRebootDevice:
-        msg["cmdOutput"] = execMyCommand("reboot 0");
-        sendMessage("say", msg.dump());
-        break;
-      case paramShutdownDevice:
-        msg["cmdOutput"] = execMyCommand("shutdown now");
-        sendMessage("say", msg.dump());
-        break;
-      case paramRandomCommand:
-        string result = execMyCommand(param.sValue);
-        msg["cmdOutput"] = result;
-        sendMessage("say", msg.dump());
-        break;
+    case paramRebootDevice:
+      msg["cmdOutput"] = execMyCommand("reboot 0");
+      sendMessage("say", msg.dump());
+      break;
+    case paramShutdownDevice:
+      msg["cmdOutput"] = execMyCommand("shutdown now");
+      sendMessage("say", msg.dump());
+      break;
+    case paramRandomCommand:
+      string result = execMyCommand(param.sValue);
+      msg["cmdOutput"] = result;
+      sendMessage("say", msg.dump());
+      break;
     }
   }
 
@@ -166,8 +174,9 @@ public:
     {
       g_lastPollUpdate = JamNetStuff::getMicroTime();
       // reset poll interval every 3 minutes
-      if ((g_lastPollUpdate - g_setIntervalTime) > 3 * 60 * 1000 * 1000) {
-        g_pollingInterval = 30 * 1000 * 1000;  // switch to 30 second interval
+      if ((g_lastPollUpdate - g_setIntervalTime) > 3 * 60 * 1000 * 1000)
+      {
+        g_pollingInterval = 30 * 1000 * 1000; // switch to 30 second interval
       }
       memcpy(&m_jamLevels, m_pLevelData->m_pJamLevels, sizeof(RTJamLevels));
       json levels = {{"speaker", "UnitChatRobot"}};
@@ -204,7 +213,8 @@ public:
         });
       }
       sendMessage("say", levels.dump());
-      if (m_jsonTimeStamp != m_jamLevels.jsonTimeStamp) {
+      if (m_jsonTimeStamp != m_jamLevels.jsonTimeStamp)
+      {
         m_jsonTimeStamp = m_jamLevels.jsonTimeStamp;
         // We need to forward the pedalboard json data
         json pedals = {{"speaker", "UnitChatRobot"}};
@@ -218,7 +228,7 @@ private:
   // member variables
   string m_token;
   RTJamLevels m_jamLevels;
-  LevelData* m_pLevelData;
-  ParamData* m_pParamData;
+  LevelData *m_pLevelData;
+  ParamData *m_pParamData;
   uint64_t m_jsonTimeStamp;
 };
