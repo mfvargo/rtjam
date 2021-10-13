@@ -12,11 +12,13 @@ CC = gcc
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
 	./src/main.cpp \
+	../common/easywsclient.cpp \
 	../common/MessageQueue.cpp \
 	../common/SharedMemory.cpp \
 	../common/RTJamNationApi.cpp \
 	../common/Settings.cpp \
 	../common/LightData.cpp \
+	../common/TimersAndStats.cpp \
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
 DEPS := $(OBJS:.o=.d)

@@ -47,6 +47,7 @@ enum RTJamParameters
   paramCheckForUpdate,
   paramRandomCommand,
   paramGetPedalTypes,
+  paramSetUpdateInterval,
   paramRebootDevice = 9998,
   paramShutdownDevice = 9999,
 };

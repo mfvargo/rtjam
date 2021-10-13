@@ -65,11 +65,15 @@ void JamEngine::syncConfigData()
     config.push_back(m_pedalBoards[i].getChainConfig(name, i));
   }
   sprintf(m_levelData.m_pJsonInfo, "%s", config.dump().c_str());
+  // mark the time the json was updated
+  m_levels.jsonTimeStamp = JamNetStuff::getMicroTime();
 }
 
 void JamEngine::getParams()
 {
   m_paramData.receive(&m_param);
+
+  cout << "received: " << m_param.param << endl;
 
   switch (m_param.param)
   {
@@ -273,7 +277,7 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   m_levels.inputRightFreq = m_pedalBoards[1].getFrequency();
   m_levels.leftTunerOn = m_pedalBoards[0].isTuning();
   m_levels.rightTunerOn = m_pedalBoards[1].isTuning();
-  this->syncLevels();
+  syncLevels();
 
   for (int i = 0; i < 2; i++)
   {

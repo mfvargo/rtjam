@@ -2,6 +2,7 @@
 #include "RTJamNationApi.hpp"
 #include "Settings.hpp"
 #include "LightData.hpp"
+#include "UnitChatRobot.hpp"
 #include <iostream>
 
 using namespace std;
@@ -10,9 +11,26 @@ LevelData BoxAPI::s_levelData;
 string BoxAPI::s_token = "";
 ParamData BoxAPI::s_paramData;
 
+UnitChatRobot robot;
+
 bool isRunning = true;
 
 vector<thread> myThreads;
+
+// Thread to keep the unit room websocket alive
+void websocketThread()
+{
+    while (isRunning)
+    {
+        if (BoxAPI::s_token != "")
+        {
+            robot.init("ws://rtjam-nation.basscleftech.com/primus", BoxAPI::s_token, &BoxAPI::s_levelData, &BoxAPI::s_paramData);
+            robot.readMessages();
+            cout << "Room lost" << endl;
+        }
+        sleep(5);
+    }
+}
 
 int fastCGIStuff()
 {
@@ -22,6 +40,7 @@ int fastCGIStuff()
     manager.start();
     manager.join();
     isRunning = false;
+    robot.isRunning = false;
     return 0;
 }
 
@@ -89,6 +108,7 @@ int main(int argc, char *argv[])
 {
     myThreads.push_back(thread(fastCGIStuff));
     myThreads.push_back(thread(jamNationStuff));
+    myThreads.push_back(thread(websocketThread));
     for (auto &element : myThreads)
     {
         element.join();
