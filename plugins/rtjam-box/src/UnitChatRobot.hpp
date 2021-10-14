@@ -217,11 +217,23 @@ public:
       sendMessage("say", levels.dump());
       if (m_jsonTimeStamp != m_jamLevels.jsonTimeStamp)
       {
-        m_jsonTimeStamp = m_jamLevels.jsonTimeStamp;
-        // We need to forward the pedalboard json data
-        json pedals = {{"speaker", "UnitChatRobot"}};
-        pedals["pedalInfo"] = json::parse(m_pLevelData->m_pJsonInfo);
-        sendMessage("say", pedals.dump());
+        try
+        {
+          m_jsonTimeStamp = m_jamLevels.jsonTimeStamp;
+          // We need to forward the pedalboard json data
+          json pedals = {{"speaker", "UnitChatRobot"}};
+          pedals["pedalInfo"] = json::parse(m_pLevelData->m_pJsonInfo);
+          sendMessage("say", pedals.dump());
+        }
+        catch (json::exception &e)
+        {
+          cerr << "error parsing pedalboard" << endl;
+          cerr << e.what() << endl;
+        }
+        catch (...)
+        {
+          cerr << "error parsing pedalboard" << endl;
+        }
       }
     }
   }
