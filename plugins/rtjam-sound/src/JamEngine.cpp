@@ -185,6 +185,16 @@ void JamEngine::getParams()
   case paramMetronomeVolume:
     // set the metronome sound type and volume
     m_jamMixer.setMetronomeConfig(m_param.iValue, m_param.fValue);
+    break;
+  case paramSetFader:
+    if (m_param.iValue >= 0 && m_param.iValue < MIX_CHANNELS)
+    {
+      if (m_param.fValue >= -1.0 && m_param.fValue <= 1.0)
+      {
+        m_jamMixer.fades[m_param.iValue] = m_param.fValue;
+      }
+    }
+    break;
   }
 }
 

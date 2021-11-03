@@ -31,6 +31,7 @@ namespace JamNetStuff
         for (int i = 0; i < MIX_CHANNELS; i++)
         {
             gains[i] = 1.0;
+            fades[i] = 0.0;
             channelLevels[i] = 0;
             bufferDepths[i] = 0.0;
             levelStats[i].windowSize = 30.0;
@@ -48,6 +49,7 @@ namespace JamNetStuff
         for (int i = 2; i < MIX_CHANNELS; i++)
         {
             gains[i] = 1.0;
+            fades[i] = 0.0;
             channelLevels[i] = 0;
             bufferDepths[i] = 0.0;
             jitterBuffers[i].flush();
@@ -78,22 +80,29 @@ namespace JamNetStuff
         // sum all the buffers.
         for (uint32_t i = 0; i < frames; i++)
         {
-            float sum = 0.0;
+            float sumLeft = 0.0;
+            float sumRight = 0.0;
             for (int j = 0; j < MIX_CHANNELS; j++)
             {
                 // This just does a pass through of all the channels for separate processing
                 outputs[2 + j][i] = mixBuffers[j][i];
                 // this is going to sum all the channels into one one
-                sum += masterVol * gains[j] * mixBuffers[j][i];
+                sumLeft += masterVol * gains[j] * mixBuffers[j][i] * sqrt(0.5f * (1.0f - fades[j]));
+                sumRight += masterVol * gains[j] * mixBuffers[j][i] * sqrt(0.5f * (1.0f + fades[j]));
             }
-            sum += beatBuffer[i];
-            if (sum > 1.0)
-                sum = 1.0;
-            if (sum < -1.0)
-                sum = -1.0;
+            sumLeft += beatBuffer[i];
+            sumRight += beatBuffer[i];
+            if (sumLeft > 1.0)
+                sumLeft = 1.0;
+            if (sumLeft < -1.0)
+                sumLeft = -1.0;
+            if (sumRight > 1.0)
+                sumRight = 1.0;
+            if (sumRight < -1.0)
+                sumRight = -1.0;
             // Store the sum in both outputs (left and right)
-            outputs[0][i] = sum;
-            outputs[1][i] = sum;
+            outputs[0][i] = sumLeft;
+            outputs[1][i] = sumRight;
         }
         for (int i = 0; i < MIX_CHANNELS; i++)
         {
