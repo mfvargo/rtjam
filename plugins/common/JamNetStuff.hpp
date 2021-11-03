@@ -244,6 +244,7 @@ namespace JamNetStuff
 
     float masterVol;
     float gains[MIX_CHANNELS];
+    float fades[MIX_CHANNELS];
     float channelLevels[MIX_CHANNELS];
     float peakLevels[MIX_CHANNELS];
     float bufferDepths[MIX_CHANNELS];
