@@ -84,6 +84,7 @@ int jamNationStuff()
                         lightData.m_pLightSettings->status = orange;
                         // Something is wrong with this token
                         token = "";
+                        BoxAPI::s_token = token;
                     };
                 }
             }
