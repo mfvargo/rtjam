@@ -96,7 +96,7 @@ namespace
         if ((ret = getaddrinfo(hostname.c_str(), sport, &hints, &result)) != 0)
         {
             fprintf(stderr, "getaddrinfo for %s gave %d: %s\n", hostname.c_str(), ret, gai_strerror(ret));
-            return 1;
+            return INVALID_SOCKET;
         }
         for (p = result; p != NULL; p = p->ai_next)
         {

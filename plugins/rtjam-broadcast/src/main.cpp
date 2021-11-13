@@ -87,15 +87,20 @@ void fifo_thread(short port, JamNetStuff::JamMixer *jamMixer)
 }
 
 using easywsclient::WebSocket;
+string bcastToken = "";
 
 void websocket_thread(JamNetStuff::JamSocket *pJamSocket, string token)
 {
   RoomChatRobot robot;
   while (true)
   {
-    robot.init("ws://rtjam-nation.basscleftech.com/primus", token, pJamSocket);
-    robot.readMessages();
-    cout << "Room lost" << endl;
+    if (bcastToken != "")
+    {
+      robot.init("ws://rtjam-nation.basscleftech.com/primus", token, pJamSocket);
+      robot.readMessages();
+      cout << "Room lost" << endl;
+      cout << "Bcast token: " << bcastToken << endl;
+    }
     sleep(5);
   }
 }
@@ -132,7 +137,6 @@ int main(int argc, char **argv)
   settings.loadFromFile();
   string urlBase = settings.getOrSetValue("rtjam-nation", std::string("http://rtjam-nation.basscleftech.com/api/1/"));
   int startPort = settings.getOrSetValue("start-port", 7891);
-  string token = "";
   string broadcastUnitName = "";
   settings.saveToFile();
   RTJamNationApi api(urlBase);
@@ -141,20 +145,20 @@ int main(int argc, char **argv)
 
   while (1)
   {
-    if (token == "")
+    if (bcastToken == "")
     {
       // We don't have a token.  Re-register the device.
       if (api.broadcastUnitDeviceRegister() && api.m_httpResponseCode == 200)
       {
         // get the token
-        token = api.m_resultBody["broadcastUnit"]["token"];
+        bcastToken = api.m_resultBody["broadcastUnit"]["token"];
         broadcastUnitName = api.m_resultBody["broadcastUnit"]["name"];
-        clog << "got a new token: " << token << endl;
+        clog << "got a new token: " << bcastToken << endl;
         for (short port = startPort; port < startPort + 1; port++)
         {
           char roomName[100];
           sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);
-          api.activateRoom(token, roomName, port);
+          api.activateRoom(bcastToken, roomName, port);
           if (bFirstTime)
           {
             roomThreads.push_back(std::thread(packet_thread, port, api.m_resultBody["room"]["token"]));
@@ -165,10 +169,10 @@ int main(int argc, char **argv)
     }
     else
     {
-      if (!api.broadcastUnitPing(token) || api.m_httpResponseCode != 200)
+      if (!api.broadcastUnitPing(bcastToken) || api.m_httpResponseCode != 200)
       {
         // Something is wrong with this token
-        token = "";
+        bcastToken = "";
       };
     }
     sleep(10);
