@@ -34,7 +34,7 @@ START_NAMESPACE_DISTRHO
 // -----------------------------------------------------------------------
 
 PluginRTJam::PluginRTJam()
-    : Plugin(paramCount, 0, 0),  // paramCount param(s), presetCount program(s), 0 states
+    : Plugin(paramCount, 0, 0), // paramCount param(s), presetCount program(s), 0 states
       fState(nullptr)
 {
     // set window size on input power bars
@@ -46,7 +46,7 @@ PluginRTJam::PluginRTJam()
 
     // Initialize the jamSocket
     switchRoom(paramRoom0);
-    
+
     // set default values
     loadProgram(0);
 
@@ -54,194 +54,205 @@ PluginRTJam::PluginRTJam()
     reverbOnInputOne = true;
 }
 
-PluginRTJam::~PluginRTJam() {
+PluginRTJam::~PluginRTJam()
+{
     // DISTRHO_SAFE_ASSERT(fState == nullptr);
 }
 
-void PluginRTJam::switchRoom(int roomParam) {
+void PluginRTJam::switchRoom(int roomParam)
+{
     // Initialize the jamSocket
     settings.loadFromFile();
     std::string serverName = settings.getOrSetValue("server", std::string(SERVER_NAME));
-    char* client_env = getenv("RTJAM_CLIENT");
+    char *client_env = getenv("RTJAM_CLIENT");
     uint32_t clientId;
-    if (client_env) {
+    if (client_env)
+    {
         clientId = atoi(client_env);
-    } else {
+    }
+    else
+    {
         clientId = rand() % 32768;
     }
     clientId = settings.getOrSetValue("clientId", clientId);
     settings.saveToFile();
     int port = SERVER_PORT;
-    switch(roomParam) {
-        case paramRoom0:
-            port = 7891;
+    switch (roomParam)
+    {
+    case paramRoom0:
+        port = 7891;
         break;
-        case paramRoom1:
-            port = 7892;
+    case paramRoom1:
+        port = 7892;
         break;
-        case paramRoom2:
-            port = 7893;
+    case paramRoom2:
+        port = 7893;
         break;
     }
     jamMixer.reset();
     jamMixer.gains[0] = dbToLinear(6.0);
     jamMixer.gains[1] = dbToLinear(6.0);
+    for (int i = 0; i < MAX_JAMMERS; i++)
+    {
+        jamMixer.setBufferSmoothness(i, 0.2);
+    }
 
     jamSocket.initClient(serverName.c_str(), port, clientId);
-
 }
 // -----------------------------------------------------------------------
 // Init
 
-void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
+void PluginRTJam::initParameter(uint32_t index, Parameter &parameter)
+{
     if (index >= paramCount)
         return;
 
-    switch (index) {
-        case paramChanGain1:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 1";
-            parameter.symbol     = "one";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain2:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 2";
-            parameter.symbol     = "two";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain3:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 3";
-            parameter.symbol     = "three";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain4:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 4";
-            parameter.symbol     = "four";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain5:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 5";
-            parameter.symbol     = "five";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain6:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 6";
-            parameter.symbol     = "six";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain7:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 7";
-            parameter.symbol     = "seven";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain8:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 8";
-            parameter.symbol     = "eight";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain9:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 9";
-            parameter.symbol     = "nine";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain10:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 10";
-            parameter.symbol     = "ten";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain11:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 11";
-            parameter.symbol     = "eleven";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain12:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 12";
-            parameter.symbol     = "twelve";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain13:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 13";
-            parameter.symbol     = "thirteen";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramChanGain14:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Ch 14";
-            parameter.symbol     = "fourteen";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramMasterVol:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Master";
-            parameter.symbol     = "master";
-            parameter.unit       = "dB";
-            parameter.ranges.def = 0.0f;
-            parameter.ranges.min = -60.0f;
-            parameter.ranges.max = 12.0f;
-            break;
-        case paramReverbMix:
-            parameter.hints      = kParameterIsAutomable;
-            parameter.name       = "Reverb";
-            parameter.symbol     = "reverb";
-            parameter.unit       = "amount";
-            parameter.ranges.def = 0.1f;
-            parameter.ranges.min = 0.0f;
-            parameter.ranges.max = 1.0f;
-            break;
+    switch (index)
+    {
+    case paramChanGain1:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 1";
+        parameter.symbol = "one";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain2:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 2";
+        parameter.symbol = "two";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain3:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 3";
+        parameter.symbol = "three";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain4:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 4";
+        parameter.symbol = "four";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain5:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 5";
+        parameter.symbol = "five";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain6:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 6";
+        parameter.symbol = "six";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain7:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 7";
+        parameter.symbol = "seven";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain8:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 8";
+        parameter.symbol = "eight";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain9:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 9";
+        parameter.symbol = "nine";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain10:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 10";
+        parameter.symbol = "ten";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain11:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 11";
+        parameter.symbol = "eleven";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain12:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 12";
+        parameter.symbol = "twelve";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain13:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 13";
+        parameter.symbol = "thirteen";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramChanGain14:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Ch 14";
+        parameter.symbol = "fourteen";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramMasterVol:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Master";
+        parameter.symbol = "master";
+        parameter.unit = "dB";
+        parameter.ranges.def = 0.0f;
+        parameter.ranges.min = -60.0f;
+        parameter.ranges.max = 12.0f;
+        break;
+    case paramReverbMix:
+        parameter.hints = kParameterIsAutomable;
+        parameter.name = "Reverb";
+        parameter.symbol = "reverb";
+        parameter.unit = "amount";
+        parameter.ranges.def = 0.1f;
+        parameter.ranges.min = 0.0f;
+        parameter.ranges.max = 1.0f;
+        break;
     }
 }
 
@@ -249,7 +260,8 @@ void PluginRTJam::initParameter(uint32_t index, Parameter& parameter) {
   Set the name of the program @a index.
   This function will be called once, shortly after the plugin is created.
 */
-void PluginRTJam::initProgramName(uint32_t index, String& programName) {
+void PluginRTJam::initProgramName(uint32_t index, String &programName)
+{
     printf("init Program");
     if (index != 0)
         return;
@@ -262,7 +274,8 @@ void PluginRTJam::initProgramName(uint32_t index, String& programName) {
 /**
   Optional callback to inform the plugin about a sample rate change.
 */
-void PluginRTJam::sampleRateChanged(double newSampleRate) {
+void PluginRTJam::sampleRateChanged(double newSampleRate)
+{
     fSampleRate = newSampleRate;
     fVerb.setSampleRate(newSampleRate);
 }
@@ -270,88 +283,94 @@ void PluginRTJam::sampleRateChanged(double newSampleRate) {
 /**
   Get the current value of a parameter.
 */
-float PluginRTJam::getParameterValue(uint32_t index) const {
-    switch (index) {
-        case paramChanGain1:
-        case paramChanGain2:
-        case paramChanGain3:
-        case paramChanGain4:
-        case paramChanGain5:
-        case paramChanGain6:
-        case paramChanGain7:
-        case paramChanGain8:
-        case paramChanGain9:
-        case paramChanGain10:
-        case paramChanGain11:
-        case paramChanGain12:
-        case paramChanGain13:
-        case paramChanGain14:
-            return jamMixer.gains[index - paramChanGain1];
-        case paramMasterVol:
-            return jamMixer.masterVol;
-        case paramRoom0:
-            return 1.0f;
-        default:
-            // All the float values are good for 0.0
-            return 0.0f;
+float PluginRTJam::getParameterValue(uint32_t index) const
+{
+    switch (index)
+    {
+    case paramChanGain1:
+    case paramChanGain2:
+    case paramChanGain3:
+    case paramChanGain4:
+    case paramChanGain5:
+    case paramChanGain6:
+    case paramChanGain7:
+    case paramChanGain8:
+    case paramChanGain9:
+    case paramChanGain10:
+    case paramChanGain11:
+    case paramChanGain12:
+    case paramChanGain13:
+    case paramChanGain14:
+        return jamMixer.gains[index - paramChanGain1];
+    case paramMasterVol:
+        return jamMixer.masterVol;
+    case paramRoom0:
+        return 1.0f;
+    default:
+        // All the float values are good for 0.0
+        return 0.0f;
     }
 }
 
 /**
   Change a parameter value.
 */
-void PluginRTJam::setParameterValue(uint32_t index, float value) {
+void PluginRTJam::setParameterValue(uint32_t index, float value)
+{
     printf("param changed %u %f\n", index, value);
-    switch (index) {
-        case paramChanGain1:
-        case paramChanGain2:
-        case paramChanGain3:
-        case paramChanGain4:
-        case paramChanGain5:
-        case paramChanGain6:
-        case paramChanGain7:
-        case paramChanGain8:
-        case paramChanGain9:
-        case paramChanGain10:
-        case paramChanGain11:
-        case paramChanGain12:
-        case paramChanGain13:
-        case paramChanGain14:
-            if (value < -29.9) {
-                value = -60.0;
-            }
-            jamMixer.gains[index - paramChanGain1] = dbToLinear(value);
-            break;
-        case paramMasterVol:
-            jamMixer.masterVol = dbToLinear(value);
-            break;
-        case paramInputMonitor:
-            monitorInput = (value > 0.5f);
-            break;
-        case paramRoom0:
-        case paramRoom1:
-        case paramRoom2:
-            if (value > 0.5f) {
-                // Switch to this room
-                switchRoom(index);
-            }
-            break;
-        case paramReverbChanOne:
-            reverbOnInputOne = (value > 0.5f);
-            break;
-        case paramReverbMix:
-            fVerb.setParameter(MVerb<float>::MIX, value);
-            break;
-
-
+    switch (index)
+    {
+    case paramChanGain1:
+    case paramChanGain2:
+    case paramChanGain3:
+    case paramChanGain4:
+    case paramChanGain5:
+    case paramChanGain6:
+    case paramChanGain7:
+    case paramChanGain8:
+    case paramChanGain9:
+    case paramChanGain10:
+    case paramChanGain11:
+    case paramChanGain12:
+    case paramChanGain13:
+    case paramChanGain14:
+        if (value < -29.9)
+        {
+            value = -60.0;
+        }
+        jamMixer.gains[index - paramChanGain1] = dbToLinear(value);
+        break;
+    case paramMasterVol:
+        jamMixer.masterVol = dbToLinear(value);
+        break;
+    case paramInputMonitor:
+        monitorInput = (value > 0.5f);
+        break;
+    case paramRoom0:
+    case paramRoom1:
+    case paramRoom2:
+        if (value > 0.5f)
+        {
+            // Switch to this room
+            switchRoom(index);
+        }
+        break;
+    case paramReverbChanOne:
+        reverbOnInputOne = (value > 0.5f);
+        break;
+    case paramReverbMix:
+        fVerb.setParameter(MVerb<float>::MIX, value);
+        break;
     }
 }
 
-float PluginRTJam::dbToLinear(float value) {
-    if (value < -59.5) {
+float PluginRTJam::dbToLinear(float value)
+{
+    if (value < -59.5)
+    {
         return 0.0f;
     }
-    return std::exp( (value/72.0f) * 72.0f / kAMP_DB);
+    return std::exp((value / 72.0f) * 72.0f / kAMP_DB);
 }
 
 /**
@@ -359,7 +378,8 @@ float PluginRTJam::dbToLinear(float value) {
   The host may call this function from any context,
   including realtime processing.
 */
-void PluginRTJam::loadProgram(uint32_t index) {
+void PluginRTJam::loadProgram(uint32_t index)
+{
     printf("loading program %u\n", index);
 
     fVerb.setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
@@ -385,7 +405,8 @@ void PluginRTJam::loadProgram(uint32_t index) {
 // -----------------------------------------------------------------------
 // Process
 
-void PluginRTJam::activate() {
+void PluginRTJam::activate()
+{
     jamMixer.reset();
     jamMixer.gains[0] = dbToLinear(6.0);
     jamMixer.gains[1] = dbToLinear(6.0);
@@ -393,31 +414,39 @@ void PluginRTJam::activate() {
     fVerb.reset();
 }
 
-void PluginRTJam::deactivate() {
+void PluginRTJam::deactivate()
+{
     // settings.saveToFile();
     jamSocket.isActivated = false;
 }
 
-
-void PluginRTJam::run(const float** inputs, float** outputs,
-                      uint32_t frames) {
+void PluginRTJam::run(const float **inputs, float **outputs,
+                      uint32_t frames)
+{
     // Get input levels
     float leftPow = 0.0;
     float rightPow = 0.0;
-    for (uint32_t i=0; i<frames; i++) {
+    for (uint32_t i = 0; i < frames; i++)
+    {
         leftPow += pow(inputs[0][i], 2);
         rightPow += pow(inputs[1][i], 2);
     }
     leftPow /= frames + 1;
-    if (leftPow > 1E-6) {
+    if (leftPow > 1E-6)
+    {
         leftPow = 10 * log10(leftPow);
-    } else {
+    }
+    else
+    {
         leftPow = -60.0f;
     }
     rightPow /= frames + 1;
-    if (rightPow > 1E-6) {
+    if (rightPow > 1E-6)
+    {
         rightPow = 10 * log10(rightPow);
-    } else {
+    }
+    else
+    {
         rightPow = -60.0f;
     }
     leftInput.addSample(leftPow);
@@ -426,42 +455,46 @@ void PluginRTJam::run(const float** inputs, float** outputs,
     // Apply reverb to inputs
     float left[frames];
     float right[frames];
-    float* tempOut[2];
+    float *tempOut[2];
     tempOut[0] = left;
     tempOut[1] = right;
     float inLeft[frames];
     float inRight[frames];
-    float* tempIn[2];
+    float *tempIn[2];
     tempIn[0] = inLeft;
     tempIn[1] = inRight;
-    for (uint32_t i=0; i<frames; i++) {
+    for (uint32_t i = 0; i < frames; i++)
+    {
         // Only give the left input to the reverb engine
         inLeft[i] = inputs[0][i];
         inRight[i] = 0.0f;
     }
-    fVerb.process((const float**) tempIn, tempOut, static_cast<int>(frames));
-    for (uint32_t i=0; i<frames; i++) {
-        if (!reverbOnInputOne) {
+    fVerb.process((const float **)tempIn, tempOut, static_cast<int>(frames));
+    for (uint32_t i = 0; i < frames; i++)
+    {
+        if (!reverbOnInputOne)
+        {
             tempOut[0][i] = inputs[0][i];
         }
         tempOut[1][i] = inputs[1][i]; // Copy the right channel back in
     }
 
     // Local monitoring
-    jamMixer.addLocalMonitor((const float**) tempOut, frames);
+    jamMixer.addLocalMonitor((const float **)tempOut, frames);
 
     // Do the network thingy..
-    jamSocket.sendPacket((const float**) tempOut, frames);
+    jamSocket.sendPacket((const float **)tempOut, frames);
     jamSocket.readPackets(&jamMixer);
 
     // Feed the output from the mixer
     jamMixer.getMix(outputs, frames);
     uint32_t ids[MAX_JAMMERS];
     jamSocket.getClientIds(ids);
-    
+
     // Update data to be shared with the U/X
     const MutexLocker csm(fMutex);
-    if (fState != nullptr) {
+    if (fState != nullptr)
+    {
         fState->levelUpdate(jamMixer.channelLevels, jamMixer.bufferDepths);
         fState->masterLevel = jamMixer.masterLevel;
         fState->inputLeft = leftInput.mean;
@@ -470,7 +503,8 @@ void PluginRTJam::run(const float** inputs, float** outputs,
         fState->clientIdsUpdate(ids);
     }
 
-    if (monitorInput) {
+    if (monitorInput)
+    {
         memcpy(outputs[0], inputs[0], sizeof(float) * frames);
         memcpy(outputs[1], inputs[1], sizeof(float) * frames);
     }
@@ -478,7 +512,8 @@ void PluginRTJam::run(const float** inputs, float** outputs,
 
 // -----------------------------------------------------------------------
 
-Plugin* createPlugin() {
+Plugin *createPlugin()
+{
     return new PluginRTJam();
 }
 

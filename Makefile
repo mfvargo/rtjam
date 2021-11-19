@@ -112,7 +112,7 @@ deploy-pi: all
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/version.txt ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 
-deploy-linux:
+deploy-linux: plugins
 	cp bin/rtjam ~/bin
 	cp bin/rtjam-vst.so  ~/vsts
 
