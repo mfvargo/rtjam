@@ -217,6 +217,13 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
 {
   m_framecount += frames;
 
+  // Debug output
+  // if (m_framecount % 375 == 0)
+  // {
+  //   // every second
+  //   m_jamMixer.dumpOut();
+  // }
+
   // Setup itermediate buffer for processed inputs
   float *tempOut[2];
   float oneBuffOut[frames];
