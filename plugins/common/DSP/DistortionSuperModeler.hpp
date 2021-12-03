@@ -41,7 +41,7 @@ public:
         "drive1",                  // Name
         EffectSetting::floatType, // Type of setting
         0.0,                      // Min value
-        25.0,                     // Max value
+        40.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(6.0);
@@ -75,7 +75,7 @@ public:
         15000,                      // Max value
         5,                        // Step Size
         EffectSetting::linear);
-    setting.setFloatValue(20.0);
+    setting.setFloatValue(7000);
     addSetting(setting);
 
     setting.init(
@@ -85,7 +85,7 @@ public:
         25.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
-    setting.setFloatValue(12.0);
+    setting.setFloatValue(6);
     addSetting(setting);
 
     setting.init(
@@ -117,7 +117,7 @@ public:
       15000,                      // Max value
       5,                        // Step Size
       EffectSetting::linear);
-    setting.setFloatValue(20.0);
+    setting.setFloatValue(7000);
     addSetting(setting);
 
 
@@ -144,8 +144,8 @@ public:
     setting.init(
         "mid",                    // Name
         EffectSetting::floatType, // Type of setting
-        -18.0,                    // Min value
-        18.0,                     // Max value
+        -30.0,                    // Min value
+        30.0,                     // Max value
         0.5,                      // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);

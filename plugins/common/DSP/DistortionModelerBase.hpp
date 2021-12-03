@@ -35,10 +35,12 @@ public:
       // HPF in chain - determines amount of low-freqs sent to clipper block
       // use F~140 Hz for full-range. F=720 for Tubescreamer type distorion
       float value = m_hpf1.getSample(input[i]);
+      value = m_lpf1.getSample(value); 
 
       // Stage 1 - first clipper (set to emulate op-amp clipping before diodes)
       value = SignalBlock::clipSample(m_clip1Type, value * m_gain1); // clip signal
-      value = m_lpf1.getSample(value);                             // filter out higher-order harmonics
+                            // filter out higher-order harmonics
+      value = m_lpf2.getSample(value); 
       value = m_hpf2.getSample(value);
 
       // Stage 2 - second clipper option if m_stages == 2
@@ -46,7 +48,7 @@ public:
       {
         value = m_hpf2.getSample(value);  
         value = SignalBlock::clipSample(m_clip2Type, value * m_gain2);
-        value = m_lpf2.getSample(value); // filter out higher-order harmonics
+        value = m_lpf3.getSample(value); // filter out higher-order harmonics
         value = m_hpf3.getSample(value);
       }  
       // Stage 3 - Tone control - 3 band EQ - low shelf, mid cut/boost, high shelf
@@ -97,7 +99,7 @@ protected:
   float m_gain1;                     // gain before clip functions
   float m_gain2;                     // gain before clip functions
   
-  unsigned int m_stages;  
+  unsigned int m_stages = 2;  // not used yet...
 
   float m_level;                    // Overall level
 
