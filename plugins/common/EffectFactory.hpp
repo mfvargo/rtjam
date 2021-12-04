@@ -16,6 +16,7 @@
 #include "Compressor.hpp"
 #include "BassEnvelope.hpp"
 #include "GuitarEnvelope.hpp"
+#include "DistortionSuperModeler.hpp"
 
 using json = nlohmann::json;
 using namespace std;
@@ -35,6 +36,7 @@ const static json s_PedalTypes = {
     {"Compressor", "Compressor Pedal"},
     {"Bass Envelope", "Bass Envelope Filter Pedal"},
     {"Guitar Envelope", "Guitar Envelope Filter Pedal (auto-wah)"},
+    {"DistortionSuperModeler", "Distortion Super Modeler"}
 };
 
 class EffectFactory
@@ -101,6 +103,10 @@ public:
       else if (effect["name"] == "Guitar Envelope")
       {
         rval = new GuitarEnvelope();
+      }
+      else if (effect["name"] == "DistortionSuperModeler")
+      {
+        rval = new DistortionSuperModeler();
       }
       else
       {
