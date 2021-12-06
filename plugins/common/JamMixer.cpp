@@ -59,7 +59,7 @@ namespace JamNetStuff
     /* print out some stats */
     void JamMixer::dumpOut()
     {
-        for (int i = 0; i < MIX_CHANNELS; i++)
+        for (int i = 0; i < MIX_CHANNELS; i += 2)
         {
             printf("Chan: %d\t", i);
             jitterBuffers[i].dumpOut();

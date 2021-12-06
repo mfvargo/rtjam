@@ -16,7 +16,7 @@
 
 #define MIN_DEPTH 512
 #define MAX_DEPTH 4096
-#define MIN_SIGMA 10.0
+#define MIN_SIGMA 7.0
 
 namespace JamNetStuff
 {
