@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
     // midi events from a device, the aconnect command must be run to connect the
     // alsa midi port to the midi through port.  for example
     // aconnect 28 14
-    // assuming the midi pedal is port 14.  you can run aconnect -i to list ports
+    // assuming the midi pedal is port 28.  you can run aconnect -i to list ports
     ports = jack_get_ports(client, "a2j", NULL, JackPortIsOutput);
     if (ports == NULL)
     {
