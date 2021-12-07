@@ -11,7 +11,6 @@
 #include <jack/midiport.h>
 #include "JamEngine.hpp"
 #include "Settings.hpp"
-#include "MidiEvent.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
@@ -55,8 +54,7 @@ int process(jack_nframes_t nframes, void *arg)
             for (jack_nframes_t i = 0; i < event_count; i++)
             {
                 jack_midi_event_get(&in_event, inport_buf, i);
-                MidiEvent mEvent(in_event);
-                pJamEngine->sendMidiEvent(mEvent);
+                pJamEngine->sendMidiEvent(in_event.buffer);
             }
         }
     }

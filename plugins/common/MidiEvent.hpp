@@ -24,9 +24,9 @@ class MidiEvent
   };
 
 public:
-  MidiEvent(jack_midi_event_t &event)
+  MidiEvent(unsigned char *buffer)
   {
-    switch (event.buffer[0] & 0xf0)
+    switch (buffer[0] & 0xf0)
     {
     case 0x80:
       m_type = noteOff;
@@ -55,11 +55,11 @@ public:
     default:
       m_type = unknownType;
     }
-    if (m_type != unknownType && event.size == 3)
+    if (m_type != unknownType)
     {
-      m_channel = event.buffer[0] & 0x0f;
-      m_note = event.buffer[1];
-      m_velocity = event.buffer[2];
+      m_channel = buffer[0] & 0x0f;
+      m_note = buffer[1];
+      m_velocity = buffer[2];
     }
   }
 
