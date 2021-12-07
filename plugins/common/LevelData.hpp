@@ -33,15 +33,25 @@ struct JsonInfo
   char buffer[64 * 1024];
 };
 
+struct MidiRingBuffer
+{
+  unsigned readIdx;
+  unsigned writeIdx;
+  unsigned char ringBuffer[32 * 3]; // 32 3 byte midi events
+};
+
 class LevelData
 {
 public:
   LevelData() : m_sharedMemory("rtjamValues")
   {
-    m_sharedMemory.Create(sizeof(RTJamLevels) + sizeof(JsonInfo));
+    m_sharedMemory.Create(sizeof(RTJamLevels) + sizeof(JsonInfo) + sizeof(MidiRingBuffer));
     m_sharedMemory.Attach();
     m_pJamLevels = (RTJamLevels *)m_sharedMemory.GetData();
     m_pJsonInfo = (char *)m_sharedMemory.GetData() + sizeof(RTJamLevels);
+    m_pRingBuffer = (MidiRingBuffer *)((char *)m_sharedMemory.GetData() + sizeof(RTJamLevels) + sizeof(JsonInfo));
+    m_pRingBuffer->readIdx = 0;
+    m_pRingBuffer->writeIdx = 0;
   }
   ~LevelData()
   {
@@ -50,6 +60,7 @@ public:
 
   RTJamLevels *m_pJamLevels;
   char *m_pJsonInfo;
+  MidiRingBuffer *m_pRingBuffer;
 
 private:
   CSharedMemory m_sharedMemory;

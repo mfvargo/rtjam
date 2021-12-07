@@ -20,6 +20,7 @@ public:
   void syncLevels();
   void syncConfigData();
   void run(const float **inputs, float **outputs, uint32_t frames);
+  void sendMidiEvent(unsigned char *buffer);
   void getParams();
   void connect(const char *host, int port, uint32_t id);
   void disconnect();

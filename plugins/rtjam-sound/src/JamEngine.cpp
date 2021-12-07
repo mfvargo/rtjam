@@ -302,6 +302,13 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   }
 }
 
+void JamEngine::sendMidiEvent(unsigned char *buffer)
+{
+  unsigned char *pBuf = &m_levelData.m_pRingBuffer->ringBuffer[m_levelData.m_pRingBuffer->writeIdx++ * 3];
+  memcpy(pBuf, buffer, 3);
+  m_levelData.m_pRingBuffer->writeIdx % 32;
+}
+
 LightColors JamEngine::dbToColor(float power)
 {
   if (power < -45.0)

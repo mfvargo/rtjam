@@ -6,6 +6,7 @@
 #include "ParamData.hpp"
 #include "LevelData.hpp"
 #include "EffectFactory.hpp"
+#include "MidiEvent.hpp"
 
 using namespace std;
 using easywsclient::WebSocket;
@@ -43,6 +44,7 @@ public:
       // object and it will call it's operator ().
       ws->dispatch(*this);
       doInterPollStuff();
+      sendMidiMessages();
     }
   }
 
@@ -235,6 +237,21 @@ public:
           cerr << "error parsing pedalboard" << endl;
         }
       }
+    }
+  }
+
+  void sendMidiMessages()
+  {
+    // See if there are any midi messages in the ring buffer
+    while (m_pLevelData->m_pRingBuffer->readIdx != m_pLevelData->m_pRingBuffer->writeIdx)
+    {
+      // There is something in the ring buffer
+      unsigned char *pBuf = &m_pLevelData->m_pRingBuffer->ringBuffer[m_pLevelData->m_pRingBuffer->readIdx++ * 3];
+      // Construct a MidiEvent using the pBuf
+      MidiEvent event(pBuf);
+      sendMessage("say", event.toJson().dump());
+      // Wrap the ring buffer index
+      m_pLevelData->m_pRingBuffer->readIdx % 32;
     }
   }
 
