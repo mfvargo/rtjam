@@ -302,6 +302,12 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   }
 }
 
+void JamEngine::sendMidiEvent(MidiEvent &midiEvent)
+{
+  // TODO Need to figure out how to do this!
+  midiEvent.dump();
+}
+
 LightColors JamEngine::dbToColor(float power)
 {
   if (power < -45.0)

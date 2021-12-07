@@ -8,6 +8,7 @@
 #include <thread>
 #include <vector>
 #include "PedalBoard.hpp"
+#include "MidiEvent.hpp"
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -20,6 +21,7 @@ public:
   void syncLevels();
   void syncConfigData();
   void run(const float **inputs, float **outputs, uint32_t frames);
+  void sendMidiEvent(MidiEvent &midiEvent);
   void getParams();
   void connect(const char *host, int port, uint32_t id);
   void disconnect();
