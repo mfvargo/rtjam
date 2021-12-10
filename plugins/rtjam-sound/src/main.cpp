@@ -18,6 +18,23 @@ jack_port_t *midi_port;
 bool useMidi = false;
 jack_client_t *client = NULL;
 
+// Utility to shell out a command
+string execMyCommand(string cmd)
+{
+    array<char, 128> buffer;
+    string result;
+    unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"), pclose);
+    if (!pipe)
+    {
+        return "popen() failed!";
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+    {
+        result += buffer.data();
+    }
+    return result;
+}
+
 static void signal_handler(int sig)
 {
     jack_client_close(client);
@@ -110,6 +127,10 @@ int main(int argc, char *argv[])
             sleep(1);
         }
     }
+
+    // If we got here, jack is running.  Let's try to start a2j midi bridge
+    execMyCommand("a2j_control start");
+
     if (status & JackNameNotUnique)
     {
         client_name = jack_get_client_name(client);
