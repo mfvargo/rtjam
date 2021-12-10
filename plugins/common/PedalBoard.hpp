@@ -11,12 +11,14 @@ public:
   {
     m_outputDCremoval.init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
     m_tuner.init();
+    m_loadedBoardId = -1;
   }
   // Initialize the pedal board. config should be a json::array() of pedals to construct
   // For an empty pedalboard, just pass in json::array()
   void init(json config)
   {
     markUnstable();
+    m_loadedBoardId = -1;
     std::this_thread::sleep_for(std::chrono::microseconds(2000));
     // Clear out any existing pedals
     for (auto &effect : m_chain)
@@ -120,6 +122,7 @@ public:
     json rval = {
         {"name", name},
         {"channel", channel},
+        {"boardId", m_loadedBoardId},
         {"effects", effects}};
     return rval;
   };
@@ -208,6 +211,9 @@ private:
 
     m_outputDCremoval.getBlock(inBuff, output, framesize);
   };
+
+public:
+  int m_loadedBoardId;
 
 private:
   bool m_stable;
