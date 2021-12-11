@@ -140,6 +140,7 @@ void JamEngine::getParams()
         cerr << "failed to parse json!" << endl;
       }
     }
+    break;
   case paramInsertPedal:
     if ((m_param.iValue >= 0 && m_param.iValue < 2) && (m_param.iValue2 >= 0))
     {
@@ -166,7 +167,9 @@ void JamEngine::getParams()
     {
       if (m_param.iValue >= 0 && m_param.iValue < 2)
       {
-        m_pedalBoards[m_param.iValue].init(json::parse(m_param.sValue)["config"]);
+        json boardInfo = json::parse(m_param.sValue);
+        m_pedalBoards[m_param.iValue].init(boardInfo["config"]);
+        m_pedalBoards[m_param.iValue].m_loadedBoardId = boardInfo["id"];
         syncConfigData();
       }
     }
