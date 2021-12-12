@@ -11,10 +11,12 @@
 
 using namespace std;
 
-vector<thread> roomThreads;
-
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 #define FIFO_FRAME_SIZE 960
+#define MAX_ROOMS 1
+
+vector<thread> roomThreads;
+string roomTokens[MAX_ROOMS];
 
 void fifo_thread(short port, JamNetStuff::JamMixer *jamMixer)
 {
@@ -89,14 +91,14 @@ void fifo_thread(short port, JamNetStuff::JamMixer *jamMixer)
 using easywsclient::WebSocket;
 string bcastToken = "";
 
-void websocket_thread(JamNetStuff::JamSocket *pJamSocket, string token)
+void websocket_thread(JamNetStuff::JamSocket *pJamSocket, int roomIdx)
 {
   RoomChatRobot robot;
   while (true)
   {
-    if (bcastToken != "")
+    if (bcastToken != "" && roomTokens[roomIdx] != "")
     {
-      robot.init("ws://rtjam-nation.basscleftech.com/primus", token, pJamSocket);
+      robot.init("ws://rtjam-nation.basscleftech.com/primus", roomTokens[roomIdx], pJamSocket);
       robot.readMessages();
       cout << "Room lost" << endl;
       cout << "Bcast token: " << bcastToken << endl;
@@ -105,7 +107,7 @@ void websocket_thread(JamNetStuff::JamSocket *pJamSocket, string token)
   }
 }
 
-void packet_thread(short port, string token)
+void packet_thread(short port, int roomIdx)
 {
   JamNetStuff::JamSocket *pJamSocket = new JamNetStuff::JamSocket();
   JamNetStuff::JamMixer *pJamMixer = new JamNetStuff::JamMixer();
@@ -120,7 +122,7 @@ void packet_thread(short port, string token)
   std::thread fifoThread = std::thread(fifo_thread, port, pJamMixer);
 
   // Start a thread to connect each room to a server chat room
-  std::thread websocketThread = std::thread(websocket_thread, pJamSocket, token);
+  std::thread websocketThread = std::thread(websocket_thread, pJamSocket, roomIdx);
 
   // Loop and broadcast data
   while (1)
@@ -159,9 +161,10 @@ int main(int argc, char **argv)
           char roomName[100];
           sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);
           api.activateRoom(bcastToken, roomName, port);
+          roomTokens[port - startPort] = api.m_resultBody["room"]["token"];
           if (bFirstTime)
           {
-            roomThreads.push_back(std::thread(packet_thread, port, api.m_resultBody["room"]["token"]));
+            roomThreads.push_back(std::thread(packet_thread, port, port - startPort));
           }
         }
         bFirstTime = false;
@@ -173,6 +176,10 @@ int main(int argc, char **argv)
       {
         // Something is wrong with this token
         bcastToken = "";
+        for (int i = 0; i < MAX_ROOMS; i++)
+        {
+          roomTokens[i] = "";
+        }
       };
     }
     sleep(10);
