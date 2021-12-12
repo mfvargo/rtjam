@@ -85,7 +85,7 @@ namespace JamNetStuff
             for (int j = 0; j < MIX_CHANNELS; j++)
             {
                 // This just does a pass through of all the channels for separate processing
-                outputs[2 + j][i] = mixBuffers[j][i];
+                outputs[2 + j][i] = mixBuffers[j][i] * gains[j];
                 // this is going to sum all the channels into one one
                 sumLeft += masterVol * gains[j] * mixBuffers[j][i] * sqrt(0.5f * (1.0f - fades[j]));
                 sumRight += masterVol * gains[j] * mixBuffers[j][i] * sqrt(0.5f * (1.0f + fades[j]));
