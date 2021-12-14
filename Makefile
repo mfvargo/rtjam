@@ -76,6 +76,10 @@ install-pi: pi-embed
 	systemctl restart rtjam-jack
 	systemctl restart rtjam-sound
 	systemctl restart rtjam-status
+	systemctl enable rtjam-box
+	systemctl enable rtjam-jack
+	systemctl enable rtjam-sound
+	systemctl enable rtjam-status
 
 stop-pi:
 	systemctl stop rtjam-box
