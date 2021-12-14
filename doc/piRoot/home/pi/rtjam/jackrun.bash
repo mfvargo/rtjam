@@ -25,4 +25,5 @@ then
 fi
 #
 /usr/bin/aplay -l > devices.txt
+/usr/bin/aconnect 20 14
 /usr/bin/jackd -R -dalsa -r48000 -n 2 -p128 -C $INDEV -P $OUTDEV -i2 -o2
