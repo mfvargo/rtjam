@@ -25,6 +25,8 @@ struct RTJamLevels
   float inputRightFreq;
   bool leftTunerOn;
   bool rightTunerOn;
+  bool leftRoomMute;
+  bool rightRoomMute;
   uint64_t jsonTimeStamp;
 };
 
