@@ -200,6 +200,8 @@ public:
           {"inputRightFreq", m_jamLevels.inputRightFreq},
           {"leftTunerOn", m_jamLevels.leftTunerOn},
           {"rightTunerOn", m_jamLevels.rightTunerOn},
+          {"leftRoomMute", m_jamLevels.leftRoomMute},
+          {"rightRoomMute", m_jamLevels.rightRoomMute},
           {"beat", m_jamLevels.beat},
           {"connected", m_jamLevels.isConnected},
           {"jsonTimeStamp", m_jamLevels.jsonTimeStamp},
