@@ -43,6 +43,8 @@ private:
   LevelData m_levelData;
   ParamData m_paramData;
   BiQuadFilter m_inputDCremoval[2];
+  bool m_LeftRoomMute;
+  bool m_RightRoomMute;
 };
 
 #endif

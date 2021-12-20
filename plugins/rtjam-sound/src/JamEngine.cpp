@@ -28,6 +28,8 @@ JamEngine::JamEngine()
   }
   m_inputDCremoval[0].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
   m_inputDCremoval[1].init(BiQuadFilter::FilterType::HighPass, 2.0, 1.0, 1.0, 48000);
+  m_LeftRoomMute = false;
+  m_RightRoomMute = false;
 }
 
 JamEngine::~JamEngine()
@@ -198,6 +200,16 @@ void JamEngine::getParams()
       }
     }
     break;
+  case paramMuteToRoom:
+    if (m_param.iValue == 0)
+    {
+      m_LeftRoomMute = m_param.iValue2 == 1;
+    }
+    if (m_param.iValue == 1)
+    {
+      m_RightRoomMute = m_param.iValue2 == 1;
+    }
+    break;
   }
 }
 
@@ -254,6 +266,14 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   m_jamSocket.readPackets(&m_jamMixer);
 
   // Send to the room
+  if (m_LeftRoomMute)
+  {
+    memset(tempOut[0], 0x00, frames * sizeof(float));
+  }
+  if (m_RightRoomMute)
+  {
+    memset(tempOut[1], 0x00, frames * sizeof(float));
+  }
   m_jamSocket.sendPacket((const float **)tempOut, frames);
 
   // Get the mix
@@ -297,6 +317,8 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   m_levels.inputRightFreq = m_pedalBoards[1].getFrequency();
   m_levels.leftTunerOn = m_pedalBoards[0].isTuning();
   m_levels.rightTunerOn = m_pedalBoards[1].isTuning();
+  m_levels.leftRoomMute = m_LeftRoomMute;
+  m_levels.rightRoomMute = m_RightRoomMute;
   syncLevels();
 
   for (int i = 0; i < 2; i++)
