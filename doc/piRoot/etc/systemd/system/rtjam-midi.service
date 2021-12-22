@@ -1,0 +1,20 @@
+[Unit]
+Description=rtjam midi event collection service
+After=network.target
+
+
+[Service]
+LimitRTPRIO=infinity
+LimitMEMLOCK=infinity
+ExecStart=/home/pi/rtjam/rtjam-midi
+WorkingDirectory=/home/pi/rtjam
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+Environment="JACK_NO_AUDIO_RESERVATION=1"
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+Environment="DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1000/bus"
+
+[Install]
+WantedBy=multi-user.target

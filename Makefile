@@ -25,6 +25,7 @@ pi-embed:
 	$(MAKE) all -C plugins/rtjam-status
 	$(MAKE) all -C plugins/rtjam-sound
 	$(MAKE) all -C plugins/rtjam-box
+	$(MAKE) all -C plugins/rtjam-midi
 	$(MAKE) all -C plugins/testHarness
 	$(MAKE) all -C plugins/testLights
 
@@ -58,6 +59,7 @@ clean:
 	$(MAKE) clean -C plugins/rtjam-broadcast
 	$(MAKE) clean -C plugins/rtjam-sound
 	$(MAKE) clean -C plugins/rtjam-box
+	$(MAKE) clean -C plugins/rtjam-midi
 	$(MAKE) clean -C plugins/rtjam-status
 	$(MAKE) clean -C plugins/testHarness
 	$(MAKE) clean -C plugins/testLights
@@ -71,6 +73,7 @@ install-pi: pi-embed
 	cp bin/rtjam-box /home/pi/rtjam
 	cp bin/rtjam-sound /home/pi/rtjam
 	cp bin/rtjam-status /home/pi/rtjam
+	cp bin/rtjam-midi /home/pi/rtjam
 	systemctl daemon-reload
 	systemctl restart rtjam-box
 	systemctl restart rtjam-jack
@@ -114,12 +117,14 @@ deploy-pi: all
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-sound ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-box ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/rtjam.cer bin/rtjam-midi ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/version.txt ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 # Destiny server
 	scp -i ~/.ssh/destiny.cer bin/rtjam-status ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/destiny.cer bin/rtjam-sound ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/destiny.cer bin/rtjam-box ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/destiny.cer bin/rtjam-broadcast ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/destiny.cer bin/rtjam-midi ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/destiny.cer bin/version.txt ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 
 deploy-linux: plugins

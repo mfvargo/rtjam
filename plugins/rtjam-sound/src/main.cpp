@@ -210,25 +210,25 @@ int main(int argc, char *argv[])
     // alsa midi port to the midi through port.  for example
     // aconnect 28 14
     // assuming the midi pedal is port 28.  you can run aconnect -i to list ports
-    ports = jack_get_ports(client, "a2j", NULL, JackPortIsOutput);
-    if (ports == NULL)
-    {
-        fprintf(stderr, "no a2j ports running.  check a2j_control --status \n");
-    }
-    else
-    {
-        cout << ports[0] << endl;
-        if (jack_connect(client, ports[0], jack_port_name(midi_port)))
-        {
-            fprintf(stderr, "cannot connect to a2j port\n");
-        }
-        else
-        {
-            useMidi = true;
-        }
+    // ports = jack_get_ports(client, "a2j", NULL, JackPortIsOutput);
+    // if (ports == NULL)
+    // {
+    //     fprintf(stderr, "no a2j ports running.  check a2j_control --status \n");
+    // }
+    // else
+    // {
+    //     cout << ports[0] << endl;
+    //     if (jack_connect(client, ports[0], jack_port_name(midi_port)))
+    //     {
+    //         fprintf(stderr, "cannot connect to a2j port\n");
+    //     }
+    //     else
+    //     {
+    //         useMidi = true;
+    //     }
 
-        jack_free(ports);
-    }
+    //     jack_free(ports);
+    // }
 
     /* install a signal handler to properly quits jack client */
     signal(SIGQUIT, signal_handler);
