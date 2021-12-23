@@ -113,6 +113,8 @@ public:
       {
         g_pollingInterval = param.iValue * 1000; // Convert to microseconds
         g_setIntervalTime = JamNetStuff::getMicroTime();
+        msg["interval"] = g_setIntervalTime;
+        sendMessage("say", msg.dump());
       }
       break;
     }
