@@ -1,26 +1,12 @@
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <signal.h>
-#ifndef WIN32
+#include <alsa/asoundlib.h>
+#include <string>
+#include <array>
 #include <unistd.h>
-#endif
-#include <jack/jack.h>
-#include <jack/midiport.h>
-#include <iostream>
-#include <fstream>
-#include <thread>
-#include <unistd.h>
-#include <pwd.h>
+#include <memory>
 #include "LevelData.hpp"
+#include "MidiEvent.hpp"
 
-jack_port_t *input_port;
-jack_client_t *client = NULL;
 using namespace std;
-
-LevelData levelData;
 
 // Utility to shell out a command
 string execMyCommand(string cmd)
@@ -39,119 +25,67 @@ string execMyCommand(string cmd)
   return result;
 }
 
-// Called on signals to close jack connection neatly
-static void signal_handler(int sig)
+static snd_seq_t *seq_handle;
+static int in_port;
+
+#define CHK(stmt, msg)    \
+  if ((stmt) < 0)         \
+  {                       \
+    puts("ERROR: " #msg); \
+    exit(1);              \
+  }
+void midi_open(void)
 {
-  jack_client_close(client);
-  fprintf(stderr, "signal received, exiting ...\n");
-  exit(0);
+  CHK(snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_INPUT, 0),
+      "Could not open sequencer");
+
+  CHK(snd_seq_set_client_name(seq_handle, "rtjam-midi"),
+      "Could not set client name");
+  CHK(in_port = snd_seq_create_simple_port(seq_handle, "listen:in",
+                                           SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
+                                           SND_SEQ_PORT_TYPE_APPLICATION),
+      "Could not open port");
 }
 
-/**
- * The process callback for this JACK application is called in a
- * special realtime thread once for each audio cycle.
- */
-
-int process(jack_nframes_t nframes, void *arg)
+snd_seq_event_t *midi_read(void)
 {
-  void *inport_buf = jack_port_get_buffer(input_port, nframes);
-  jack_midi_event_t in_event;
-  jack_nframes_t event_count = jack_midi_get_event_count(inport_buf);
-  if (event_count != 0)
-  {
-    jack_midi_event_t in_event;
-    for (jack_nframes_t i = 0; i < event_count; i++)
-    {
-      jack_midi_event_get(&in_event, inport_buf, i);
-      unsigned char *pBuf = &levelData.m_pRingBuffer->ringBuffer[levelData.m_pRingBuffer->writeIdx++ * 3];
-      memcpy(pBuf, in_event.buffer, 3);
-      levelData.m_pRingBuffer->writeIdx % 32;
-    }
-  }
-  return 0;
+  snd_seq_event_t *ev = NULL;
+  CHK(snd_seq_event_input(seq_handle, &ev), "Error reading Midi Input");
+  return ev;
 }
 
-/**
- * JACK calls this shutdown_callback if the server ever shuts down or
- * decides to disconnect the client.
- */
-void jack_shutdown(void *arg)
+LevelData levelData;
+
+void midi_process(const snd_seq_event_t *ev)
 {
-  free(input_port);
-  exit(1);
+  unsigned char *pBuf = &levelData.m_pRingBuffer->ringBuffer[levelData.m_pRingBuffer->writeIdx++ * 28];
+  memcpy(pBuf, ev, sizeof(snd_seq_event_t));
+  levelData.m_pRingBuffer->writeIdx % 32;
+  MidiEvent mEvent(ev);
+  mEvent.dump();
+
+  // if ((ev->type == SND_SEQ_EVENT_NOTEON) || (ev->type == SND_SEQ_EVENT_NOTEOFF))
+  // {
+  //   const char *type = (ev->type == SND_SEQ_EVENT_NOTEON) ? "on " : "off";
+  //   printf("[%d] Note %s: %2x vel(%2x)\n", ev->time.tick, type,
+  //          ev->data.note.note,
+  //          ev->data.note.velocity);
+  // }
+  // else if (ev->type == SND_SEQ_EVENT_CONTROLLER)
+  //   printf("[%d] Control:  %2x val(%2x)\n", ev->time.tick,
+  //          ev->data.control.param,
+  //          ev->data.control.value);
+  // else
+  //   printf("[%d] Unknown:  Unhandled Event Received\n", ev->time.tick);
 }
 
-int main(int argc, char *argv[])
+int main()
 {
-  int i;
-  const char **ports;
-  const char *client_name = "rtjam-midi";
-  const char *server_name = NULL;
-  jack_options_t options = JackNoStartServer;
-  jack_status_t status;
+  midi_open();
+  // This should connect the pedal to the port here.
+  execMyCommand("aconnect 32 129");
 
-  // loop while trying to connect to jack.  If jack is not running this will just keep looping
-  // until it starts.
-  while (client == NULL)
-  {
-    /* open a client connection to the JACK server */
-    client = jack_client_open(client_name, options, &status);
-    if (client == NULL)
-    {
-      fprintf(stderr, "jack_client_open() failed, status = 0x%2.0x\n", status);
-      sleep(3);
-    }
-  }
-
-  // If we got here, jack is running.  Let's try to start a2j midi bridge
-  execMyCommand("a2j_control start");
-  execMyCommand("aconnect 20 14");
-
-  if (status & JackNameNotUnique)
-  {
-    client_name = jack_get_client_name(client);
-    fprintf(stderr, "unique name `%s' assigned\n", client_name);
-  }
-
-  jack_set_process_callback(client, process, NULL);
-
-  jack_on_shutdown(client, jack_shutdown, 0);
-
-  input_port = jack_port_register(client, "in", JACK_DEFAULT_MIDI_TYPE, (JackPortIsInput | JackPortIsTerminal), 0);
-
-  /* Tell the JACK server that we are ready to roll.  Our
-     * process() callback will start running now. */
-
-  if (jack_activate(client))
-  {
-    fprintf(stderr, "cannot activate client");
-    exit(1);
-  }
-
-  // Lets try to connect the midi-port to something
-  ports = jack_get_ports(client, "a2j", NULL, JackPortIsOutput);
-  if (ports == NULL)
-  {
-    fprintf(stderr, "no a2j ports running.  check a2j_control --status \n");
-    exit(1);
-  }
-  cout << ports[0] << endl;
-  if (jack_connect(client, ports[0], jack_port_name(input_port)))
-    fprintf(stderr, "cannot connect to a2j port\n");
-
-  jack_free(ports);
-
-  /* install a signal handler to properly quits jack client */
-  signal(SIGQUIT, signal_handler);
-  signal(SIGTERM, signal_handler);
-  signal(SIGHUP, signal_handler);
-  signal(SIGINT, signal_handler);
-
-  /* keep running until the transport stops */
   while (1)
-  {
-    sleep(1);
-  }
-  jack_client_close(client);
-  exit(0);
+    midi_process(midi_read());
+  return -1;
 }
