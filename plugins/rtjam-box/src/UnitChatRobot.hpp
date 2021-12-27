@@ -250,9 +250,9 @@ public:
     while (m_pLevelData->m_pRingBuffer->readIdx != m_pLevelData->m_pRingBuffer->writeIdx)
     {
       // There is something in the ring buffer
-      unsigned char *pBuf = &m_pLevelData->m_pRingBuffer->ringBuffer[m_pLevelData->m_pRingBuffer->readIdx++ * 3];
+      unsigned char *pBuf = &m_pLevelData->m_pRingBuffer->ringBuffer[m_pLevelData->m_pRingBuffer->readIdx++ * 28];
       // Construct a MidiEvent using the pBuf
-      MidiEvent event(pBuf);
+      MidiEvent event((const snd_seq_event_t *)pBuf);
       sendMessage("say", event.toJson().dump());
       // Wrap the ring buffer index
       m_pLevelData->m_pRingBuffer->readIdx % 32;

@@ -39,7 +39,7 @@ struct MidiRingBuffer
 {
   unsigned readIdx;
   unsigned writeIdx;
-  unsigned char ringBuffer[32 * 3]; // 32 3 byte midi events
+  unsigned char ringBuffer[32 * 28]; // 32 3 byte midi events
 };
 
 class LevelData
