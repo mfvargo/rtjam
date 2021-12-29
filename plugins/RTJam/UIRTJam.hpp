@@ -96,7 +96,6 @@ private:
     ScopedPointer<ImageSlider> fSliderMaster;
     ScopedPointer<ImageSwitch> fMonitorInputButton;
     RTJamState fState;
-    bool clickOn;
     Point<int> Corners[MAX_JAMMERS - 1];
 
     NanoVG fNanoText;

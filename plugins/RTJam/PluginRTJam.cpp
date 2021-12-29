@@ -307,7 +307,6 @@ float PluginRTJam::getParameterValue(uint32_t index) const
 */
 void PluginRTJam::setParameterValue(uint32_t index, float value)
 {
-    printf("param changed %u %f\n", index, value);
     switch (index)
     {
     case paramChanGain1:
