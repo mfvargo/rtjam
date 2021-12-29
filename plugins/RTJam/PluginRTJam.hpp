@@ -32,7 +32,6 @@
 #include "JamNetStuff.hpp"
 #include "JamDirectory.hpp"
 #include "Settings.hpp"
-#include "MVerb.h"
 
 class UIRTJam;
 struct RTJamState;
@@ -81,8 +80,6 @@ public:
         paramRoom0,
         paramRoom1,
         paramRoom2,
-        paramReverbChanOne,
-        paramReverbMix,
         paramCount
     };
 
@@ -181,7 +178,6 @@ private:
 
     bool reverbOnInputOne;
     float *reverbBuf[2];
-    MVerb<float> fVerb;
 
     Mutex fMutex;
     RTJamState *fState;

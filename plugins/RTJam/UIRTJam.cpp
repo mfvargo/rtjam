@@ -53,20 +53,6 @@ UIRTJam::UIRTJam()
     fSliderMaster->setEndPos(158, 88);
     fSliderMaster->setRange(-30.0f, 12.0);
     fSliderMaster->setCallback(this);
-    // knobs
-    Image knobImage(Art::knobData, Art::knobWidth, Art::knobHeight);
-    {
-        ImageKnob *const knob(new ImageKnob(this, knobImage, ImageKnob::Vertical));
-        knob->setId(PluginRTJam::paramReverbMix);
-        knob->setAbsolutePos(10, 365);
-        knob->setRange(0.0f, 1.0f);
-        knob->setDefault(0.1f);
-        knob->setValue(0.1f);
-        knob->setCallback(this);
-        fKnobs.push_back(knob);
-    }
-    // Read envrionment
-    clickOn = getenv("CLICK_ON") != NULL;
 
     // level sliders
     Point<int> sliderPosStart(20, 180);
@@ -205,9 +191,6 @@ void UIRTJam::parameterChanged(uint32_t index, float value)
     case PluginRTJam::paramMasterVol:
         fSliderMaster->setValue(value);
         break;
-    case PluginRTJam::paramReverbMix:
-        fKnobs[0]->setValue(value);
-        break;
     }
 }
 
@@ -286,12 +269,6 @@ void UIRTJam::onDisplay()
     drawPos.setX(drawPos.getX() + 24);
     fMeterBar.drawAt(drawPos, 170, 1.0 - ((fState.channelLevels[0] + 60) / 60));
 
-    // Reverb Level
-    char strBuf[32 + 1];
-    strBuf[32] = '\0';
-    std::snprintf(strBuf, 32, "%02d%%", int(fKnobs[0]->getValue() * 100));
-    drawText(-20, 395, strBuf);
-
     // Input level 1
     drawPos.setX(111);
     fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputRight + 66) / 60);
@@ -319,15 +296,6 @@ void UIRTJam::onDisplay()
     {
         drawChannel(i);
     }
-    // printf("5001: %s\n", jamDirectory.findUser(5001).c_str());
-    // if (clickOn) {
-    //     // Metronome
-    //     drawPos.setPos(50, 115);
-    //     for(int i=0; i<4; i++) {
-    //         fMeterBar.drawAt(drawPos, 30, 1.0 - (fState.beat == i));
-    //         drawPos.setX(drawPos.getX() + spacing);
-    //     }
-    // }
 }
 
 void UIRTJam::drawChannel(int chan)
@@ -497,9 +465,6 @@ void UIRTJam::imageSwitchClicked(ImageSwitch *button, bool down)
 
         break;
     case PluginRTJam::paramInputMonitor:
-        setParameterValue(button->getId(), down);
-        break;
-    case PluginRTJam::paramReverbChanOne:
         setParameterValue(button->getId(), down);
         break;
     }
