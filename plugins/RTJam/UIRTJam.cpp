@@ -47,16 +47,17 @@ UIRTJam::UIRTJam()
     Point<int> sliderPosStart(20, 180);
     Point<int> sliderPosEnd(20, 330);
     int colWidth = 125;
-    int rowHeight = 200;
+    int rowHeight = 140;
 
     // Now for the channels
     for (int row = 0; row < 3; row++)
     {
-        for (int col = 0; col < 3; col++)
+        for (int col = 0; col < 4; col++)
         {
-            Corners[row * 4 + col].setPos(200 + col * colWidth, 30 + row * rowHeight);
+            Corners[row * 4 + col].setPos(200 + col * colWidth, 20 + row * rowHeight);
         }
     }
+
     // Room selectors
     for (int i = 0; i < MAX_ROOMS; i++)
     {
@@ -162,9 +163,9 @@ void UIRTJam::drawChannel(int chan)
 
     // Smooth indicator
     const float depth = fState.clientIds[chan] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[chan * 2];
-    fMeterBar.drawAt(drawPos, height, 1.0 - depth);
+    fMeterBar.drawAt(drawPos, height, 1.0 - (depth / 2));
     std::snprintf(strBuf, 32, "%0.0f", depth * 40);
-    // drawText(drawPos.getX() - 40, drawPos.getY() + height + 5, strBuf);
+    drawText(drawPos.getX() - 40, drawPos.getY() + height + 5, strBuf);
 
     drawPos.setX(drawPos.getX() + spacing);
     fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[chan * 2] + 60) / 60));

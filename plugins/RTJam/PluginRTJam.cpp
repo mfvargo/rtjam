@@ -86,7 +86,7 @@ void PluginRTJam::switchRoom(int roomParam)
         port = 7892;
         break;
     case paramRoom2:
-        port = 7893;
+        port = 7895;
         break;
     }
     jamMixer.reset();
@@ -94,7 +94,7 @@ void PluginRTJam::switchRoom(int roomParam)
     jamMixer.gains[1] = dbToLinear(6.0);
     for (int i = 0; i < MAX_JAMMERS; i++)
     {
-        jamMixer.setBufferSmoothness(i, 0.2);
+        jamMixer.setBufferSmoothness(i, 0.08);
     }
 
     jamSocket.initClient(serverName.c_str(), port, clientId);
@@ -393,6 +393,16 @@ void PluginRTJam::deactivate()
 void PluginRTJam::run(const float **inputs, float **outputs,
                       uint32_t frames)
 {
+    frameCount += frames;
+
+    // Debug output
+    if (frameCount > 48000)
+    {
+        // every second
+        frameCount = 0;
+        jamMixer.dumpOut();
+    }
+
     // Get input levels
     float leftPow = 0.0;
     float rightPow = 0.0;

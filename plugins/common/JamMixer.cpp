@@ -61,8 +61,11 @@ namespace JamNetStuff
     {
         for (int i = 0; i < MIX_CHANNELS; i += 2)
         {
-            printf("Chan: %d\t", i);
-            jitterBuffers[i].dumpOut();
+            if (jitterBuffers[i].depth() > 0)
+            {
+                printf("Chan: %d\t", i);
+                jitterBuffers[i].dumpOut();
+            }
         }
         printf("\n");
     }
