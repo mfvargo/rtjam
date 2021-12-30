@@ -400,7 +400,7 @@ void PluginRTJam::run(const float **inputs, float **outputs,
     {
         // every second
         frameCount = 0;
-        jamMixer.dumpOut();
+        // jamMixer.dumpOut();
     }
 
     // Get input levels
