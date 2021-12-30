@@ -34,8 +34,6 @@
 #include "RTJamArt.hpp"
 #include "levelMeters.hpp"
 #include "MeterBar.hpp"
-#include "JamDirectory.hpp"
-// #include "LabelBox.hpp"
 
 #define MAX_ROOMS 3
 
@@ -87,22 +85,15 @@ protected:
 
 private:
     Image fImgBackground;
-    PartialImage fSlideLine;
     Image fSmoothButtonNormal, fsmoothButtonPressed;
-    ImageSlider *fVol[MIX_CHANNELS];
     ImageSwitch *fRooms[MAX_ROOMS];
-    ImageSwitch *fReverb;
     JamNetStuff::JamMeterBar fMeterBar;
-    ScopedPointer<ImageSlider> fSliderMaster;
-    ScopedPointer<ImageSwitch> fMonitorInputButton;
     RTJamState fState;
-    bool clickOn;
     Point<int> Corners[MAX_JAMMERS - 1];
 
     NanoVG fNanoText;
     NanoVG::FontId fNanoFont;
 
-    JamNetStuff::JamDirectory jamDirectory;
     std::vector<ImageKnob *> fKnobs;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)

@@ -25,7 +25,6 @@ FILES_DSP = \
 FILES_UI = \
 	UIRTJam.cpp \
 	RTJamArt.cpp \
-	../common/JamDirectory.cpp \
 	../common/PartialImage.cpp \
 	../common/LabelBox.cpp \
 	../common/MeterBar.cpp \
@@ -39,7 +38,7 @@ include ../../dpf/Makefile.plugins.mk
 # --------------------------------------------------------------
 # Extra flags
 
-LINK_FLAGS += -lpthread -lcurl
+LINK_FLAGS += -lpthread
 CXXFLAGS += -Wno-psabi -I../common -I../common/DSP
 
 # --------------------------------------------------------------

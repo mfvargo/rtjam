@@ -135,7 +135,7 @@ namespace JamNetStuff
   public:
     JitterBuffer();
 
-    void flush();
+    void flush(int initialDepth = 0);
     int depth();
     void putIn(const float *buffer, int frames, uint32_t seqNo);
     void getOut(float *buffer, int frames);
@@ -159,6 +159,8 @@ namespace JamNetStuff
     uint32_t lastSequence;
     int numDropped;
     StreamTimeStats bufferStats;
+    bool m_filling;
+    int m_fillDepth;
 
     void copySamples(float *dst, const float *src, int count);
   };

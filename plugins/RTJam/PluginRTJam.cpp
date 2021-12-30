@@ -86,7 +86,7 @@ void PluginRTJam::switchRoom(int roomParam)
         port = 7892;
         break;
     case paramRoom2:
-        port = 7893;
+        port = 7895;
         break;
     }
     jamMixer.reset();
@@ -94,7 +94,7 @@ void PluginRTJam::switchRoom(int roomParam)
     jamMixer.gains[1] = dbToLinear(6.0);
     for (int i = 0; i < MAX_JAMMERS; i++)
     {
-        jamMixer.setBufferSmoothness(i, 0.2);
+        jamMixer.setBufferSmoothness(i, 0.08);
     }
 
     jamSocket.initClient(serverName.c_str(), port, clientId);
@@ -244,15 +244,6 @@ void PluginRTJam::initParameter(uint32_t index, Parameter &parameter)
         parameter.ranges.min = -60.0f;
         parameter.ranges.max = 12.0f;
         break;
-    case paramReverbMix:
-        parameter.hints = kParameterIsAutomable;
-        parameter.name = "Reverb";
-        parameter.symbol = "reverb";
-        parameter.unit = "amount";
-        parameter.ranges.def = 0.1f;
-        parameter.ranges.min = 0.0f;
-        parameter.ranges.max = 1.0f;
-        break;
     }
 }
 
@@ -277,7 +268,6 @@ void PluginRTJam::initProgramName(uint32_t index, String &programName)
 void PluginRTJam::sampleRateChanged(double newSampleRate)
 {
     fSampleRate = newSampleRate;
-    fVerb.setSampleRate(newSampleRate);
 }
 
 /**
@@ -317,7 +307,6 @@ float PluginRTJam::getParameterValue(uint32_t index) const
 */
 void PluginRTJam::setParameterValue(uint32_t index, float value)
 {
-    printf("param changed %u %f\n", index, value);
     switch (index)
     {
     case paramChanGain1:
@@ -355,12 +344,6 @@ void PluginRTJam::setParameterValue(uint32_t index, float value)
             switchRoom(index);
         }
         break;
-    case paramReverbChanOne:
-        reverbOnInputOne = (value > 0.5f);
-        break;
-    case paramReverbMix:
-        fVerb.setParameter(MVerb<float>::MIX, value);
-        break;
     }
 }
 
@@ -380,18 +363,6 @@ float PluginRTJam::dbToLinear(float value)
 */
 void PluginRTJam::loadProgram(uint32_t index)
 {
-    printf("loading program %u\n", index);
-
-    fVerb.setParameter(MVerb<float>::DAMPINGFREQ, 0.5f);
-    fVerb.setParameter(MVerb<float>::DENSITY, 0.5f);
-    fVerb.setParameter(MVerb<float>::BANDWIDTHFREQ, 0.5f);
-    fVerb.setParameter(MVerb<float>::DECAY, 0.5f);
-    fVerb.setParameter(MVerb<float>::PREDELAY, 0.5f);
-    fVerb.setParameter(MVerb<float>::SIZE, 0.75f);
-    fVerb.setParameter(MVerb<float>::GAIN, 1.0f);
-    fVerb.setParameter(MVerb<float>::MIX, 0.1f);
-    fVerb.setParameter(MVerb<float>::EARLYMIX, 0.5f);
-
     if (index != 0)
         return;
 
@@ -411,7 +382,6 @@ void PluginRTJam::activate()
     jamMixer.gains[0] = dbToLinear(6.0);
     jamMixer.gains[1] = dbToLinear(6.0);
     jamSocket.isActivated = true;
-    fVerb.reset();
 }
 
 void PluginRTJam::deactivate()
@@ -423,6 +393,16 @@ void PluginRTJam::deactivate()
 void PluginRTJam::run(const float **inputs, float **outputs,
                       uint32_t frames)
 {
+    frameCount += frames;
+
+    // Debug output
+    if (frameCount > 48000)
+    {
+        // every second
+        frameCount = 0;
+        // jamMixer.dumpOut();
+    }
+
     // Get input levels
     float leftPow = 0.0;
     float rightPow = 0.0;
@@ -452,38 +432,11 @@ void PluginRTJam::run(const float **inputs, float **outputs,
     leftInput.addSample(leftPow);
     rightInput.addSample(rightPow);
 
-    // Apply reverb to inputs
-    float left[frames];
-    float right[frames];
-    float *tempOut[2];
-    tempOut[0] = left;
-    tempOut[1] = right;
-    float inLeft[frames];
-    float inRight[frames];
-    float *tempIn[2];
-    tempIn[0] = inLeft;
-    tempIn[1] = inRight;
-    for (uint32_t i = 0; i < frames; i++)
-    {
-        // Only give the left input to the reverb engine
-        inLeft[i] = inputs[0][i];
-        inRight[i] = 0.0f;
-    }
-    fVerb.process((const float **)tempIn, tempOut, static_cast<int>(frames));
-    for (uint32_t i = 0; i < frames; i++)
-    {
-        if (!reverbOnInputOne)
-        {
-            tempOut[0][i] = inputs[0][i];
-        }
-        tempOut[1][i] = inputs[1][i]; // Copy the right channel back in
-    }
-
     // Local monitoring
-    jamMixer.addLocalMonitor((const float **)tempOut, frames);
+    jamMixer.addLocalMonitor(inputs, frames);
 
     // Do the network thingy..
-    jamSocket.sendPacket((const float **)tempOut, frames);
+    jamSocket.sendPacket(inputs, frames);
     jamSocket.readPackets(&jamMixer);
 
     // Feed the output from the mixer
@@ -501,12 +454,6 @@ void PluginRTJam::run(const float **inputs, float **outputs,
         fState->inputRight = rightInput.mean;
         fState->beat = jamMixer.getBeat();
         fState->clientIdsUpdate(ids);
-    }
-
-    if (monitorInput)
-    {
-        memcpy(outputs[0], inputs[0], sizeof(float) * frames);
-        memcpy(outputs[1], inputs[1], sizeof(float) * frames);
     }
 }
 

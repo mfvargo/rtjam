@@ -34,7 +34,7 @@ namespace JamNetStuff
         );
     }
 
-    void JitterBuffer::flush()
+    void JitterBuffer::flush(int initialDepth)
     {
         readIdx = 0;
         writeIdx = 0;
@@ -44,14 +44,16 @@ namespace JamNetStuff
         numGets = 0;
         numDropped = 0;
         lastSequence = 0;
-        targetDepth = MIN_DEPTH;
+        targetDepth = MIN_DEPTH + initialDepth;
         nSigma = MIN_SIGMA;
+        m_filling = true;
+        m_fillDepth = initialDepth;
     }
 
     // Set the number of sigmas of depth variance
     void JitterBuffer::setSmoothness(float smooth)
     {
-        flush();
+        flush(smooth * 20 * MIN_DEPTH);
         nSigma = MIN_SIGMA + (smooth * 100.0);
     }
 
@@ -112,16 +114,22 @@ namespace JamNetStuff
         {
             targetDepth = MAX_DEPTH;
         }
-        // if (targetDepth < MIN_DEPTH)
-        // {
-        //     targetDepth = MIN_DEPTH;
-        // }
+
+        // Check for Prefill
+        if (m_filling && depth() < m_fillDepth)
+        {
+            // Not done with initial fill
+            return;
+        }
+        m_filling = false;
+
         if (depth() < frames)
         {
             // Not enough for a frame
             if (numPuts > 0)
             {
                 numUnderruns++;
+                m_filling = true;
             }
             // Play back the last frame
             memcpy(buffer, lastFrame, frames * sizeof(float));
