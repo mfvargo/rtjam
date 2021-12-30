@@ -30,7 +30,6 @@
 #include "DistrhoPlugin.hpp"
 #include "extra/Mutex.hpp"
 #include "JamNetStuff.hpp"
-#include "JamDirectory.hpp"
 #include "Settings.hpp"
 
 class UIRTJam;

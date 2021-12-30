@@ -34,7 +34,6 @@
 #include "RTJamArt.hpp"
 #include "levelMeters.hpp"
 #include "MeterBar.hpp"
-#include "JamDirectory.hpp"
 // #include "LabelBox.hpp"
 
 #define MAX_ROOMS 3
@@ -101,7 +100,6 @@ private:
     NanoVG fNanoText;
     NanoVG::FontId fNanoFont;
 
-    JamNetStuff::JamDirectory jamDirectory;
     std::vector<ImageKnob *> fKnobs;
 
     DISTRHO_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(UIRTJam)

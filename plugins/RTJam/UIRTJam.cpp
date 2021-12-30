@@ -200,8 +200,6 @@ void UIRTJam::parameterChanged(uint32_t index, float value)
 */
 void UIRTJam::programLoaded(uint32_t index)
 {
-    jamDirectory.loadFromNetwork();
-
     printf("program Load %d\n", index);
     if (index != 0)
         return;
@@ -256,7 +254,7 @@ void UIRTJam::onDisplay()
     // Input section
     drawPos.setPos(10, 180);
     // My Name
-    drawText(20, 140, jamDirectory.findUser(fState.clientIds[0]).c_str());
+    drawText(20, 140, std::to_string(fState.clientIds[0]).c_str());
 
     // Input level 0
     fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputLeft + 66) / 60);
@@ -350,7 +348,7 @@ void UIRTJam::drawChannel(int chan)
     if (fState.clientIds[chan] != EMPTY_SLOT)
     {
         drawPos = Corners[chan - 1];
-        drawText(drawPos.getX(), drawPos.getY() - 18, jamDirectory.findUser(fState.clientIds[chan]).c_str());
+        drawText(drawPos.getX(), drawPos.getY() - 18, std::to_string(fState.clientIds[chan]).c_str());
     }
 }
 
