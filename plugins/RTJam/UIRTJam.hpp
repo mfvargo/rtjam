@@ -90,7 +90,6 @@ private:
     ImageSwitch *fRooms[MAX_ROOMS];
     ImageSwitch *fReverb;
     JamNetStuff::JamMeterBar fMeterBar;
-    ScopedPointer<ImageSlider> fSliderMaster;
     ScopedPointer<ImageSwitch> fMonitorInputButton;
     RTJamState fState;
     Point<int> Corners[MAX_JAMMERS - 1];

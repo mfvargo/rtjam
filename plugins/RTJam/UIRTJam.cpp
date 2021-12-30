@@ -44,16 +44,6 @@ UIRTJam::UIRTJam()
     fNanoFont = fNanoText.findFont(NANOVG_DEJAVU_SANS_TTF);
     Image sliderImage(Art::smallSliderData, Art::smallSliderWidth, Art::smallSliderHeight);
 
-    // Master Volume
-    fSliderMaster = new ImageSlider(this, sliderImage);
-    fSliderMaster->setId(PluginRTJam::paramMasterVol);
-    fSliderMaster->setInverted(true);
-    fSliderMaster->setStartPos(158, 3);
-    fSliderMaster->setEndPos(158, 88);
-    fSliderMaster->setRange(-30.0f, 12.0);
-    fSliderMaster->setCallback(this);
-
-    // level sliders
     Point<int> sliderPosStart(20, 180);
     Point<int> sliderPosEnd(20, 330);
 
@@ -104,30 +94,9 @@ UIRTJam::~UIRTJam()
   A parameter has changed on the plugin side.
   This is called by the host to inform the UI about parameter changes.
 */
-void UIRTJam::parameterChanged(uint32_t index, float value)
+void UIRTJam::parameterChanged(uint32_t, float)
 {
     return;
-    switch (index)
-    {
-    case PluginRTJam::paramChanGain1:
-    case PluginRTJam::paramChanGain2:
-    case PluginRTJam::paramChanGain3:
-    case PluginRTJam::paramChanGain4:
-    case PluginRTJam::paramChanGain5:
-    case PluginRTJam::paramChanGain6:
-    case PluginRTJam::paramChanGain7:
-    case PluginRTJam::paramChanGain8:
-    case PluginRTJam::paramChanGain9:
-    case PluginRTJam::paramChanGain10:
-    case PluginRTJam::paramChanGain11:
-    case PluginRTJam::paramChanGain12:
-    case PluginRTJam::paramChanGain13:
-    case PluginRTJam::paramChanGain14:
-        break;
-    case PluginRTJam::paramMasterVol:
-        fSliderMaster->setValue(value);
-        break;
-    }
 }
 
 /**
@@ -191,13 +160,6 @@ void UIRTJam::onDisplay()
     // Input level 1
     drawPos.setX(111);
     fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputRight + 66) / 60);
-    drawPos.setX(drawPos.getX() + 32);
-
-    // Master Volume section
-    drawPos.setPos(150, 10);
-    // output level
-    fMeterBar.drawAt(drawPos, 100, 1.0 - (fState.masterLevel + 60) / 60);
-    drawPos.setX(drawPos.getX() + 32);
 
     // Channel meters post fader
     for (int i = 1; i < MAX_JAMMERS; i++)
