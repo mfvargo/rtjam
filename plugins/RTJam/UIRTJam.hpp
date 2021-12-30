@@ -86,9 +86,7 @@ protected:
 
 private:
     Image fImgBackground;
-    PartialImage fSlideLine;
     Image fSmoothButtonNormal, fsmoothButtonPressed;
-    ImageSlider *fVol[MIX_CHANNELS];
     ImageSwitch *fRooms[MAX_ROOMS];
     ImageSwitch *fReverb;
     JamNetStuff::JamMeterBar fMeterBar;
