@@ -46,14 +46,17 @@ UIRTJam::UIRTJam()
 
     Point<int> sliderPosStart(20, 180);
     Point<int> sliderPosEnd(20, 330);
+    int colWidth = 125;
+    int rowHeight = 200;
 
     // Now for the channels
-    Corners[0].setPos(237, 25);
-    Corners[1].setPos(417, 25);
-    Corners[2].setPos(597, 25);
-    Corners[3].setPos(237, 225);
-    Corners[4].setPos(417, 225);
-    Corners[5].setPos(597, 225);
+    for (int row = 0; row < 3; row++)
+    {
+        for (int col = 0; col < 3; col++)
+        {
+            Corners[row * 4 + col].setPos(200 + col * colWidth, 30 + row * rowHeight);
+        }
+    }
     // Room selectors
     for (int i = 0; i < MAX_ROOMS; i++)
     {
@@ -61,7 +64,7 @@ UIRTJam::UIRTJam()
                                     Image(Art::room_offData, Art::room_offWidth, Art::room_offHeight, GL_BGR),
                                     Image(Art::room_onData, Art::room_onWidth, Art::room_onHeight, GL_BGR));
         fRooms[i]->setId(PluginRTJam::paramRoom0 + i);
-        fRooms[i]->setAbsolutePos(20, 20 + i * 30);
+        fRooms[i]->setAbsolutePos(20, 20 + i * 20);
         fRooms[i]->setCallback(this);
     }
     fRooms[0]->setDown(true);
@@ -76,16 +79,6 @@ UIRTJam::~UIRTJam()
     {
         delete fRooms[i];
     }
-
-    // delete fReverb;
-    /*
-    // This is some threadsafe way to null a pointer in the DSP module
-    if (PluginRTJam* const dspPtr = (PluginRTJam*)getPluginInstancePointer())
-    {
-        const MutexLocker csm(dspPtr->fMutex);
-        dspPtr->fState = nullptr;
-    }
-    */
 }
 // -----------------------------------------------------------------------
 // DSP/Plugin callbacks
@@ -146,23 +139,8 @@ void UIRTJam::onDisplay()
 {
     fImgBackground.draw();
 
-    Point<int> drawPos(40, 20);
-
-    // Input section
-    drawPos.setPos(10, 180);
-    // My Name
-    drawText(20, 140, std::to_string(fState.clientIds[0]).c_str());
-
-    // Input level 0
-    fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputLeft + 66) / 60);
-    drawPos.setX(drawPos.getX() + 32);
-
-    // Input level 1
-    drawPos.setX(111);
-    fMeterBar.drawAt(drawPos, 170, 1.0 - (fState.inputRight + 66) / 60);
-
     // Channel meters post fader
-    for (int i = 1; i < MAX_JAMMERS; i++)
+    for (int i = 0; i < MAX_JAMMERS; i++)
     {
         drawChannel(i);
     }
@@ -170,9 +148,9 @@ void UIRTJam::onDisplay()
 
 void UIRTJam::drawChannel(int chan)
 {
-    Point<int> drawPos(Corners[chan - 1]);
-    const int height = 140;
-    const int spacing = 27;
+    Point<int> drawPos(Corners[chan]);
+    const int height = 100;
+    const int spacing = 25;
     char strBuf[32 + 1];
     strBuf[32] = '\0';
 
@@ -186,23 +164,17 @@ void UIRTJam::drawChannel(int chan)
     const float depth = fState.clientIds[chan] == EMPTY_SLOT ? 0.0 : fState.bufferDepths[chan * 2];
     fMeterBar.drawAt(drawPos, height, 1.0 - depth);
     std::snprintf(strBuf, 32, "%0.0f", depth * 40);
-    drawText(drawPos.getX() - 40, drawPos.getY() + height + 5, strBuf);
+    // drawText(drawPos.getX() - 40, drawPos.getY() + height + 5, strBuf);
 
     drawPos.setX(drawPos.getX() + spacing);
-
-    drawPos.setX(drawPos.getX() + spacing - 10);
     fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[chan * 2] + 60) / 60));
     drawPos.setX(drawPos.getX() + spacing);
-
-    // Input 1 section
-    drawPos.setX(drawPos.getX() + 4 + spacing);
     fMeterBar.drawAt(drawPos, height, 1.0 - ((fState.channelLevels[chan * 2 + 1] + 60) / 60));
-    drawPos.setX(drawPos.getX() + spacing);
 
     // Name for the jammer
     if (fState.clientIds[chan] != EMPTY_SLOT)
     {
-        drawPos = Corners[chan - 1];
+        drawPos = Corners[chan];
         drawText(drawPos.getX(), drawPos.getY() - 18, std::to_string(fState.clientIds[chan]).c_str());
     }
 }
@@ -211,10 +183,10 @@ void UIRTJam::drawText(int x, int y, const char *strBuf)
 {
     fNanoText.beginFrame(this);
     fNanoText.fontFaceId(fNanoFont);
-    fNanoText.fontSize(16);
+    fNanoText.fontSize(14);
     fNanoText.textAlign(NanoVG::ALIGN_CENTER | NanoVG::ALIGN_TOP);
     fNanoText.fillColor(Color(0.0f, 0.0f, 0.0f));
-    fNanoText.textBox(x, y, 100.0f, strBuf, nullptr);
+    fNanoText.textBox(x, y, 80.0f, strBuf, nullptr);
     fNanoText.endFrame();
 }
 

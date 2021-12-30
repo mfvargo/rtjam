@@ -34,7 +34,6 @@
 #include "RTJamArt.hpp"
 #include "levelMeters.hpp"
 #include "MeterBar.hpp"
-// #include "LabelBox.hpp"
 
 #define MAX_ROOMS 3
 
@@ -88,9 +87,7 @@ private:
     Image fImgBackground;
     Image fSmoothButtonNormal, fsmoothButtonPressed;
     ImageSwitch *fRooms[MAX_ROOMS];
-    ImageSwitch *fReverb;
     JamNetStuff::JamMeterBar fMeterBar;
-    ScopedPointer<ImageSwitch> fMonitorInputButton;
     RTJamState fState;
     Point<int> Corners[MAX_JAMMERS - 1];
 
