@@ -27,7 +27,9 @@ Settings::Settings()
       m_filename = pw->pw_dir;
     }
   }
-  m_filename = "/home/pi/settings.json";
+  m_filename += "/settins.json";
+  cout << m_filename << endl;
+  //  m_filename = "/home/pi/settings.json";
 }
 
 int Settings::getOrSetValue(const char *key, int value)
