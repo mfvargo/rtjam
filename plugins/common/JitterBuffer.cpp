@@ -119,6 +119,7 @@ namespace JamNetStuff
         if (m_filling && depth() < m_fillDepth)
         {
             // Not done with initial fill
+            memset(buffer, 0x00, frames * sizeof(float));
             return;
         }
         m_filling = false;
