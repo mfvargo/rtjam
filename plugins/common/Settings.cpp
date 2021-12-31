@@ -27,7 +27,7 @@ Settings::Settings()
       m_filename = pw->pw_dir;
     }
   }
-  m_filename += "/settins.json";
+  m_filename += "/settings.json";
   cout << m_filename << endl;
   //  m_filename = "/home/pi/settings.json";
 }
