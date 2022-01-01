@@ -139,6 +139,7 @@ int main(int argc, char **argv)
   settings.loadFromFile();
   string urlBase = settings.getOrSetValue("rtjam-nation", std::string("http://rtjam-nation.basscleftech.com/api/1/"));
   int startPort = settings.getOrSetValue("start-port", 7891);
+  int roomCount = settings.getOrSetValue("room-count", 1);
   string broadcastUnitName = "";
   settings.saveToFile();
   RTJamNationApi api(urlBase);
@@ -156,7 +157,7 @@ int main(int argc, char **argv)
         bcastToken = api.m_resultBody["broadcastUnit"]["token"];
         broadcastUnitName = api.m_resultBody["broadcastUnit"]["name"];
         clog << "got a new token: " << bcastToken << endl;
-        for (short port = startPort; port < startPort + 1; port++)
+        for (short port = startPort; port < startPort + roomCount; port++)
         {
           char roomName[100];
           sprintf(roomName, "%s:%d", broadcastUnitName.c_str(), port);

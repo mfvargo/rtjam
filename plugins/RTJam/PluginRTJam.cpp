@@ -86,7 +86,7 @@ void PluginRTJam::switchRoom(int roomParam)
         port = 7892;
         break;
     case paramRoom2:
-        port = 7895;
+        port = 7893;
         break;
     }
     jamMixer.reset();
