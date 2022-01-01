@@ -13,7 +13,7 @@ using namespace std;
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 #define FIFO_FRAME_SIZE 960
-#define MAX_ROOMS 1
+#define MAX_ROOMS 3
 
 vector<thread> roomThreads;
 string roomTokens[MAX_ROOMS];
