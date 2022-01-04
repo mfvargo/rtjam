@@ -15,8 +15,8 @@ public:
     setting.init(
         "treble",                 // Name
         EffectSetting::floatType, // Type of setting
-        -10.0,                    // Min value
-        10.0,                     // Max value
+        -20.0,                    // Min value
+        20.0,                     // Max value
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -24,8 +24,8 @@ public:
     setting.init(
         "mid",                    // Name
         EffectSetting::floatType, // Type of setting
-        -10.0,                    // Min value
-        10.0,                     // Max value
+        -20.0,                    // Min value
+        20.0,                     // Max value
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
@@ -33,8 +33,8 @@ public:
     setting.init(
         "low",                    // Name
         EffectSetting::floatType, // Type of setting
-        -10.0,                    // Min value
-        10.0,                     // Max value
+        -20.0,                    // Min value
+        20.0,                     // Max value
         0.25,                     // Step Size
         EffectSetting::dB);
     setting.setFloatValue(0.0);
