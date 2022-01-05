@@ -24,7 +24,8 @@ public:
     room_processing
   };
 
-  bool isConnected() {
+  bool isConnected()
+  {
     return (ws != NULL && ws->getReadyState() != WebSocket::CLOSED);
   }
 
@@ -39,6 +40,7 @@ public:
     if (ws == NULL)
     {
       // failed to connect.
+      cout << "Error connecting to Server on Websocket!" << endl;
       return;
     }
     m_token = token;
@@ -46,7 +48,6 @@ public:
     m_state = room_init;
     createRoom();
   };
-
 
   // The operator () lets me pass a ChatRobot to the websocket dispatch function
   // So this is the callback when a message comes in on the websocket
@@ -89,7 +90,8 @@ public:
 
   void sendMessage(string event, string message)
   {
-    if (isConnected()) {
+    if (isConnected())
+    {
       json msg = {{"event", event},
                   {"message", message},
                   {"room", m_token},
@@ -99,8 +101,6 @@ public:
     }
   }
 
-
-
 protected:
   // member variables
   WebSocket::pointer ws = NULL;
@@ -108,7 +108,6 @@ protected:
   RoomState m_state;
   int m_msgId;
   int m_responseId;
-
 
   void createRoom()
   {
