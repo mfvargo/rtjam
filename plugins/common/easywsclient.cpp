@@ -107,9 +107,9 @@ namespace
             }
             if (connect(sockfd, p->ai_addr, p->ai_addrlen) != SOCKET_ERROR)
             {
-                fprintf(stderr, "websocket connect failed %d: %s\n", errno, strerror(errno));
                 break;
             }
+            fprintf(stderr, "websocket connect failed %d: %s\n", errno, strerror(errno));
             closesocket(sockfd);
             sockfd = INVALID_SOCKET;
         }
