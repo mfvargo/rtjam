@@ -10,6 +10,7 @@ using namespace std;
 LevelData BoxAPI::s_levelData;
 string BoxAPI::s_token = "";
 ParamData BoxAPI::s_paramData;
+uint64_t BoxAPI::s_jsonTimeStamp = 1;
 
 UnitChatRobot robot;
 
