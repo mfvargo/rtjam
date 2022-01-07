@@ -19,10 +19,14 @@ public:
   BoxAPI() : Fastcgipp::Request<char>(50 * 1024)
   {
   }
-  static string s_token;
-  static ParamData s_paramData;
-  static LevelData s_levelData;
-  static uint64_t s_jsonTimeStamp;
+  static string s_token;            // jam unit's token
+  static ParamData s_paramData;     // parameter data msq queue to rtjam-sound
+  static LevelData s_levelData;     // shared memory with rtjam-sound and rtjam-midi
+  static uint64_t s_jsonTimeStamp;  // timestamp of last pedal update
+  static bool s_cmdOutputDirty;     // is the cmdOuput dirty
+  static string s_cmdOuput;         // output of last cmd
+  static bool s_pedalTypesDirty;    // has somebody requested pedalTypes be updated
+  static bool s_audioHardwareDirty; // Audio hardware config has been requested
 
 private:
   RTJamLevels m_jamLevels;
@@ -132,7 +136,25 @@ private:
     }
 
     // Now build the pedalTypes
-    result["pedalTypes"] = s_PedalTypes;
+    if (s_pedalTypesDirty)
+    {
+      s_pedalTypesDirty = false;
+      result["pedalTypes"] = s_PedalTypes;
+    }
+
+    if (s_cmdOutputDirty)
+    {
+      s_cmdOutputDirty = false;
+      result["cmdOutput"] = s_cmdOuput;
+    }
+
+    if (s_audioHardwareDirty)
+    {
+      s_audioHardwareDirty = false;
+      result["audioHardware"] = {
+          {"driver", execMyCommand("cat soundin.cfg")},
+          {"cards", execMyCommand("aplay -l")}};
+    }
 
     // Now update board config if it has changed
     if (s_jsonTimeStamp != m_jamLevels.jsonTimeStamp)
@@ -216,6 +238,7 @@ private:
       break;
       case paramListAudioConfig:
         out << execMyCommand("aplay -l");
+        s_audioHardwareDirty = true;
         break;
       case paramCheckForUpdate:
         out << execMyCommand("./checkupdate.bash");
@@ -228,10 +251,12 @@ private:
         break;
       case paramRandomCommand:
         out << execMyCommand(param.sValue);
+        s_cmdOutputDirty = true;
         break;
       case paramGetPedalTypes:
       {
         json pedalTypes(s_PedalTypes);
+        s_pedalTypesDirty = true;
         out << pedalTypes.dump(2);
       }
       break;
@@ -262,6 +287,7 @@ private:
     {
       result += buffer.data();
     }
+    s_cmdOuput = result;
     return result;
   }
 
