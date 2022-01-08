@@ -7,10 +7,15 @@
 
 using namespace std;
 
+// Static class data initialization from BoxAPI
 LevelData BoxAPI::s_levelData;
 string BoxAPI::s_token = "";
 ParamData BoxAPI::s_paramData;
-
+uint64_t BoxAPI::s_jsonTimeStamp = 1;
+bool BoxAPI::s_cmdOutputDirty = false;
+string BoxAPI::s_cmdOuput = "";
+bool BoxAPI::s_pedalTypesDirty = true;
+bool BoxAPI::s_audioHardwareDirty = false;
 UnitChatRobot robot;
 
 bool isRunning = true;
