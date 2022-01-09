@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 
     char port_name[16];
     int inportCount = 0;
-    for (i = 0; i < 1; i++)
+    for (i = 0; i < 2; i++)
     {
         sprintf(port_name, "input_%d", i + 1);
         input_ports[i] = jack_port_register(client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
         }
         else
         {
-            fprintf(stderr, "input ports available\n"); // don't exit, we can run with just one.
+            fprintf(stderr, "input port %d unavailable\n", i); // don't exit, we can run with just one.
         }
     }
 
