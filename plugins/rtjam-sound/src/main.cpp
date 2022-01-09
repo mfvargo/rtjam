@@ -47,10 +47,19 @@ static void signal_handler(int sig)
 int process(jack_nframes_t nframes, void *arg)
 {
     JamEngine *pJamEngine = (JamEngine *)arg;
+    float tbufIn[nframes];
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
-    inputs[1] = (float *)jack_port_get_buffer(input_ports[1], nframes);
+    if (input_ports[1])
+    {
+        inputs[1] = (float *)jack_port_get_buffer(input_ports[1], nframes);
+    }
+    else
+    {
+        memset(tbufIn, 0x00, sizeof(float) * nframes);
+        inputs[1] = tbufIn;
+    }
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
     // Call the run function
@@ -124,15 +133,28 @@ int main(int argc, char *argv[])
     output_ports = (jack_port_t **)calloc(2, sizeof(jack_port_t *));
 
     char port_name[16];
-    for (i = 0; i < 2; i++)
+    int inportCount = 0;
+    for (i = 0; i < 1; i++)
     {
         sprintf(port_name, "input_%d", i + 1);
         input_ports[i] = jack_port_register(client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
+        if (input_ports[i] != NULL)
+        {
+            inportCount++;
+        }
+        else
+        {
+            fprintf(stderr, "input ports available\n"); // don't exit, we can run with just one.
+        }
+    }
+
+    for (i = 0; i < 2; i++)
+    {
         sprintf(port_name, "output_%d", i + 1);
         output_ports[i] = jack_port_register(client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-        if ((input_ports[i] == NULL) || (output_ports[i] == NULL))
+        if (output_ports[i] == NULL)
         {
-            fprintf(stderr, "no more JACK ports available\n");
+            fprintf(stderr, "no more JACK output ports available\n");
             exit(1);
         }
     }
@@ -160,7 +182,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < inportCount; i++)
         if (jack_connect(client, ports[i], jack_port_name(input_ports[i])))
             fprintf(stderr, "cannot connect input ports\n");
 
