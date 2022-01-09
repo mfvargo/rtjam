@@ -8,14 +8,11 @@
 #include <unistd.h>
 #endif
 #include <jack/jack.h>
-#include <jack/midiport.h>
 #include "JamEngine.hpp"
 #include "Settings.hpp"
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
-jack_port_t *midi_port;
-bool useMidi = false;
 jack_client_t *client = NULL;
 
 // Utility to shell out a command
@@ -50,32 +47,23 @@ static void signal_handler(int sig)
 int process(jack_nframes_t nframes, void *arg)
 {
     JamEngine *pJamEngine = (JamEngine *)arg;
+    float tbufIn[nframes];
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
-    inputs[1] = (float *)jack_port_get_buffer(input_ports[1], nframes);
+    if (input_ports[1])
+    {
+        inputs[1] = (float *)jack_port_get_buffer(input_ports[1], nframes);
+    }
+    else
+    {
+        memset(tbufIn, 0x00, sizeof(float) * nframes);
+        inputs[1] = tbufIn;
+    }
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
     // Call the run function
     pJamEngine->run((const float **)inputs, outputs, nframes);
-    // Check for midi Events
-    if (useMidi)
-    {
-        void *inport_buf = jack_port_get_buffer(midi_port, nframes);
-        jack_midi_event_t in_event;
-        jack_nframes_t event_count = jack_midi_get_event_count(inport_buf);
-        if (event_count != 0)
-        {
-            cout << "count: " << event_count << endl;
-            jack_midi_event_t in_event;
-            for (jack_nframes_t i = 0; i < event_count; i++)
-            {
-                jack_midi_event_get(&in_event, inport_buf, i);
-                pJamEngine->sendMidiEvent(in_event.buffer);
-            }
-        }
-    }
-
     return 0;
 }
 
@@ -87,7 +75,6 @@ void jack_shutdown(void *arg)
 {
     free(input_ports);
     free(output_ports);
-    free(midi_port);
     exit(1);
 }
 
@@ -146,21 +133,31 @@ int main(int argc, char *argv[])
     output_ports = (jack_port_t **)calloc(2, sizeof(jack_port_t *));
 
     char port_name[16];
+    int inportCount = 0;
     for (i = 0; i < 2; i++)
     {
         sprintf(port_name, "input_%d", i + 1);
         input_ports[i] = jack_port_register(client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsInput, 0);
-        sprintf(port_name, "output_%d", i + 1);
-        output_ports[i] = jack_port_register(client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-        if ((input_ports[i] == NULL) || (output_ports[i] == NULL))
+        if (input_ports[i] != NULL)
         {
-            fprintf(stderr, "no more JACK ports available\n");
-            exit(1);
+            inportCount++;
+        }
+        else
+        {
+            fprintf(stderr, "input port %d unavailable\n", i); // don't exit, we can run with just one.
         }
     }
 
-    /* Create a midi port to read midi events */
-    midi_port = jack_port_register(client, "in", JACK_DEFAULT_MIDI_TYPE, (JackPortIsInput | JackPortIsTerminal), 0);
+    for (i = 0; i < 2; i++)
+    {
+        sprintf(port_name, "output_%d", i + 1);
+        output_ports[i] = jack_port_register(client, port_name, JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
+        if (output_ports[i] == NULL)
+        {
+            fprintf(stderr, "no more JACK output ports available\n");
+            exit(1);
+        }
+    }
 
     /* Tell the JACK server that we are ready to roll.  Our
      * process() callback will start running now. */
@@ -185,7 +182,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    for (i = 0; i < 2; i++)
+    for (i = 0; i < inportCount; i++)
         if (jack_connect(client, ports[i], jack_port_name(input_ports[i])))
             fprintf(stderr, "cannot connect input ports\n");
 
@@ -203,32 +200,6 @@ int main(int argc, char *argv[])
             fprintf(stderr, "cannot connect input ports\n");
 
     free(ports);
-
-    // This section will try to open the midi port from a2j
-    // a2J will read midi events from jack 14:Midi Through port.  In order to get
-    // midi events from a device, the aconnect command must be run to connect the
-    // alsa midi port to the midi through port.  for example
-    // aconnect 28 14
-    // assuming the midi pedal is port 28.  you can run aconnect -i to list ports
-    // ports = jack_get_ports(client, "a2j", NULL, JackPortIsOutput);
-    // if (ports == NULL)
-    // {
-    //     fprintf(stderr, "no a2j ports running.  check a2j_control --status \n");
-    // }
-    // else
-    // {
-    //     cout << ports[0] << endl;
-    //     if (jack_connect(client, ports[0], jack_port_name(midi_port)))
-    //     {
-    //         fprintf(stderr, "cannot connect to a2j port\n");
-    //     }
-    //     else
-    //     {
-    //         useMidi = true;
-    //     }
-
-    //     jack_free(ports);
-    // }
 
     /* install a signal handler to properly quits jack client */
     signal(SIGQUIT, signal_handler);
