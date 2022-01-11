@@ -37,6 +37,11 @@ const static json s_PedalTypes = {
     {"Bass Envelope", "Bass Envelope Filter Pedal"},
     {"Guitar Envelope", "Guitar Envelope Filter Pedal (auto-wah)"},
     {"DistortionSuperModeler", "Distortion Super Modeler"}
+    //{"TubeOverdrive", "Tube Style Overdrive"}
+   // {"SoulDrive", "Klon Style Overdrive"},
+   // {"DistortionMetalDrive", "High-Gain Overdrive"},
+   // {"DistortionOctaveFuzz", "Octave Fuzz"},
+  //  {"Boost", "Boost Pedal"}
 };
 
 class EffectFactory
