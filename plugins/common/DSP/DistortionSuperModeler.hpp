@@ -16,6 +16,18 @@ public:
         EffectSetting setting;
 
         setting.init(
+            "stages",                 // Name
+            EffectSetting::intType,      // Type of setting
+            1, // Min value
+            2, // Max value
+            1,                           // Step Size
+            EffectSetting::selector);
+        setting.setLabels({"1", "2"});
+        setting.setIntValue(2);
+        addSetting(setting);
+
+
+        setting.init(
             "hpf1Freq",               // Name
             EffectSetting::floatType, // Type of setting
             20,                       // Min value
@@ -39,7 +51,7 @@ public:
             "drive1",                 // Name
             EffectSetting::floatType, // Type of setting
             0.0,                      // Min value
-            40.0,                     // Max value
+            80.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
         setting.setFloatValue(6.0);
@@ -80,7 +92,7 @@ public:
             "drive2",                 // Name
             EffectSetting::floatType, // Type of setting
             0.0,                      // Min value
-            25.0,                     // Max value
+            40.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
         setting.setFloatValue(6);
@@ -157,6 +169,17 @@ public:
         setting.setFloatValue(700.0);
         addSetting(setting);
 
+      setting.init(
+            "midQ",                    // Name
+            EffectSetting::floatType, // Type of setting
+            0.1,                    // Min value
+            20,                     // Max value
+            0.1,                      // Step Size
+            EffectSetting::linear);
+        setting.setFloatValue(0.707);
+        addSetting(setting);
+
+
         setting.init(
             "treble",                 // Name
             EffectSetting::floatType, // Type of setting
@@ -170,7 +193,7 @@ public:
         setting.init(
             "trebleFreq",             // Name
             EffectSetting::floatType, // Type of setting
-            1000,                     // Min value
+            800,                     // Min value
             7000,                     // Max value
             0.5,                      // Step Size
             EffectSetting::linear);
@@ -181,7 +204,7 @@ public:
             "level",                  // Name
             EffectSetting::floatType, // Type of setting
             -60.0,                    // Min value
-            6.0,                      // Max value
+            12.0,                      // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
         setting.setFloatValue(-12.0);
@@ -203,7 +226,8 @@ public:
     void loadFromConfig() override
     {
         // Read the settings from the map and apply them to our copy of the data.
-
+        m_stages = getSettingByName("stages").getIntValue(); 
+       // std::cout << "stages =" << m_stages << endl;
         m_hpf1Freq = getSettingByName("hpf1Freq").getFloatValue();
         m_lpf1Freq = getSettingByName("lpf1Freq").getFloatValue();
         m_gain1 = getSettingByName("drive1").getFloatValue();
@@ -217,6 +241,7 @@ public:
         m_toneBassCutBoost = getSettingByName("bass").getFloatValue();
         m_toneBassFreq = getSettingByName("bassFreq").getFloatValue();
         m_toneMidrangeCutBoost = getSettingByName("mid").getFloatValue();
+        m_toneMidrangeQ = getSettingByName("midQ").getFloatValue();
         m_toneMidrangeFreq = getSettingByName("midFreq").getFloatValue();
         m_toneTrebleCutBoost = getSettingByName("treble").getFloatValue();
         m_toneTrebleFreq = getSettingByName("trebleFreq").getFloatValue();
