@@ -38,8 +38,11 @@ include ../../dpf/Makefile.plugins.mk
 # --------------------------------------------------------------
 # Extra flags
 
+DSP_INC := INC_DIRS := $(shell find ../common -type d)
+DSP_INC_FLAGS := $(addprefix -I,$(DSP_INC))
+
 LINK_FLAGS += -lpthread
-CXXFLAGS += -Wno-psabi -I../common -I../common/DSP
+CXXFLAGS += -Wno-psabi $(DSP_INC_FLAGS)
 
 # --------------------------------------------------------------
 # Enable all selected plugin types

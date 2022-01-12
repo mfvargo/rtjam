@@ -8,7 +8,7 @@ public:
     void init() override
     {
         // Setup base class stuff
-        Effect::init();
+        DistortionModelerBase::init();
         // What is this effects name?
         m_name = "DistortionSuperModeler";
 
@@ -16,16 +16,15 @@ public:
         EffectSetting setting;
 
         setting.init(
-            "stages",                 // Name
-            EffectSetting::intType,      // Type of setting
-            1, // Min value
-            2, // Max value
-            1,                           // Step Size
+            "stages",               // Name
+            EffectSetting::intType, // Type of setting
+            1,                      // Min value
+            2,                      // Max value
+            1,                      // Step Size
             EffectSetting::selector);
         setting.setLabels({"1", "2"});
         setting.setIntValue(2);
         addSetting(setting);
-
 
         setting.init(
             "hpf1Freq",               // Name
@@ -169,16 +168,15 @@ public:
         setting.setFloatValue(700.0);
         addSetting(setting);
 
-      setting.init(
-            "midQ",                    // Name
+        setting.init(
+            "midQ",                   // Name
             EffectSetting::floatType, // Type of setting
-            0.1,                    // Min value
-            20,                     // Max value
+            0.1,                      // Min value
+            20,                       // Max value
             0.1,                      // Step Size
             EffectSetting::linear);
         setting.setFloatValue(0.707);
         addSetting(setting);
-
 
         setting.init(
             "treble",                 // Name
@@ -193,7 +191,7 @@ public:
         setting.init(
             "trebleFreq",             // Name
             EffectSetting::floatType, // Type of setting
-            800,                     // Min value
+            800,                      // Min value
             7000,                     // Max value
             0.5,                      // Step Size
             EffectSetting::linear);
@@ -204,7 +202,7 @@ public:
             "level",                  // Name
             EffectSetting::floatType, // Type of setting
             -60.0,                    // Min value
-            12.0,                      // Max value
+            12.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
         setting.setFloatValue(-12.0);
@@ -226,8 +224,8 @@ public:
     void loadFromConfig() override
     {
         // Read the settings from the map and apply them to our copy of the data.
-        m_stages = getSettingByName("stages").getIntValue(); 
-       // std::cout << "stages =" << m_stages << endl;
+        m_stages = getSettingByName("stages").getIntValue();
+        // std::cout << "stages =" << m_stages << endl;
         m_hpf1Freq = getSettingByName("hpf1Freq").getFloatValue();
         m_lpf1Freq = getSettingByName("lpf1Freq").getFloatValue();
         m_gain1 = getSettingByName("drive1").getFloatValue();
