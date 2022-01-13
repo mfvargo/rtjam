@@ -3,16 +3,16 @@
 #include "DistortionModelerBase.hpp"
 #include "SignalBlock.hpp"
 
-class DistortionOctaveFuzz : public DistortionModelerBase
+class DistortionTubeDrive : public DistortionModelerBase
 {
 public:
     void init() override
     {
         // Setup base class stuff
-        Effect::init();
+        DistortionModelerBase::init();
 
         // What is this effects name?
-        m_name = "OctaveFuzz";
+        m_name = "TubeOverdrive";
 
         // Now setup the settings this effect can receive.
         EffectSetting setting;
@@ -20,8 +20,8 @@ public:
         setting.init(
             "drive",                 // Name
             EffectSetting::floatType, // Type of setting
-            6.0,                      // Min value
-            30.0,                     // Max value
+            0.0,                      // Min value
+            80.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
         setting.setFloatValue(6.0);
@@ -31,8 +31,8 @@ public:
         setting.init(
             "treble",                 // Name
             EffectSetting::floatType, // Type of setting
-            -20.0,                    // Min value
-            10.0,                     // Max value
+            0,                    // Min value
+            20.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
         setting.setFloatValue(0.0);
@@ -42,10 +42,10 @@ public:
             "level",                  // Name
             EffectSetting::floatType, // Type of setting
             -60.0,                    // Min value
-            6.0,                      // Max value
+            12.0,                      // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
-        setting.setFloatValue(-12.0);
+        setting.setFloatValue(-20.0);
         addSetting(setting);
 
         loadFromConfig();
@@ -56,22 +56,22 @@ public:
         // Read the settings from the map and apply them to our copy of the data.
 
         m_hpf1Freq = 190.0;
-        m_lpf1Freq = 6500.0;
+        m_lpf1Freq = 4220.0;
         m_gain1 = getSettingByName("drive").getFloatValue();
-        m_clip1Type = SignalBlock::ClipType::hard;
-        m_hpf2Freq = 55;
-        m_lpf2Freq = 2250;
-        m_gain2 = getSettingByName("drive").getFloatValue();
-        m_clip2Type = SignalBlock::ClipType::even;
-        m_hpf3Freq = 110;
-        m_lpf3Freq = 8700;
+        m_clip1Type = SignalBlock::ClipType::soft;
+        m_hpf2Freq = 104;
+        m_lpf2Freq = 5880;
+        //m_gain2 = getSettingByName("drive2").getFloatValue();
+        //m_clip2Type = (SignalBlock::ClipType)getSettingByName("clip2Type").getIntValue();
+        //m_hpf3Freq = 110;
+        //m_lpf3Freq = 8700;
         m_toneBassCutBoost = 14;
-        m_toneBassFreq = 150;
-        m_toneMidrangeCutBoost = 18;
-        m_toneMidrangeQ = 1;
-        m_toneMidrangeFreq = 730;
+        m_toneBassFreq = 130;
+        m_toneMidrangeCutBoost = 24;
+        m_toneMidrangeQ = 0.11;
+        m_toneMidrangeFreq = 740;
         m_toneTrebleCutBoost = getSettingByName("treble").getFloatValue();
-        m_toneTrebleFreq = 3000.0;
+        m_toneTrebleFreq = 3200.0;
         m_level = getSettingByName("level").getFloatValue();
         m_dryLevel = 0;
 
