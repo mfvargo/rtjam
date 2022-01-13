@@ -24,7 +24,7 @@ public:
             80.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
-        setting.setFloatValue(6.0);
+        setting.setFloatValue(60.0);
         addSetting(setting);
 
         
@@ -35,7 +35,7 @@ public:
             20.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
-        setting.setFloatValue(0.0);
+        setting.setFloatValue(10.0);
         addSetting(setting);
 
         setting.init(
@@ -45,7 +45,7 @@ public:
             12.0,                      // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
-        setting.setFloatValue(-20.0);
+        setting.setFloatValue(-40.0);
         addSetting(setting);
 
         loadFromConfig();
@@ -54,8 +54,8 @@ public:
     void loadFromConfig() override
     {
         // Read the settings from the map and apply them to our copy of the data.
-
-        m_hpf1Freq = 190.0;
+        m_stages = 1;
+        m_hpf1Freq = 170.0;
         m_lpf1Freq = 4220.0;
         m_gain1 = getSettingByName("drive").getFloatValue();
         m_clip1Type = SignalBlock::ClipType::soft;
@@ -68,10 +68,10 @@ public:
         m_toneBassCutBoost = 14;
         m_toneBassFreq = 130;
         m_toneMidrangeCutBoost = 24;
-        m_toneMidrangeQ = 0.11;
+        m_toneMidrangeQ = 0.9;
         m_toneMidrangeFreq = 740;
         m_toneTrebleCutBoost = getSettingByName("treble").getFloatValue();
-        m_toneTrebleFreq = 3200.0;
+        m_toneTrebleFreq = 2200.0;
         m_level = getSettingByName("level").getFloatValue();
         m_dryLevel = 0;
 

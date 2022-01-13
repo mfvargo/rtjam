@@ -20,11 +20,11 @@ public:
         setting.init(
             "drive",                 // Name
             EffectSetting::floatType, // Type of setting
-            6.0,                      // Min value
-            30.0,                     // Max value
+            10.0,                      // Min value
+            50.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
-        setting.setFloatValue(6.0);
+        setting.setFloatValue(20.0);
         addSetting(setting);
 
         
@@ -45,7 +45,7 @@ public:
             6.0,                      // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
-        setting.setFloatValue(-12.0);
+        setting.setFloatValue(-20.0);
         addSetting(setting);
 
         loadFromConfig();
@@ -54,7 +54,7 @@ public:
     void loadFromConfig() override
     {
         // Read the settings from the map and apply them to our copy of the data.
-
+        m_stages = 2;
         m_hpf1Freq = 190.0;
         m_lpf1Freq = 6500.0;
         m_gain1 = getSettingByName("drive").getFloatValue();
