@@ -17,6 +17,13 @@
 #include "BassEnvelope.hpp"
 #include "GuitarEnvelope.hpp"
 #include "DistortionSuperModeler.hpp"
+#include "DistortionTubeDrive.hpp"
+#include "DistortionSoulDrive.hpp"
+#include "DistortionMetalDrive.hpp"
+#include "DistortionOctaveFuzz.hpp"
+#include "Boost.hpp"
+
+
 
 using json = nlohmann::json;
 using namespace std;
@@ -36,7 +43,12 @@ const static json s_PedalTypes = {
     {"Compressor", "Compressor Pedal"},
     {"Bass Envelope", "Bass Envelope Filter Pedal"},
     {"Guitar Envelope", "Guitar Envelope Filter Pedal (auto-wah)"},
-    {"DistortionSuperModeler", "Distortion Super Modeler"}
+    {"DistortionSuperModeler", "Distortion Super Modeler"},
+    {"TubeDrive", "Tube Overdrive"},
+    {"SoulDrive", "Soul Overdrive"},
+    {"MetalDrive", "Metal Overdrive"},
+    {"OctaveFuzz", "Octave Fuzz"},
+    {"Boost", "Boost Pedal"}
 };
 
 class EffectFactory
@@ -108,6 +120,35 @@ public:
       {
         rval = new DistortionSuperModeler();
       }
+      else if (effect["name"] == "TubeDrive")
+      {
+        rval = new DistortionTubeDrive();
+      }
+      else if (effect["name"] == "SoulDrive")
+      {
+        rval = new DistortionSoulDrive();
+      }
+      else if (effect["name"] == "MetalDrive")
+      {
+        rval = new DistortionMetalDrive();
+      }
+      else if (effect["name"] == "OctaveFuzz")
+      {
+        rval = new DistortionOctaveFuzz();
+      }
+      else if (effect["name"] == "Boost")
+      {
+        rval = new Boost();
+      }
+
+
+
+
+
+
+
+
+
       else
       {
         return rval;

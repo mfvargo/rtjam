@@ -13,6 +13,8 @@ public:
     high,
   };
 
+
+
   void init() override
   {
     // Setup base class stuff
@@ -93,20 +95,21 @@ protected:
   float m_gain1; // gain before clip functions
   float m_gain2; // gain before clip functions
 
-  unsigned int m_stages = 2; // not used yet...
+  int m_stages; // number of overdrive stages (single/dual)
 
   float m_level; // Overall level
 
-  float m_lpf1Freq = 8000; // frequency of the first clip block lpf (fixed filter)
-  float m_lpf2Freq = 5000; // frequency of the first clip block lpf (fixed filter)
-  float m_lpf3Freq = 5000; // frequency of the first clip block lpf (fixed filter)
+  float m_lpf1Freq; // frequency of the first clip block lpf (fixed filter)
+  float m_lpf2Freq; // frequency of the first clip block lpf (fixed filter)
+  float m_lpf3Freq; // frequency of the first clip block lpf (fixed filter)
 
   float m_hpf1Freq = 250; // high-pass filter 1 cutoff
   float m_hpf2Freq = 30;  // high-pass filter 1 cutoff
   float m_hpf3Freq = 30;  // high-pass filter 1 cutoff
 
   float m_toneBassFreq;     // LPF cut-off frequency for tone control
-  float m_toneMidrangeFreq; // HPF cut-off frequency for tone control
+  float m_toneMidrangeFreq; // Peaking filter cut/boost frequency for tone control
+  float m_toneMidrangeQ;    // Peaking filter Q
   float m_toneTrebleFreq;   // HPF cut-off frequency for tone control
 
   float m_toneBassCutBoost;     // LPF cut-off frequency for tone control
@@ -129,7 +132,7 @@ protected:
     m_lpf3.init(BiQuadFilter::FilterType::LowPass, m_lpf3Freq, 1.0, 1.0, 48000);
 
     m_toneBass.init(BiQuadFilter::FilterType::LowShelf, m_toneBassFreq, m_toneBassCutBoost, 0.707, 48000);
-    m_toneMidrange.init(BiQuadFilter::FilterType::Peaking, m_toneMidrangeFreq, m_toneMidrangeCutBoost, 0.707, 48000);
+    m_toneMidrange.init(BiQuadFilter::FilterType::Peaking, m_toneMidrangeFreq, m_toneMidrangeCutBoost, m_toneMidrangeQ, 48000);
     m_toneTreble.init(BiQuadFilter::FilterType::HighShelf, m_toneTrebleFreq, m_toneTrebleCutBoost, 0.707, 48000);
   };
 };
