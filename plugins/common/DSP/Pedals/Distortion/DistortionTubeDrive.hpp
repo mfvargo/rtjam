@@ -67,8 +67,8 @@ public:
         //m_lpf3Freq = 8700;
         m_toneBassCutBoost = 14;
         m_toneBassFreq = 130;
-        m_toneMidrangeCutBoost = 24;
-        m_toneMidrangeQ = 0.9;
+        m_toneMidrangeCutBoost = 21;
+        m_toneMidrangeQ = 0.11;
         m_toneMidrangeFreq = 740;
         m_toneTrebleCutBoost = getSettingByName("treble").getFloatValue();
         m_toneTrebleFreq = 2200.0;
