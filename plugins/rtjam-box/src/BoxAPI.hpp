@@ -10,6 +10,10 @@
 #include "EffectFactory.hpp"
 #include "MidiEvent.hpp"
 
+#ifndef GIT_HASH
+#define GIT_HASH "No Githash in Makefile"
+#endif
+
 using namespace std;
 using json = nlohmann::json;
 
@@ -60,6 +64,7 @@ private:
     memcpy(&m_jamLevels, s_levelData.m_pJamLevels, sizeof(RTJamLevels));
     json result = {
         {"jamUnitToken", s_token},
+        {"gitHash", GIT_HASH},
         {"masterLevel", m_jamLevels.masterLevel},
         {"peakMaster", m_jamLevels.peakMaster},
         {"inputLeft", m_jamLevels.inputLeft},
@@ -103,6 +108,7 @@ private:
     // Build the level data
     result["levels"] = {
         {"jamUnitToken", s_token},
+        {"gitHash", GIT_HASH},
         {"masterLevel", m_jamLevels.masterLevel},
         {"peakMaster", m_jamLevels.peakMaster},
         {"inputLeft", m_jamLevels.inputLeft},
