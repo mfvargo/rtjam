@@ -22,6 +22,19 @@ class MidiEvent
     unknownType,
   };
 
+  const char *typeMap[9] =
+      {
+          "noteOff",
+          "noteOn",
+          "polyPressure",
+          "controlChange",
+          "programChange",
+          "channelPressure",
+          "pitchBend",
+          "systemMessage",
+          "unknownType",
+  };
+
 public:
   // MidiEvent(unsigned char *buffer)
   // {
@@ -97,7 +110,7 @@ public:
 
   void dump()
   {
-    cout << "msg: " << m_type << " chan: " << m_channel << " note: " << m_note << " vel: " << m_velocity << endl;
+    cout << "msg: " << typeMap[m_type] << " chan: " << m_channel << " note: " << m_note << " vel: " << m_velocity << endl;
   }
 
   json toJson()

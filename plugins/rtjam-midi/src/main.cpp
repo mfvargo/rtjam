@@ -36,7 +36,7 @@ static int in_port;
   }
 void midi_open(void)
 {
-  CHK(snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_INPUT, 0),
+  CHK(snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_DUPLEX, 0),
       "Could not open sequencer");
 
   CHK(snd_seq_set_client_name(seq_handle, "rtjam-midi"),
@@ -45,6 +45,32 @@ void midi_open(void)
                                            SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,
                                            SND_SEQ_PORT_TYPE_APPLICATION),
       "Could not open port");
+}
+
+int scanForPort()
+{
+  snd_seq_client_info_t *cinfo;
+  snd_seq_port_info_t *pinfo;
+
+  snd_seq_client_info_alloca(&cinfo);
+  snd_seq_port_info_alloca(&pinfo);
+  snd_seq_client_info_set_client(cinfo, -1);
+  while (snd_seq_query_next_client(seq_handle, cinfo) >= 0)
+  {
+    /* reset query info */
+    snd_seq_port_info_set_client(pinfo, snd_seq_client_info_get_client(cinfo));
+    snd_seq_port_info_set_port(pinfo, -1);
+    while (snd_seq_query_next_port(seq_handle, pinfo) >= 0)
+    {
+      int card = snd_seq_client_info_get_card(cinfo);
+      if (card != -1)
+      {
+        cout << "Found " << snd_seq_client_info_get_name(cinfo) << endl;
+        return snd_seq_client_info_get_client(cinfo);
+      }
+    }
+  }
+  return -1;
 }
 
 snd_seq_event_t *midi_read(void)
@@ -63,27 +89,17 @@ void midi_process(const snd_seq_event_t *ev)
   levelData.m_pRingBuffer->writeIdx % 32;
   MidiEvent mEvent(ev);
   mEvent.dump();
-
-  // if ((ev->type == SND_SEQ_EVENT_NOTEON) || (ev->type == SND_SEQ_EVENT_NOTEOFF))
-  // {
-  //   const char *type = (ev->type == SND_SEQ_EVENT_NOTEON) ? "on " : "off";
-  //   printf("[%d] Note %s: %2x vel(%2x)\n", ev->time.tick, type,
-  //          ev->data.note.note,
-  //          ev->data.note.velocity);
-  // }
-  // else if (ev->type == SND_SEQ_EVENT_CONTROLLER)
-  //   printf("[%d] Control:  %2x val(%2x)\n", ev->time.tick,
-  //          ev->data.control.param,
-  //          ev->data.control.value);
-  // else
-  //   printf("[%d] Unknown:  Unhandled Event Received\n", ev->time.tick);
 }
 
 int main()
 {
   midi_open();
+
+  int port = scanForPort();
   // This should connect the pedal to the port here.
-  execMyCommand("aconnect 32 129");
+  string cmd = "aconnect " + std::to_string(port) + " " + std::to_string(snd_seq_client_id(seq_handle));
+  cout << cmd << endl;
+  cout << execMyCommand(cmd) << endl;
 
   while (1)
     midi_process(midi_read());
