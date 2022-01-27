@@ -83,6 +83,7 @@ private:
         {"rightRoomMute", m_jamLevels.rightRoomMute},
         {"beat", m_jamLevels.beat},
         {"connected", m_jamLevels.isConnected},
+        {"midiDevice", s_levelData.m_pRingBuffer->deviceName},
         {"players", json::array()},
     };
     for (int i = 0; i < MAX_JAMMERS; i++)
@@ -127,6 +128,7 @@ private:
         {"rightRoomMute", m_jamLevels.rightRoomMute},
         {"beat", m_jamLevels.beat},
         {"connected", m_jamLevels.isConnected},
+        {"midiDevice", s_levelData.m_pRingBuffer->deviceName},
         {"players", json::array()},
     };
     for (int i = 0; i < MAX_JAMMERS; i++)

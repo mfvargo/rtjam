@@ -207,6 +207,7 @@ public:
           {"beat", m_jamLevels.beat},
           {"connected", m_jamLevels.isConnected},
           {"jsonTimeStamp", m_jamLevels.jsonTimeStamp},
+          {"midiDevice", m_pLevelData->m_pRingBuffer->deviceName},
           {"players", json::array()},
       };
       for (int i = 0; i < MAX_JAMMERS; i++)

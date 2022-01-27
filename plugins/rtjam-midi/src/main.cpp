@@ -8,6 +8,8 @@
 
 using namespace std;
 
+LevelData levelData;
+
 // Utility to shell out a command
 string execMyCommand(string cmd)
 {
@@ -66,6 +68,7 @@ int scanForPort()
       if (card != -1)
       {
         cout << "Found " << snd_seq_client_info_get_name(cinfo) << endl;
+        strcpy(levelData.m_pRingBuffer->deviceName, snd_seq_client_info_get_name(cinfo));
         return snd_seq_client_info_get_client(cinfo);
       }
     }
@@ -79,8 +82,6 @@ snd_seq_event_t *midi_read(void)
   CHK(snd_seq_event_input(seq_handle, &ev), "Error reading Midi Input");
   return ev;
 }
-
-LevelData levelData;
 
 void midi_process(const snd_seq_event_t *ev)
 {
