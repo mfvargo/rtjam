@@ -89,19 +89,17 @@ void fifo_thread(short port, JamNetStuff::JamMixer *jamMixer)
 }
 
 using easywsclient::WebSocket;
-string bcastToken = "";
 
 void websocket_thread(JamNetStuff::JamSocket *pJamSocket, int roomIdx)
 {
   RoomChatRobot robot;
   while (true)
   {
-    if (bcastToken != "" && roomTokens[roomIdx] != "")
+    if (roomTokens[roomIdx] != "")
     {
       robot.init("ws://rtjam-nation.basscleftech.com/primus", roomTokens[roomIdx], pJamSocket);
       robot.readMessages();
       cout << "Room lost" << endl;
-      cout << "Bcast token: " << bcastToken << endl;
     }
     sleep(5);
   }
@@ -143,6 +141,7 @@ int main(int argc, char **argv)
   string broadcastUnitName = "";
   settings.saveToFile();
   RTJamNationApi api(urlBase);
+  string bcastToken = "";
 
   bool bFirstTime = true;
 
@@ -173,6 +172,7 @@ int main(int argc, char **argv)
     }
     else
     {
+      clog << "sending ping with: " << bcastToken << endl;
       if (!api.broadcastUnitPing(bcastToken) || api.m_httpResponseCode != 200)
       {
         // Something is wrong with this token
