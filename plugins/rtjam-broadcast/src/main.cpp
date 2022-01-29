@@ -172,7 +172,6 @@ int main(int argc, char **argv)
     }
     else
     {
-      clog << "sending ping with: " << bcastToken << endl;
       if (!api.broadcastUnitPing(bcastToken) || api.m_httpResponseCode != 200)
       {
         // Something is wrong with this token
