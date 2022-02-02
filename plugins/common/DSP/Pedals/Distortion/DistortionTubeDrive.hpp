@@ -12,13 +12,13 @@ public:
         DistortionModelerBase::init();
 
         // What is this effects name?
-        m_name = "TubeOverdrive";
+        m_name = "TubeDrive";
 
         // Now setup the settings this effect can receive.
         EffectSetting setting;
 
         setting.init(
-            "drive",                 // Name
+            "drive",                  // Name
             EffectSetting::floatType, // Type of setting
             0.0,                      // Min value
             80.0,                     // Max value
@@ -27,11 +27,10 @@ public:
         setting.setFloatValue(60.0);
         addSetting(setting);
 
-        
         setting.init(
             "treble",                 // Name
             EffectSetting::floatType, // Type of setting
-            0,                    // Min value
+            0,                        // Min value
             20.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
@@ -42,7 +41,7 @@ public:
             "level",                  // Name
             EffectSetting::floatType, // Type of setting
             -60.0,                    // Min value
-            12.0,                      // Max value
+            12.0,                     // Max value
             0.5,                      // Step Size
             EffectSetting::dB);
         setting.setFloatValue(-40.0);

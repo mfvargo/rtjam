@@ -23,11 +23,14 @@
 #include "DistortionOctaveFuzz.hpp"
 #include "Boost.hpp"
 
-
-
 using json = nlohmann::json;
 using namespace std;
 
+// this maps the short name to long name for the pedal
+// PLEASE NOTE:  The first field (key) MUST match the m_name value
+// for the class it will manufacture.  For example, if the key is "TubeDrive", then
+// the value of m_name set by that class must match!  otherwise the saved json
+// won't match and the factory won't be able to create the pedal.
 const static json s_PedalTypes = {
     {"Bass DI", "Bass Guitar Tone Shaping"},
     {"DistortionModeler", "Distortion Playground"},
@@ -48,8 +51,7 @@ const static json s_PedalTypes = {
     {"SoulDrive", "Soul Overdrive"},
     {"MetalDrive", "Metal Overdrive"},
     {"OctaveFuzz", "Octave Fuzz"},
-    {"Boost", "Boost Pedal"}
-};
+    {"Boost", "Boost Pedal"}};
 
 class EffectFactory
 {
@@ -140,14 +142,6 @@ public:
       {
         rval = new Boost();
       }
-
-
-
-
-
-
-
-
 
       else
       {
