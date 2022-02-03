@@ -26,8 +26,11 @@ public:
      // init freq reading averaging filter
      m_freqAvgFilter.init(100, 1000);
      
-     // init tuner pre-filter 
-     m_tunerFilter.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     // init tuner pre-filter - cascade of LPFs
+     m_tunerFilterStage1.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     m_tunerFilterStage2.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     m_tunerFilterStage3.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     m_tunerFilterStage4.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
   
   };
 
@@ -36,10 +39,10 @@ public:
     
     // filter and downsample/window input
     // apply 8th order IIR and store every 48th sample - Fs = 1ksps
-    float value = m_tunerFilter.getSample(input);
-    value = m_tunerFilter.getSample(value);
-    value = m_tunerFilter.getSample(value);
-    value = m_tunerFilter.getSample(value);
+    float value = m_tunerFilterStage1.getSample(input);
+    value = m_tunerFilterStage2.getSample(value);
+    value = m_tunerFilterStage3.getSample(value);
+    value = m_tunerFilterStage4.getSample(value);
     
     value *= 48;  // add gain before downsampling
     if((++m_downSampleCount %= 48) == 0)
@@ -112,7 +115,12 @@ public:
   }
 
 private:
-  BiQuadFilter m_tunerFilter;
+  BiQuadFilter m_tunerFilterStage1;   // 8 pole filter - 4 biquads in cascade
+  BiQuadFilter m_tunerFilterStage2;
+  BiQuadFilter m_tunerFilterStage3;
+  BiQuadFilter m_tunerFilterStage4;
+  
+
   EmaFilter m_freqAvgFilter;
   
   int m_downSampleCount;
