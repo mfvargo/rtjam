@@ -27,10 +27,10 @@ public:
      m_freqAvgFilter.init(100, 1000);
      
      // init tuner pre-filter - cascade of LPFs
-     m_tunerFilter1.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
-     m_tunerFilter2.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
-     m_tunerFilter3.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
-     m_tunerFilter4.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     m_tunerFilterStage1.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     m_tunerFilterStage2.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     m_tunerFilterStage3.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
+     m_tunerFilterStage4.init(BiQuadFilter::FilterType::LowPass, 350, 1.0, 0.707, 48000);
   
   };
 
