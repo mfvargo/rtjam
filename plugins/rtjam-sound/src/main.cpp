@@ -115,9 +115,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    // If we got here, jack is running.  Let's try to start a2j midi bridge
-    execMyCommand("a2j_control start");
-
     if (status & JackNameNotUnique)
     {
         client_name = jack_get_client_name(client);
