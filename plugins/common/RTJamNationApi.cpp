@@ -16,7 +16,7 @@ json resultJson;
 RTJamNationApi::RTJamNationApi(string urlbase)
 {
   m_urlBase = urlbase;
-  checkLinkStatus();
+  checkLinkStatus("eth0");
 }
 
 bool RTJamNationApi::status()
@@ -171,7 +171,7 @@ bool RTJamNationApi::post(string url, json body)
     return -1;                \
   } while (0)
 
-bool RTJamNationApi::checkLinkStatus()
+bool RTJamNationApi::checkLinkStatus(string interface)
 {
   bool rval = false;
   int rv;
@@ -183,7 +183,7 @@ bool RTJamNationApi::checkLinkStatus()
     ERROR("Socket failed. Errno = %d\n", errno);
 
   struct ifreq if_req;
-  (void)strncpy(if_req.ifr_name, "eth0", sizeof(if_req.ifr_name));
+  (void)strncpy(if_req.ifr_name, interface.c_str(), sizeof(if_req.ifr_name));
 
   // get the interface up flags
   if (ioctl(socId, SIOCGIFFLAGS, &if_req) == -1)

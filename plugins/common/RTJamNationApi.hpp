@@ -25,7 +25,7 @@ public:
   bool playerList(string roomToken);
   json m_resultBody;
   long m_httpResponseCode;
-  bool checkLinkStatus();
+  bool checkLinkStatus(string interface);
 
 private:
   bool put(string url, json body);
