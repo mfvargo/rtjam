@@ -247,7 +247,8 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
     // It's been 60 minutes since we connected or we got a paramConnectionKeepAlive
     // Time to disconnect
     // TODO: Put this back in once I figure why it's not working correctly.
-    // disconnect();
+    cout << "Disconnect timeout: " << now - m_connectionTime << endl;
+    disconnect();
   }
 
   m_framecount += frames;

@@ -57,6 +57,7 @@ int jamNationStuff()
     settings.saveVersionFile();
     settings.loadFromFile();
     string urlBase = settings.getOrSetValue("rtjam-nation", "rtjam-nation.basscleftech.com/api/1/");
+    string networkInterface = settings.getOrSetValue("networkInterface", "eth0");
     settings.setValue("gitCommit", GIT_HASH);
     int version = stoi(settings.getOrSetValue("rtjam-unit-version", "0"));
     settings.saveToFile();
@@ -66,7 +67,7 @@ int jamNationStuff()
     while (isRunning)
     {
         // printf("Light color: %d\n", lightData.m_pLightSettings->status);
-        if (api.checkLinkStatus())
+        if (api.checkLinkStatus(networkInterface))
         {
             if (loopCount % 10 == 0)
             {
