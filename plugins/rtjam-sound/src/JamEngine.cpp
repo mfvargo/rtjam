@@ -212,10 +212,7 @@ void JamEngine::getParams()
     }
     break;
   case paramConnectionKeepAlive:
-    if (m_jamSocket.isActivated)
-    {
-      m_connectionTime = JamNetStuff::getMicroTime();
-    }
+    m_connectionTime = JamNetStuff::getMicroTime();
     break;
   }
 }
@@ -248,7 +245,7 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
     // Time to disconnect
     // TODO: Put this back in once I figure why it's not working correctly.
     cout << "Disconnect timeout: " << now - m_connectionTime << endl;
-    disconnect();
+    // disconnect();
   }
 
   m_framecount += frames;
