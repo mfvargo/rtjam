@@ -43,6 +43,7 @@ namespace JamNetStuff
   {
   public:
     MicroTimer();
+    void reset();
     uint64_t getExpiredTime();
     uint64_t getTimeFromStart();
 

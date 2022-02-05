@@ -66,7 +66,6 @@ int jamNationStuff()
     int loopCount = 0;
     while (isRunning)
     {
-        // printf("Light color: %d\n", lightData.m_pLightSettings->status);
         if (api.checkLinkStatus(networkInterface))
         {
             if (loopCount % 10 == 0)

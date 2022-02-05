@@ -38,7 +38,7 @@ private:
   RTJamParam m_param;
   LightData m_lightData;
   uint64_t m_framecount;
-  uint64_t m_connectionTime;
+  JamNetStuff::MicroTimer m_conTimer;
   RTJamLevels m_levels;
   std::vector<std::thread> m_threads;
   LevelData m_levelData;

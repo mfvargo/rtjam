@@ -30,8 +30,15 @@ namespace JamNetStuff
     // Class to get microsecond time Stamps
     MicroTimer::MicroTimer()
     {
-        lastTime = 0;
+        reset();
     }
+
+    void MicroTimer::reset()
+    {
+        lastTime = 0;
+        getExpiredTime();
+    }
+
     uint64_t MicroTimer::getExpiredTime()
     {
         uint64_t now = getMicroTime();

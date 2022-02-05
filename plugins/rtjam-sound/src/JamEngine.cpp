@@ -22,7 +22,6 @@ void paramFetch(JamEngine *pJamPlugin)
 JamEngine::JamEngine()
 {
   m_framecount = 0;
-  m_connectionTime = 0;
   for (int i = 0; i < NUM_OUTPUTS; i++)
   {
     m_outputs[i] = new float[MAX_FIFO_FRAME_SIZE];
@@ -212,7 +211,8 @@ void JamEngine::getParams()
     }
     break;
   case paramConnectionKeepAlive:
-    m_connectionTime = JamNetStuff::getMicroTime();
+    cout << "Disconnect timer value: " << m_conTimer.getTimeFromStart() << endl;
+    m_conTimer.reset();
     break;
   }
 }
@@ -220,7 +220,7 @@ void JamEngine::getParams()
 void JamEngine::connect(const char *host, int port, uint32_t id)
 {
   // Log the time the connection starts
-  m_connectionTime = JamNetStuff::getMicroTime();
+  m_conTimer.reset();
   // Turn on the socket
   m_jamSocket.isActivated = true;
   // Reset all the other player volumes in the mixer and flush all the jitterBuffers
@@ -231,7 +231,6 @@ void JamEngine::connect(const char *host, int port, uint32_t id)
 
 void JamEngine::disconnect()
 {
-  m_connectionTime = 0; // reset the connection time
   m_jamSocket.disconnect();
 }
 
@@ -239,23 +238,24 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
 {
   // Auto disconnect if we don't have a keepalive
   uint64_t now = JamNetStuff::getMicroTime();
-  if (m_jamSocket.isActivated && now - m_connectionTime > (uint64_t)3600000000) // 60 * 60 * 1000 * 1000 = 3600000000 microseconds 1 hour
+  if (m_jamSocket.isActivated && m_conTimer.getTimeFromStart() > (uint64_t)10 * 60 * 1000 * 1000) // 10 minutes
   {
     // It's been 60 minutes since we connected or we got a paramConnectionKeepAlive
     // Time to disconnect
     // TODO: Put this back in once I figure why it's not working correctly.
-    cout << "Disconnect timeout: " << now - m_connectionTime << endl;
-    // disconnect();
+    cout << "Disconnect timeout: " << m_conTimer.getTimeFromStart() << endl;
+    disconnect();
   }
 
   m_framecount += frames;
 
   // Debug output
-  // if (m_framecount % 375 == 0)
-  // {
-  //   // every second
-  //   m_jamMixer.dumpOut();
-  // }
+  if (m_framecount % 375 == 0)
+  {
+    // every second
+    // cout << "Disconnect timeout: " << m_conTimer.getTimeFromStart() << endl;
+    // m_jamMixer.dumpOut();
+  }
 
   // Setup itermediate buffer for processed inputs
   float *tempOut[2];
