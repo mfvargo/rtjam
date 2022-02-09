@@ -159,6 +159,7 @@ namespace JamNetStuff
     unsigned numGets;
     uint32_t lastSequence;
     int numDropped;
+    int numDups;
     StreamTimeStats bufferStats;
     bool m_filling;
     int m_fillDepth;

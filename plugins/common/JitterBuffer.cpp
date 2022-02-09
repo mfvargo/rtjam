@@ -43,6 +43,7 @@ namespace JamNetStuff
         numPuts = 0;
         numGets = 0;
         numDropped = 0;
+        numDups = 0;
         lastSequence = 0;
         targetDepth = MIN_DEPTH + initialDepth;
         nSigma = MIN_SIGMA;
@@ -83,6 +84,13 @@ namespace JamNetStuff
         {
             // lost packets
             numDropped++;
+        }
+        if (dropped == 0)
+        {
+            // duplicate packet
+            numDups++;
+            // ignore it
+            return;
         }
         if (depth() > maxDepth)
         {
@@ -190,12 +198,13 @@ namespace JamNetStuff
     void JitterBuffer::dumpOut()
     {
         printf(
-            "avgDepth: %08.1f\t target: %06d\t under: %05d\t over: %05d\t dropped: %05d\t delta_u:%03.2f\t seq: %d\n",
+            "avgDepth: %08.1f\t target: %06d\t under: %05d\t over: %05d\t dropped: %05d\t dups: %05d\t delta_u:%03.2f\t seq: %d\n",
             bufferStats.mean,
             targetDepth,
             numUnderruns,
             numOverruns,
             numDropped,
+            numDups,
             bufferStats.sigma,
             lastSequence);
     }
