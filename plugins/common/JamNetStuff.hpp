@@ -46,10 +46,20 @@ namespace JamNetStuff
     void reset();
     uint64_t getExpiredTime();
     uint64_t getTimeFromStart();
+    void setTimerInterval(uint64_t interval)
+    {
+      m_interval = interval;
+    }
+    uint64_t getTimerInterval()
+    {
+      return m_interval;
+    }
+    bool isExpired();
 
   private:
-    uint64_t lastTime;
-    uint64_t startTime;
+    uint64_t m_lastTime;
+    uint64_t m_startTime;
+    uint64_t m_interval;
   };
 
   // Class to calculate statistics on Stuff using cheap and easy avg func
