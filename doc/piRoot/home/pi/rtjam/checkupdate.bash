@@ -12,7 +12,7 @@ fi
 cmp -s $WEBVER $LOCALVER
 if [ "$?" -ne "0" ]; then
   echo "Update software" > $FLAGFILE
-  echo "Update needed.  Scheduled for next 5 minutes"
+  echo "Update needed. Scheduled in $(( 60 - $(date +%s) % 60 )) seconds"
 else
   rm -f $FLAGFILE
   echo "No update needed"

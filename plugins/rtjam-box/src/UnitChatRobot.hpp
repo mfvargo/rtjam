@@ -139,7 +139,9 @@ public:
     }
     break;
     case paramCheckForUpdate:
-      msg["cmdOutput"] = execMyCommand("./checkupdate.bash");
+      msg["updateMsg"] = {
+          {"text", execMyCommand("./checkupdate.bash")},
+          {"time", execMyCommand("echo $(( 60 - $(date +%s) % 60 ))")}};
       sendMessage("say", msg.dump());
       break;
     case paramRebootDevice:
