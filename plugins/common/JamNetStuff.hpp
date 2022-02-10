@@ -280,6 +280,7 @@ namespace JamNetStuff
     float cBuf1[MAX_FRAME_SIZE];
     float *conversionBuf[2];
     MetroNome m_metronome;
+    uint32_t m_seqNo;
   };
 
   class JamSocket
