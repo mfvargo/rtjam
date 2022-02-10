@@ -23,6 +23,7 @@ namespace JamNetStuff
         conversionBuf[0] = cBuf0;
         conversionBuf[1] = cBuf1;
         reset();
+        m_seqNo = 0;
     }
 
     // reset to default values
@@ -135,8 +136,8 @@ namespace JamNetStuff
 
     void JamMixer::addLocalMonitor(const float **input, uint32_t frames)
     {
-        jitterBuffers[0].putIn(input[0], frames, 1);
-        jitterBuffers[1].putIn(input[1], frames, 1);
+        jitterBuffers[0].putIn(input[0], frames, m_seqNo);
+        jitterBuffers[1].putIn(input[1], frames, m_seqNo++);
     }
 
     void JamMixer::setBufferSmoothness(int channel, float smooth)

@@ -19,42 +19,41 @@ namespace JamNetStuff
 
     uint64_t getMicroTime()
     {
-        uint64_t rval;
-        struct timeval currentTime;
-        gettimeofday(&currentTime, NULL);
-        rval = (currentTime.tv_sec - THE_BEGINNING_OF_TIME) * (int)1e6;
-        rval += currentTime.tv_usec;
-        return rval;
+        return (uint64_t)chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now().time_since_epoch()).count();
     }
 
     // Class to get microsecond time Stamps
     MicroTimer::MicroTimer()
     {
+        m_interval = 0;
         reset();
     }
 
     void MicroTimer::reset()
     {
-        lastTime = 0;
-        getExpiredTime();
+        uint64_t now = getMicroTime();
+        m_startTime = m_lastTime = now;
     }
 
+    // get the time expired since the last time you asked
     uint64_t MicroTimer::getExpiredTime()
     {
         uint64_t now = getMicroTime();
-        if (lastTime == 0)
-        {
-            startTime = now;
-            lastTime = now;
-        }
-        uint64_t rval = now - lastTime;
-        lastTime = now;
+        uint64_t rval = now - m_lastTime;
+        m_lastTime = now;
         return rval;
     }
 
+    // get time expired since the timer was reset
     uint64_t MicroTimer::getTimeFromStart()
     {
-        return getMicroTime() - startTime;
+        return getMicroTime() - m_startTime;
+    }
+
+    // Test if the interval of time has passed since reset
+    bool MicroTimer::isExpired()
+    {
+        return (getTimeFromStart() > m_interval);
     }
 
     // Class to calculate statistics on Stuff using cheap and easy avg func
