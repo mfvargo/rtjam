@@ -84,7 +84,7 @@ int jamNationStuff()
                 if (token != "")
                 {
                     lightData.m_pLightSettings->status = green;
-                    if (!api.jamUnitPing(token) || api.m_httpResponseCode != 200)
+                    if (!api.jamUnitPing(token, BoxAPI::s_levelData.m_pJamLevels->isConnected) || api.m_httpResponseCode != 200)
                     {
                         lightData.m_pLightSettings->status = orange;
                         // Something is wrong with this token

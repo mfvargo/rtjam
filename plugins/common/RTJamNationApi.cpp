@@ -36,13 +36,14 @@ bool RTJamNationApi::jamUnitDeviceRegister()
   return post(m_urlBase + "jamUnit", args);
 }
 
-bool RTJamNationApi::jamUnitPing(string token)
+bool RTJamNationApi::jamUnitPing(string token, bool connected)
 {
   json args;
   args["token"] = token;
   args["lanIp"] = m_lanIp;
   args["macAddress"] = m_macAddress;
   args["gitHash"] = GIT_HASH;
+  args["connected"] = connected;
   return put(m_urlBase + "jamUnit/ping", args);
 }
 
@@ -92,8 +93,7 @@ bool RTJamNationApi::get(string url, json body)
   client.Build()->Get(url).Option(CURLOPT_VERBOSE, 0L).AcceptJson().StoreData(data).WithJson().SendData<string>(body.dump()).Header("X-Client", "restincurl").WithCompletion([&](const Result &result)
                                                                                                                                                                              {
                                                                                                                                                                                curlCode = result.curl_code;
-                                                                                                                                                                               httpResponseCode = result.http_response_code;
-                                                                                                                                                                             })
+                                                                                                                                                                               httpResponseCode = result.http_response_code; })
       .ExecuteSynchronous();
   if (curlCode == CURLE_OK)
   {
@@ -119,8 +119,7 @@ bool RTJamNationApi::put(string url, json body)
   client.Build()->Put(url).Option(CURLOPT_VERBOSE, 0L).AcceptJson().StoreData(data).WithJson().SendData<string>(body.dump()).Header("X-Client", "restincurl").WithCompletion([&](const Result &result)
                                                                                                                                                                              {
                                                                                                                                                                                curlCode = result.curl_code;
-                                                                                                                                                                               httpResponseCode = result.http_response_code;
-                                                                                                                                                                             })
+                                                                                                                                                                               httpResponseCode = result.http_response_code; })
       .ExecuteSynchronous();
   if (curlCode == CURLE_OK)
   {
@@ -146,8 +145,7 @@ bool RTJamNationApi::post(string url, json body)
   client.Build()->Post(url).Option(CURLOPT_VERBOSE, 0L).AcceptJson().StoreData(data).WithJson().SendData<string>(body.dump()).Header("X-Client", "restincurl").WithCompletion([&](const Result &result)
                                                                                                                                                                               {
                                                                                                                                                                                 curlCode = result.curl_code;
-                                                                                                                                                                                httpResponseCode = result.http_response_code;
-                                                                                                                                                                              })
+                                                                                                                                                                                httpResponseCode = result.http_response_code; })
       .ExecuteSynchronous();
   if (curlCode == CURLE_OK)
   {

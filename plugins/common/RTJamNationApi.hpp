@@ -18,7 +18,7 @@ public:
   RTJamNationApi(string urlbase);
   bool status();
   bool jamUnitDeviceRegister();
-  bool jamUnitPing(string token);
+  bool jamUnitPing(string token, bool connected);
   bool broadcastUnitDeviceRegister();
   bool broadcastUnitPing(string token);
   bool activateRoom(string token, string name, int port);
