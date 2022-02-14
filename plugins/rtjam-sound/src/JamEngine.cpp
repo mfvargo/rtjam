@@ -236,9 +236,9 @@ void JamEngine::disconnect()
 void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
 {
   // Auto disconnect if we don't have a keepalive
-  if (m_jamSocket.isActivated && m_conTimer.getTimeFromStart() > (uint64_t)10 * 60 * 1000 * 1000) // 10 minutes
+  if (m_jamSocket.isActivated && m_conTimer.getTimeFromStart() > (uint64_t)90 * 60 * 1000 * 1000) // 90 minutes
   {
-    // It's been 10 minutes since we connected or we got a paramConnectionKeepAlive
+    // It's been 90 minutes since we connected or we got a paramConnectionKeepAlive
     // Time to disconnect
     // TODO: Put this back in once I figure why it's not working correctly.
     cout << "Disconnect timeout: " << m_conTimer.getTimeFromStart() << endl;
