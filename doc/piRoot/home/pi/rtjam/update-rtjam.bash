@@ -1,8 +1,15 @@
 #!/bin/bash
-FLAGFILE=/home/pi/rtjam/update_software.flag
+WEBVER=/home/pi/rtjam/version.txt
+LOCALVER=/home/pi/rtjam/version.local.txt
 cd /home/pi/rtjam
-# Check for update flag file
-if [ -f $FLAGFILE ]; then
+rm $WEBVER
+wget -O $WEBVER localhost/pi/version.txt
+if [ "$?" -ne "0" ]; then
+  echo "could not get version from server"
+  exit 2
+fi
+cmp -s $WEBVER $LOCALVER
+if [ "$?" -ne "0" ]; then
   echo "Updating rtjam software"
   /usr/bin/systemctl stop rtjam-box
   /usr/bin/systemctl stop rtjam-sound
@@ -27,4 +34,3 @@ if [ -f $FLAGFILE ]; then
 else
   echo "No update needed"
 fi
-rm -f $FLAGFILE

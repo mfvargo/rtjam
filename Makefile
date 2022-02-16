@@ -119,6 +119,7 @@ deploy-pi: all
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-box ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-broadcast ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/rtjam-midi ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/rtjam.cer doc/piRoot/home/pi/rtjam/update-rtjam.bash ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/rtjam.cer bin/version.txt ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 # Destiny server
 	scp -i ~/.ssh/destiny.cer bin/rtjam-status ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
@@ -126,6 +127,7 @@ deploy-pi: all
 	scp -i ~/.ssh/destiny.cer bin/rtjam-box ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/destiny.cer bin/rtjam-broadcast ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/destiny.cer bin/rtjam-midi ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
+	scp -i ~/.ssh/destiny.cer doc/piRoot/home/pi/rtjam/update-rtjam.bash ubuntu@rtjam-nation.basscleftech.com:/home/ubuntu/www/html/pi
 	scp -i ~/.ssh/destiny.cer bin/version.txt ubuntu@destiny2.basscleftech.com:/home/ubuntu/www/html/pi
 
 deploy-linux: plugins
