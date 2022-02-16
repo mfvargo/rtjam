@@ -139,7 +139,7 @@ public:
     }
     break;
     case paramCheckForUpdate:
-      execMyCommand("wget localhost/pi/update-rtjam.bash");
+      execMyCommand("wget -O update-rtjam.bash localhost/pi/update-rtjam.bash");
       execMyCommand("chmod +x update-rtjam.bash");
       msg["updateMsg"] = {
           {"text", execMyCommand("./checkupdate.bash")},
