@@ -454,11 +454,22 @@ namespace JamNetStuff
         // Check for full room,  a negative serverChannel means there is no room for them
         if (serverChannel < 0)
             return;
+
         // If we get here, we have a valid player and need to broadcast them
+
+        // Are we sending a live mix to the webstream?
         if (jamMixer != NULL)
         {
             jamMixer->addData(&m_packet);
         }
+
+        // Are we saving the session to a file?
+        bool savingToFile = true;
+        if (savingToFile)
+        {
+            // do the file save stuff.
+        }
+
         m_packet.setServerChannel(serverChannel);
         // Time calculations for beat tempo and ping timing
         uint64_t nowTime = getMicroTime();
