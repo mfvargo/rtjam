@@ -301,7 +301,8 @@ namespace JamNetStuff
     JamNetStuff::JamPacket m_packet;
     ifstream m_infile;
     ofstream m_outfile;
-    int m_timeOffset;
+    int64_t m_timeOffset;
+    uint64_t m_timeStamp;
   };
 
   class JamSocket

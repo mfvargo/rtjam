@@ -24,6 +24,7 @@ jack_client_t *client;
 
 JamNetStuff::ReplayStream replay;
 float *m_outputs[NUM_OUTPUTS];
+int framecount = 0;
 
 static void signal_handler(int sig)
 {
@@ -47,17 +48,23 @@ int process(jack_nframes_t nframes, void *arg)
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
 
+    // debug
+    if (++framecount % 375 == 0)
+    {
+        pMixer->dumpOut();
+    }
     // read audio from replay stream
-    // while (replay.readPacket())
-    // {
-    //     pMixer->addData(replay.getJamPacket());
-    // }
+    while (replay.packetReady())
+    {
+        pMixer->addData(replay.getJamPacket());
+        replay.readPacket();
+    }
 
     // Read output of mixer
     pMixer->getMix(m_outputs, nframes);
     // Do stuff here
     memcpy(outputs[0], m_outputs[0], sizeof(float) * nframes);
-    memcpy(outputs[1], m_outputs[1], sizeof(float) * nframes);
+    memcpy(outputs[1], inputs[1], sizeof(float) * nframes);
     return 0;
 }
 
@@ -75,6 +82,7 @@ void jack_shutdown(void *arg)
 int main(int argc, char *argv[])
 {
     JamNetStuff::JamMixer *pMixer = new JamNetStuff::JamMixer();
+    pMixer->reset();
     json config;
     int i;
     const char **ports;
@@ -191,15 +199,13 @@ int main(int argc, char *argv[])
     {
         std::string input_line;
         std::getline(std::cin, input_line);
-        if (replay.readOpen(input_line.c_str()))
+        if (replay.readOpen("doc/packets.raw"))
         {
-            cout << "Opened up " << input_line << endl;
-            replay.readPacket();
-            replay.readPacket();
+            cout << "Opened up " << endl;
         }
         else
         {
-            cout << "Failed to open up " << input_line << endl;
+            cout << "Failed to open" << endl;
         }
     }
     jack_client_close(client);

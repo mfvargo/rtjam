@@ -13,6 +13,19 @@ namespace JamNetStuff
       return m_infile.good();
     }
     m_infile.open(filename, ios::in | ios::binary);
+    if (!m_infile.good())
+    {
+      return false;
+    }
+    // now that we are here, let's load the first packet
+    if (!readPacket())
+    {
+      // Could not read first packet.  close
+      close();
+      return false;
+    }
+    uint64_t now = getMicroTime();
+    m_timeOffset = now - m_timeStamp;
     return m_infile.good();
   }
 
@@ -42,6 +55,20 @@ namespace JamNetStuff
     return false;
   }
 
+  bool ReplayStream::packetReady()
+  {
+    if (!m_infile.is_open())
+    {
+      return false;
+    }
+    if (m_infile.peek() == EOF)
+    {
+      m_infile.close();
+      return false;
+    }
+    return (getMicroTime() > m_timeStamp + m_timeOffset);
+  }
+
   bool ReplayStream::readPacket()
   {
     if (!m_infile.is_open())
@@ -50,19 +77,18 @@ namespace JamNetStuff
     }
     uint64_t timeStamp;
     m_infile.read((char *)&timeStamp, sizeof(timeStamp));
-    timeStamp = be64toh(timeStamp);
-    cout << "timestamp: " << timeStamp << endl;
+    m_timeStamp = be64toh(timeStamp);
     uint16_t cnt;
     m_infile.read((char *)&cnt, sizeof(cnt));
     cnt = ntohs(cnt);
-    cout << "Count: " << cnt << endl;
     if (m_infile.good() && cnt > 0 && cnt < sizeof(JamMessage))
     {
       m_infile.read((char *)m_packet.getPacket(), cnt);
       if (m_infile.good())
       {
         m_packet.decodeHeader(cnt);
-        m_packet.dumpPacket("replay: ");
+        // m_packet.dumpPacket("replay: ");
+        return true;
       }
     }
     return false;
