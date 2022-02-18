@@ -285,16 +285,23 @@ namespace JamNetStuff
     uint32_t m_seqNo;
   };
 
-  class CaptureFile
+  // Class to read and write packets streams to a file
+  class ReplayStream
   {
   public:
-    // Class that will be used to save recorded files of jam sessions
-    bool open(const char *filename);
-    bool writeData(JamNetStuff::JamPacket *packet);
+    bool readOpen(const char *filename);
+    bool writeOpen(const char *filename);
     bool close();
+    bool writePacket(JamNetStuff::JamPacket *packet);
+    bool readPacket();
+    bool packetReady();
+    JamNetStuff::JamPacket *getJamPacket();
 
   private:
-    ofstream m_file;
+    JamNetStuff::JamPacket m_packet;
+    ifstream m_infile;
+    ofstream m_outfile;
+    int m_timeOffset;
   };
 
   class JamSocket
@@ -321,7 +328,6 @@ namespace JamNetStuff
   private:
     PlayerList m_playerList;
     JamPacket m_packet;
-    CaptureFile m_capture;
     int jamSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_in senderAddr;
@@ -333,6 +339,7 @@ namespace JamNetStuff
     int m_tempo;
     uint64_t m_tempoStart;
     bool m_pinging;
+    ReplayStream m_capture;
   };
 };
 

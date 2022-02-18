@@ -14,7 +14,6 @@
 #include <pwd.h>
 
 #include "JamNetStuff.hpp"
-#include "ReplayStream.hpp"
 
 #define MAX_FIFO_FRAME_SIZE 1024
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
@@ -23,7 +22,7 @@ jack_port_t **input_ports;
 jack_port_t **output_ports;
 jack_client_t *client;
 
-ReplayStream replay;
+JamNetStuff::ReplayStream replay;
 float *m_outputs[NUM_OUTPUTS];
 
 static void signal_handler(int sig)
@@ -49,16 +48,16 @@ int process(jack_nframes_t nframes, void *arg)
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
 
     // read audio from replay stream
-    while (replay.readPacket())
-    {
-        pMixer->addData(replay.getJamPacket());
-    }
+    // while (replay.readPacket())
+    // {
+    //     pMixer->addData(replay.getJamPacket());
+    // }
 
     // Read output of mixer
     pMixer->getMix(m_outputs, nframes);
     // Do stuff here
-    memcpy(outputs[0], inputs[0], sizeof(float) * nframes);
-    memcpy(outputs[1], inputs[1], sizeof(float) * nframes);
+    memcpy(outputs[0], m_outputs[0], sizeof(float) * nframes);
+    memcpy(outputs[1], m_outputs[1], sizeof(float) * nframes);
     return 0;
 }
 
@@ -192,9 +191,11 @@ int main(int argc, char *argv[])
     {
         std::string input_line;
         std::getline(std::cin, input_line);
-        if (replay.open(input_line.c_str()))
+        if (replay.readOpen(input_line.c_str()))
         {
             cout << "Opened up " << input_line << endl;
+            replay.readPacket();
+            replay.readPacket();
         }
         else
         {

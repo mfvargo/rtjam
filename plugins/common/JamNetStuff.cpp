@@ -304,43 +304,6 @@ namespace JamNetStuff
         }
     }
 
-    bool CaptureFile::open(const char *filename)
-    {
-        // Open the file
-        if (m_file.is_open())
-        {
-            return false;
-        }
-        m_file.open(filename, ios::out | ios::binary);
-        return m_file.good();
-    }
-
-    bool CaptureFile::writeData(JamNetStuff::JamPacket *packet)
-    {
-        // Write the data to the file
-        if (m_file.is_open())
-        {
-            // we write the packet to the file
-            uint64_t tStamp = htobe64(JamNetStuff::getMicroTime()); // Timestamp
-            m_file.write((const char *)&tStamp, sizeof(tStamp));
-            uint16_t cnt = htons(packet->getSize()); // Sizeof the packet
-            m_file.write((const char *)&cnt, sizeof(cnt));
-            m_file.write((const char *)packet->getPacket(), cnt); // The packet itself (encoded)
-            return m_file.good();
-        }
-        return false;
-    }
-
-    bool CaptureFile::close()
-    {
-        if (!m_file.is_open())
-        {
-            return false;
-        }
-        m_file.close();
-        return m_file.good();
-    }
-
     JamSocket::JamSocket()
     {
         isActivated = false;
@@ -433,7 +396,7 @@ namespace JamNetStuff
         m_tempoStart = lastPingTime = getMicroTime();
         m_pinging = true;
         // Open the save file
-        m_capture.open("packets.raw");
+        m_capture.writeOpen("packets.raw");
     }
 
     int JamSocket::sendPacket(const float **buffer, int frames)
@@ -532,12 +495,8 @@ namespace JamNetStuff
 
         // Are we saving the session to a file?
         // This code is here so that the file always contains network encoded packets
-        bool savingToFile = true;
-        if (savingToFile)
-        {
-            // do the file save stuff.
-            m_capture.writeData(&m_packet);
-        }
+        // do the file save stuff.
+        m_capture.writePacket(&m_packet);
 
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {

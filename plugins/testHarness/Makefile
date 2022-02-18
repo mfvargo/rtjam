@@ -11,6 +11,7 @@ SRCS = \
 	../common/JamMixer.cpp \
 	../common/JitterBuffer.cpp \
 	../common/ChannelMap.cpp \
+	../common/ReplayStream.cpp \
 
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
