@@ -321,11 +321,11 @@ namespace JamNetStuff
         if (m_file.is_open())
         {
             // we write the packet to the file
-            int cnt = packet->getSize();
-            uint64_t tStamp = JamNetStuff::getMicroTime();
+            uint64_t tStamp = htobe64(JamNetStuff::getMicroTime()); // Timestamp
             m_file.write((const char *)&tStamp, sizeof(tStamp));
+            uint16_t cnt = htons(packet->getSize()); // Sizeof the packet
             m_file.write((const char *)&cnt, sizeof(cnt));
-            m_file.write((const char *)packet->getPacket(), cnt);
+            m_file.write((const char *)packet->getPacket(), cnt); // The packet itself (encoded)
             return m_file.good();
         }
         return false;
