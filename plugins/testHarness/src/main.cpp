@@ -13,11 +13,18 @@
 #include <unistd.h>
 #include <pwd.h>
 
-#include "PedalBoard.hpp"
+#include "JamNetStuff.hpp"
+#include "ReplayStream.hpp"
+
+#define MAX_FIFO_FRAME_SIZE 1024
+#define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
 jack_port_t **input_ports;
 jack_port_t **output_ports;
 jack_client_t *client;
+
+ReplayStream replay;
+float *m_outputs[NUM_OUTPUTS];
 
 static void signal_handler(int sig)
 {
@@ -33,16 +40,25 @@ static void signal_handler(int sig)
 
 int process(jack_nframes_t nframes, void *arg)
 {
-    PedalBoard *board = (PedalBoard *)arg;
+    JamNetStuff::JamMixer *pMixer = (JamNetStuff::JamMixer *)arg;
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
     inputs[1] = (float *)jack_port_get_buffer(input_ports[1], nframes);
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
+
+    // read audio from replay stream
+    while (replay.readPacket())
+    {
+        pMixer->addData(replay.getJamPacket());
+    }
+
+    // Read output of mixer
+    pMixer->getMix(m_outputs, nframes);
     // Do stuff here
-    board->process(inputs[0], outputs[0], nframes);
-    memcpy(outputs[1], outputs[0], sizeof(float) * nframes);
+    memcpy(outputs[0], inputs[0], sizeof(float) * nframes);
+    memcpy(outputs[1], inputs[1], sizeof(float) * nframes);
     return 0;
 }
 
@@ -59,25 +75,20 @@ void jack_shutdown(void *arg)
 
 int main(int argc, char *argv[])
 {
+    JamNetStuff::JamMixer *pMixer = new JamNetStuff::JamMixer();
     json config;
-    PedalBoard pedalBoard;
-
-    // std::ifstream infile("testboard.json");
-    // json boardConfig;
-    // infile >> boardConfig;
-    // pedalBoard.init(boardConfig["effects"]);
-
-    // Add an extra ToneStack in second spot
-    pedalBoard.insertPedal(10, "Bass DI");
-
-    std::cout << pedalBoard.getChainConfig("yank_it", 0).dump(2);
-
     int i;
     const char **ports;
     const char *client_name = "testHarness";
     const char *server_name = NULL;
     jack_options_t options = JackNullOption;
     jack_status_t status;
+
+    // Allocate output buffers
+    for (int i = 0; i < NUM_OUTPUTS; i++)
+    {
+        m_outputs[i] = new float[MAX_FIFO_FRAME_SIZE];
+    }
 
     /* open a client connection to the JACK server */
 
@@ -101,7 +112,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "unique name `%s' assigned\n", client_name);
     }
 
-    jack_set_process_callback(client, process, &(pedalBoard));
+    jack_set_process_callback(client, process, pMixer);
 
     jack_on_shutdown(client, jack_shutdown, 0);
 
@@ -181,7 +192,14 @@ int main(int argc, char *argv[])
     {
         std::string input_line;
         std::getline(std::cin, input_line);
-        pedalBoard.toggleEffect(atoi(input_line.c_str()));
+        if (replay.open(input_line.c_str()))
+        {
+            cout << "Opened up " << input_line << endl;
+        }
+        else
+        {
+            cout << "Failed to open up " << input_line << endl;
+        }
     }
     jack_client_close(client);
     exit(0);
