@@ -322,6 +322,8 @@ namespace JamNetStuff
         {
             // we write the packet to the file
             int cnt = packet->getSize();
+            uint64_t tStamp = JamNetStuff::getMicroTime();
+            m_file.write((const char *)&tStamp, sizeof(tStamp));
             m_file.write((const char *)&cnt, sizeof(cnt));
             m_file.write((const char *)packet->getPacket(), cnt);
             return m_file.good();
