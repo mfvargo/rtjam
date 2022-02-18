@@ -23,6 +23,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include "jamrtime.h"
 #include <mutex>
 #include <vector>
@@ -283,6 +285,18 @@ namespace JamNetStuff
     uint32_t m_seqNo;
   };
 
+  class CaptureFile
+  {
+  public:
+    // Class that will be used to save recorded files of jam sessions
+    bool open(const char *filename);
+    bool writeData(JamNetStuff::JamPacket *packet);
+    bool close();
+
+  private:
+    ofstream m_file;
+  };
+
   class JamSocket
   {
   public:
@@ -307,6 +321,7 @@ namespace JamNetStuff
   private:
     PlayerList m_playerList;
     JamPacket m_packet;
+    CaptureFile m_capture;
     int jamSocket;
     struct sockaddr_in serverAddr;
     struct sockaddr_in senderAddr;

@@ -304,6 +304,41 @@ namespace JamNetStuff
         }
     }
 
+    bool CaptureFile::open(const char *filename)
+    {
+        // Open the file
+        if (m_file.is_open())
+        {
+            return false;
+        }
+        m_file.open(filename, ios::out | ios::binary);
+        return m_file.good();
+    }
+
+    bool CaptureFile::writeData(JamNetStuff::JamPacket *packet)
+    {
+        // Write the data to the file
+        if (m_file.is_open())
+        {
+            // we write the packet to the file
+            int cnt = packet->getSize();
+            m_file.write((const char *)&cnt, sizeof(cnt));
+            m_file.write((const char *)packet->getPacket(), cnt);
+            return m_file.good();
+        }
+        return false;
+    }
+
+    bool CaptureFile::close()
+    {
+        if (!m_file.is_open())
+        {
+            return false;
+        }
+        m_file.close();
+        return m_file.good();
+    }
+
     JamSocket::JamSocket()
     {
         isActivated = false;
@@ -395,6 +430,8 @@ namespace JamNetStuff
         }
         m_tempoStart = lastPingTime = getMicroTime();
         m_pinging = true;
+        // Open the save file
+        m_capture.open("packets.raw");
     }
 
     int JamSocket::sendPacket(const float **buffer, int frames)
@@ -463,13 +500,6 @@ namespace JamNetStuff
             jamMixer->addData(&m_packet);
         }
 
-        // Are we saving the session to a file?
-        bool savingToFile = true;
-        if (savingToFile)
-        {
-            // do the file save stuff.
-        }
-
         m_packet.setServerChannel(serverChannel);
         // Time calculations for beat tempo and ping timing
         uint64_t nowTime = getMicroTime();
@@ -497,6 +527,16 @@ namespace JamNetStuff
         }
         m_packet.setServerTime(m_pinging ? nowTime : 0);
         m_packet.encodeHeader();
+
+        // Are we saving the session to a file?
+        // This code is here so that the file always contains network encoded packets
+        bool savingToFile = true;
+        if (savingToFile)
+        {
+            // do the file save stuff.
+            m_capture.writeData(&m_packet);
+        }
+
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {
             Player player = m_playerList.get(i);
