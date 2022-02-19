@@ -64,7 +64,7 @@ int process(jack_nframes_t nframes, void *arg)
     pMixer->getMix(m_outputs, nframes);
     // Do stuff here
     memcpy(outputs[0], m_outputs[0], sizeof(float) * nframes);
-    memcpy(outputs[1], inputs[1], sizeof(float) * nframes);
+    memcpy(outputs[1], m_outputs[1], sizeof(float) * nframes);
     return 0;
 }
 
