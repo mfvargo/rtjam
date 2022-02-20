@@ -396,7 +396,21 @@ namespace JamNetStuff
         m_tempoStart = lastPingTime = getMicroTime();
         m_pinging = true;
         // Open the save file
-        m_capture.writeOpen("packets.raw");
+    }
+
+    bool JamSocket::recordRoom()
+    {
+        return m_capture.writeOpen("packets.raw");
+    }
+
+    bool JamSocket::stopAudio()
+    {
+        return m_capture.close();
+    }
+
+    bool JamSocket::playAudio()
+    {
+        return m_capture.readOpen("packets.raw");
     }
 
     int JamSocket::sendPacket(const float **buffer, int frames)

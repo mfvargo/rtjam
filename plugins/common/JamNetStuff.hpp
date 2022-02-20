@@ -326,6 +326,10 @@ namespace JamNetStuff
     std::map<unsigned, float> getLatency() { return m_playerList.getLatency(); };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
 
+    bool recordRoom();
+    bool stopAudio();
+    bool playAudio();
+
   private:
     PlayerList m_playerList;
     JamPacket m_packet;
