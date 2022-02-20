@@ -2,7 +2,7 @@
 
 namespace JamNetStuff
 {
-  bool ReplayStream::readOpen(const char *filename)
+  string ReplayStream::readOpen(const char *filename)
   {
     m_timeOffset = 0;
     // Open the file
@@ -10,49 +10,51 @@ namespace JamNetStuff
     {
       // If file is open, rewind to the beginning
       m_infile.seekg(0);
-      return m_infile.good();
+      return "playing";
     }
     m_infile.open(filename, ios::in | ios::binary);
     if (!m_infile.good())
     {
-      return false;
+      return "error opening file";
     }
     // now that we are here, let's load the first packet
     if (!readPacket())
     {
       // Could not read first packet.  close
       close();
-      return false;
+      return "error reading file";
     }
     uint64_t now = getMicroTime();
     m_timeOffset = now - m_timeStamp;
-    return m_infile.good();
+    return "playing";
   }
 
-  bool ReplayStream::writeOpen(const char *filename)
+  string ReplayStream::writeOpen(const char *filename)
   {
     // Open the file
     if (m_outfile.is_open())
     {
-      return false;
+      return "recording";
     }
     m_outfile.open(filename, ios::out | ios::binary);
-    return m_outfile.good();
+    if (!m_outfile.good())
+    {
+      return "error opening file";
+    }
+    return "recording";
   }
 
-  bool ReplayStream::close()
+  string ReplayStream::close()
   {
     if (m_infile.is_open())
     {
       m_infile.close();
-      return m_infile.good();
     }
     if (m_outfile.is_open())
     {
       m_outfile.close();
-      return m_outfile.good();
     }
-    return false;
+    return "idle";
   }
 
   bool ReplayStream::packetReady()

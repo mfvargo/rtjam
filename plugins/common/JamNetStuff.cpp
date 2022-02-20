@@ -398,17 +398,17 @@ namespace JamNetStuff
         // Open the save file
     }
 
-    bool JamSocket::recordRoom()
+    string JamSocket::recordRoom()
     {
         return m_capture.writeOpen("packets.raw");
     }
 
-    bool JamSocket::stopAudio()
+    string JamSocket::stopAudio()
     {
         return m_capture.close();
     }
 
-    bool JamSocket::playAudio()
+    string JamSocket::playAudio()
     {
         return m_capture.readOpen("packets.raw");
     }

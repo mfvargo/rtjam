@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
     {
         std::string input_line;
         std::getline(std::cin, input_line);
-        if (replay.readOpen("doc/packets.raw"))
+        if (replay.readOpen("doc/packets.raw") == "playing")
         {
             cout << "Opened up " << endl;
         }

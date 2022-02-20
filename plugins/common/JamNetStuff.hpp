@@ -289,9 +289,9 @@ namespace JamNetStuff
   class ReplayStream
   {
   public:
-    bool readOpen(const char *filename);
-    bool writeOpen(const char *filename);
-    bool close();
+    string readOpen(const char *filename);
+    string writeOpen(const char *filename);
+    string close();
     bool writePacket(JamNetStuff::JamPacket *packet);
     bool readPacket();
     bool packetReady();
@@ -326,9 +326,9 @@ namespace JamNetStuff
     std::map<unsigned, float> getLatency() { return m_playerList.getLatency(); };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
 
-    bool recordRoom();
-    bool stopAudio();
-    bool playAudio();
+    string recordRoom();
+    string stopAudio();
+    string playAudio();
 
   private:
     PlayerList m_playerList;

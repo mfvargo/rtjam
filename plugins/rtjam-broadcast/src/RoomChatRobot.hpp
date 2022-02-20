@@ -36,6 +36,7 @@ public:
   {
     // This is a message from the room chat.
     string command = msg["message"];
+    cout << command << endl;
 
     // See if this message is a command for the robot
     int idx = command.find("!tempo");
@@ -68,7 +69,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["recordRoom"] = m_pJamSocket->stopAudio();
+      resp["stopAudio"] = m_pJamSocket->stopAudio();
       sendMessage("say", resp.dump());
       return;
     }
@@ -76,7 +77,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["recordRoom"] = m_pJamSocket->playAudio();
+      resp["playAudio"] = m_pJamSocket->playAudio();
       sendMessage("say", resp.dump());
       return;
     }
