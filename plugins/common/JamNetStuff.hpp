@@ -354,6 +354,7 @@ namespace JamNetStuff
     uint64_t m_tempoStart;
     bool m_pinging;
     ReplayStream m_capture;
+    short m_port;
   };
 };
 

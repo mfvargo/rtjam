@@ -353,6 +353,7 @@ namespace JamNetStuff
 
     void JamSocket::initServer(short port)
     {
+        m_port = port;
         // Try to set the Type of Service to Voice (for whatever that is worth)
         int tos_local = IPTOS_LOWDELAY;
         if (setsockopt(jamSocket, IPPROTO_IP, IP_TOS, &tos_local, sizeof(tos_local)))
@@ -400,7 +401,8 @@ namespace JamNetStuff
 
     string JamSocket::recordRoom()
     {
-        return m_capture.writeOpen("packets.raw");
+        string filename = std::to_string(m_port) + ".raw";
+        return m_capture.writeOpen(filename.c_str());
     }
 
     string JamSocket::stopAudio()
@@ -410,7 +412,8 @@ namespace JamNetStuff
 
     string JamSocket::playAudio()
     {
-        return m_capture.readOpen("packets.raw");
+        string filename = std::to_string(m_port) + ".raw";
+        return m_capture.readOpen(filename.c_str());
     }
 
     int JamSocket::sendPacket(const float **buffer, int frames)
