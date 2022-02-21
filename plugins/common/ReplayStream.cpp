@@ -153,10 +153,10 @@ namespace JamNetStuff
     }
 
     // debug
-    if (++m_framecount % 375 == 0)
-    {
-      m_mixer.dumpOut();
-    }
+    // if (++m_framecount % 375 == 0)
+    // {
+    //   m_mixer.dumpOut();
+    // }
 
     uint64_t outFrameTime = 128 * 1000 / 48;
     m_delta += m_timer.getExpiredTime(); // add time since we did this last
