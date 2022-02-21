@@ -302,6 +302,7 @@ namespace JamNetStuff
 
   private:
     JamNetStuff::JamPacket m_packet;
+    JamNetStuff::JamPacket m_sendPacket;
     JamNetStuff::JamMixer m_mixer;
     JamNetStuff::MicroTimer m_timer;
     ifstream m_infile;

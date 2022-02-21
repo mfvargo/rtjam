@@ -4,6 +4,9 @@ namespace JamNetStuff
 {
   ReplayStream::ReplayStream()
   {
+    m_sendPacket.setClientId(40001); // TODO: fix this later
+    m_sendPacket.setIsClient(true);
+
     for (int i = 0; i < MIX_CHANNELS + 2; i++)
     {
       m_outputs[i] = new float[1024];
@@ -161,12 +164,10 @@ namespace JamNetStuff
     {
       // it's been over 128 samnples of time.  Let's make a packet
       m_mixer.getMix(m_outputs, 128);
-      m_packet.setClientId(40001); // TODO: fix this later
-      m_packet.setIsClient(true);
-      m_packet.encodeAudio((const float **)m_outputs, 128);
-      m_packet.encodeHeader();
+      m_sendPacket.encodeAudio((const float **)m_outputs, 128);
+      m_sendPacket.encodeHeader();
       m_delta -= outFrameTime;
-      return &m_packet;
+      return &m_sendPacket;
     }
 
     return NULL;
