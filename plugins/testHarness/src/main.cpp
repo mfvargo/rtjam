@@ -42,6 +42,7 @@ int process(jack_nframes_t nframes, void *arg)
 {
     float *inputs[2];
     float *outputs[2];
+
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
     inputs[1] = (float *)jack_port_get_buffer(input_ports[1], nframes);
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
@@ -51,6 +52,7 @@ int process(jack_nframes_t nframes, void *arg)
     if (pPlaybackPacket)
     {
         // we do stuff here to decode the mix and feed it.
+        pPlaybackPacket->decodeJamBuffer(outputs);
     }
     else
     {

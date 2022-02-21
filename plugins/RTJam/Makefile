@@ -20,6 +20,7 @@ FILES_DSP = \
 	../common/JamMixer.cpp \
 	../common/JitterBuffer.cpp \
 	../common/ChannelMap.cpp \
+	../common/ReplayStream.cpp \
 	../common/TimersAndStats.cpp
 
 FILES_UI = \

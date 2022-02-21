@@ -289,6 +289,8 @@ namespace JamNetStuff
   class ReplayStream
   {
   public:
+    ReplayStream();
+    ~ReplayStream();
     string readOpen(const char *filename);
     string writeOpen(const char *filename);
     string close();
@@ -301,11 +303,14 @@ namespace JamNetStuff
   private:
     JamNetStuff::JamPacket m_packet;
     JamNetStuff::JamMixer m_mixer;
+    JamNetStuff::MicroTimer m_timer;
     ifstream m_infile;
     ofstream m_outfile;
     int64_t m_timeOffset;
     uint64_t m_timeStamp;
+    uint64_t m_delta;
     int m_framecount;
+    float *m_outputs[MIX_CHANNELS + 2]; // each channel plus 2 for the overall mix
   };
 
   class JamSocket

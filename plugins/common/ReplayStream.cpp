@@ -2,11 +2,27 @@
 
 namespace JamNetStuff
 {
+  ReplayStream::ReplayStream()
+  {
+    for (int i = 0; i < MIX_CHANNELS + 2; i++)
+    {
+      m_outputs[i] = new float[1024];
+    }
+  }
+  ReplayStream::~ReplayStream()
+  {
+    for (int i = 0; i < MIX_CHANNELS + 2; i++)
+    {
+      delete m_outputs[i];
+    }
+  }
   string ReplayStream::readOpen(const char *filename)
   {
     // for debug
     m_framecount = 0;
     m_timeOffset = 0;
+    m_delta = 0;
+    m_timer.reset();
     // Open the file
     if (m_infile.is_open())
     {
@@ -139,11 +155,19 @@ namespace JamNetStuff
       m_mixer.dumpOut();
     }
 
-    // Need to check if it's time to chunk out another mix chunk...
-    // TODO: figure this out.  Something to do with the time since we last chunked out
-    // and if a frames worth of time has gone by.  And if so, we need to get the mix out of the mixer
-    // and encode it into a packet so that will get sent to the people in the room.
-    // maybe use a timer objects?
+    uint64_t outFrameTime = 128 * 1000 / 48;
+    m_delta += m_timer.getExpiredTime(); // add time since we did this last
+    if (m_delta > outFrameTime)
+    {
+      // it's been over 128 samnples of time.  Let's make a packet
+      m_mixer.getMix(m_outputs, 128);
+      m_packet.setClientId(40001); // TODO: fix this later
+      m_packet.setIsClient(true);
+      m_packet.encodeAudio((const float **)m_outputs, 128);
+      m_packet.encodeHeader();
+      m_delta -= outFrameTime;
+      return &m_packet;
+    }
 
     return NULL;
   }
