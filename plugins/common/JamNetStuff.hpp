@@ -296,6 +296,7 @@ namespace JamNetStuff
     bool readPacket();
     bool packetReady();
     JamNetStuff::JamPacket *getJamPacket();
+    JamPacket *getPlayBackMix();
 
   private:
     JamNetStuff::JamPacket m_packet;
@@ -338,7 +339,7 @@ namespace JamNetStuff
     struct sockaddr_in senderAddr;
     socklen_t addr_size;
     int readData();
-    int sendData(struct sockaddr_in *to_addr, bool headerOnly = false);
+    int sendData(struct sockaddr_in *to_addr, bool headerOnly, JamPacket *pPacket);
     uint64_t beatCount;
     uint64_t lastPingTime;
     int m_tempo;

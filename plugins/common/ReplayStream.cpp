@@ -116,4 +116,9 @@ namespace JamNetStuff
   {
     return &m_packet;
   }
+
+  JamNetStuff::JamPacket *ReplayStream::getPlayBackMix()
+  {
+    return NULL;
+  }
 }

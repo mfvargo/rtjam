@@ -422,7 +422,7 @@ namespace JamNetStuff
         // Send a packet to the server!
         m_packet.encodeAudio(buffer, frames);
         m_packet.encodeHeader();
-        return sendData(&serverAddr);
+        return sendData(&serverAddr, false, &m_packet);
     }
 
     // Client side function to read incoming packets and shove them into the mixer.
@@ -512,11 +512,18 @@ namespace JamNetStuff
         // do the file save stuff.
         m_capture.writePacket(&m_packet);
 
+        // Are we playing back some recorded audio?
+        JamPacket *pPlaybackPacket = m_capture.getPlayBackMix();
+
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {
             Player player = m_playerList.get(i);
             // Get the addresses and send (note: only send the header (for ping) to packet sender)
-            sendData(&player.Address, player.clientId == clientId);
+            sendData(&player.Address, player.clientId == clientId, &m_packet);
+            if (pPlaybackPacket != NULL)
+            {
+                sendData(&player.Address, false, pPlaybackPacket);
+            }
         }
     }
 
@@ -540,12 +547,12 @@ namespace JamNetStuff
         }
         return nBytes;
     }
-    int JamSocket::sendData(struct sockaddr_in *to_addr, bool headerOnly)
+    int JamSocket::sendData(struct sockaddr_in *to_addr, bool headerOnly, JamPacket *pPacket)
     {
         int rval = sendto(
             jamSocket,
-            m_packet.getPacket(),
-            m_packet.getSize(headerOnly),
+            pPacket->getPacket(),
+            pPacket->getSize(headerOnly),
             0,
             (struct sockaddr *)to_addr,
             sizeof(struct sockaddr));
