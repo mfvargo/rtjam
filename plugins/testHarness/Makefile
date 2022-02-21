@@ -5,7 +5,13 @@ CC = gcc
 
 #SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 SRCS = \
-	./src/main.cpp
+	./src/main.cpp \
+	../common/JamNetStuff.cpp \
+	../common/TimersAndStats.cpp \
+	../common/JamMixer.cpp \
+	../common/JitterBuffer.cpp \
+	../common/ChannelMap.cpp \
+	../common/ReplayStream.cpp \
 
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))

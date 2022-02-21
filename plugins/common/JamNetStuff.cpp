@@ -395,6 +395,22 @@ namespace JamNetStuff
         }
         m_tempoStart = lastPingTime = getMicroTime();
         m_pinging = true;
+        // Open the save file
+    }
+
+    string JamSocket::recordRoom()
+    {
+        return m_capture.writeOpen("packets.raw");
+    }
+
+    string JamSocket::stopAudio()
+    {
+        return m_capture.close();
+    }
+
+    string JamSocket::playAudio()
+    {
+        return m_capture.readOpen("packets.raw");
     }
 
     int JamSocket::sendPacket(const float **buffer, int frames)
@@ -406,7 +422,7 @@ namespace JamNetStuff
         // Send a packet to the server!
         m_packet.encodeAudio(buffer, frames);
         m_packet.encodeHeader();
-        return sendData(&serverAddr);
+        return sendData(&serverAddr, false, &m_packet);
     }
 
     // Client side function to read incoming packets and shove them into the mixer.
@@ -454,11 +470,15 @@ namespace JamNetStuff
         // Check for full room,  a negative serverChannel means there is no room for them
         if (serverChannel < 0)
             return;
+
         // If we get here, we have a valid player and need to broadcast them
+
+        // Are we sending a live mix to the webstream?
         if (jamMixer != NULL)
         {
             jamMixer->addData(&m_packet);
         }
+
         m_packet.setServerChannel(serverChannel);
         // Time calculations for beat tempo and ping timing
         uint64_t nowTime = getMicroTime();
@@ -486,11 +506,24 @@ namespace JamNetStuff
         }
         m_packet.setServerTime(m_pinging ? nowTime : 0);
         m_packet.encodeHeader();
+
+        // Are we saving the session to a file?
+        // This code is here so that the file always contains network encoded packets
+        // do the file save stuff.
+        m_capture.writePacket(&m_packet);
+
+        // Are we playing back some recorded audio?
+        JamPacket *pPlaybackPacket = m_capture.getPlayBackMix();
+
         for (int i = 0; i < m_playerList.numPlayers(); i++)
         {
             Player player = m_playerList.get(i);
             // Get the addresses and send (note: only send the header (for ping) to packet sender)
-            sendData(&player.Address, player.clientId == clientId);
+            sendData(&player.Address, player.clientId == clientId, &m_packet);
+            if (pPlaybackPacket != NULL)
+            {
+                sendData(&player.Address, false, pPlaybackPacket);
+            }
         }
     }
 
@@ -514,12 +547,12 @@ namespace JamNetStuff
         }
         return nBytes;
     }
-    int JamSocket::sendData(struct sockaddr_in *to_addr, bool headerOnly)
+    int JamSocket::sendData(struct sockaddr_in *to_addr, bool headerOnly, JamPacket *pPacket)
     {
         int rval = sendto(
             jamSocket,
-            m_packet.getPacket(),
-            m_packet.getSize(headerOnly),
+            pPacket->getPacket(),
+            pPacket->getSize(headerOnly),
             0,
             (struct sockaddr *)to_addr,
             sizeof(struct sockaddr));

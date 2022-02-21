@@ -22,6 +22,7 @@ SRCS = \
 	../common/MessageQueue.cpp \
 	../common/Settings.cpp \
 	../common/LightData.cpp \
+	../common/ReplayStream \
 
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))

@@ -23,6 +23,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
 #include "jamrtime.h"
 #include <mutex>
 #include <vector>
@@ -283,6 +285,35 @@ namespace JamNetStuff
     uint32_t m_seqNo;
   };
 
+  // Class to read and write packets streams to a file
+  class ReplayStream
+  {
+  public:
+    ReplayStream();
+    ~ReplayStream();
+    string readOpen(const char *filename);
+    string writeOpen(const char *filename);
+    string close();
+    bool writePacket(JamNetStuff::JamPacket *packet);
+    bool readPacket();
+    bool packetReady();
+    JamNetStuff::JamPacket *getJamPacket();
+    JamPacket *getPlayBackMix();
+
+  private:
+    JamNetStuff::JamPacket m_packet;
+    JamNetStuff::JamPacket m_sendPacket;
+    JamNetStuff::JamMixer m_mixer;
+    JamNetStuff::MicroTimer m_timer;
+    ifstream m_infile;
+    ofstream m_outfile;
+    int64_t m_timeOffset;
+    uint64_t m_timeStamp;
+    uint64_t m_delta;
+    int m_framecount;
+    float *m_outputs[MIX_CHANNELS + 2]; // each channel plus 2 for the overall mix
+  };
+
   class JamSocket
   {
   public:
@@ -304,6 +335,10 @@ namespace JamNetStuff
     std::map<unsigned, float> getLatency() { return m_playerList.getLatency(); };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
 
+    string recordRoom();
+    string stopAudio();
+    string playAudio();
+
   private:
     PlayerList m_playerList;
     JamPacket m_packet;
@@ -312,12 +347,13 @@ namespace JamNetStuff
     struct sockaddr_in senderAddr;
     socklen_t addr_size;
     int readData();
-    int sendData(struct sockaddr_in *to_addr, bool headerOnly = false);
+    int sendData(struct sockaddr_in *to_addr, bool headerOnly, JamPacket *pPacket);
     uint64_t beatCount;
     uint64_t lastPingTime;
     int m_tempo;
     uint64_t m_tempoStart;
     bool m_pinging;
+    ReplayStream m_capture;
   };
 };
 

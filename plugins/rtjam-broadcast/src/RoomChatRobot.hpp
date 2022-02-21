@@ -36,6 +36,7 @@ public:
   {
     // This is a message from the room chat.
     string command = msg["message"];
+    cout << command << endl;
 
     // See if this message is a command for the robot
     int idx = command.find("!tempo");
@@ -53,6 +54,30 @@ public:
       }
       json resp = {{"speaker", "RoomChatRobot"}};
       resp["tempo"] = m_pJamSocket->getTempo();
+      sendMessage("say", resp.dump());
+      return;
+    }
+    if (command.find("!recordRoom") != string::npos)
+    {
+      // Command to start recording the room
+      json resp = {{"speaker", "RoomChatRobot"}};
+      resp["recordRoom"] = m_pJamSocket->recordRoom();
+      sendMessage("say", resp.dump());
+      return;
+    }
+    if (command.find("!stopAudio") != string::npos)
+    {
+      // Command to start recording the room
+      json resp = {{"speaker", "RoomChatRobot"}};
+      resp["stopAudio"] = m_pJamSocket->stopAudio();
+      sendMessage("say", resp.dump());
+      return;
+    }
+    if (command.find("!playAudio") != string::npos)
+    {
+      // Command to start recording the room
+      json resp = {{"speaker", "RoomChatRobot"}};
+      resp["playAudio"] = m_pJamSocket->playAudio();
       sendMessage("say", resp.dump());
       return;
     }

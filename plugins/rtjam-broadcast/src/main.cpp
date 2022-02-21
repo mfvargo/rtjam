@@ -126,7 +126,6 @@ void packet_thread(short port, int roomIdx)
   while (1)
   {
     pJamSocket->sendDataToRoomMembers(pJamMixer);
-    // pJamSocket->sendDataToRoomMembers(NULL);
   }
 }
 
@@ -138,12 +137,19 @@ int main(int argc, char **argv)
   string urlBase = settings.getOrSetValue("rtjam-nation", std::string("http://rtjam-nation.basscleftech.com/api/1/"));
   int startPort = settings.getOrSetValue("start-port", 7891);
   int roomCount = settings.getOrSetValue("room-count", 1);
+  string networkInterface = settings.getOrSetValue("networkInterface", "eth0");
+
   string broadcastUnitName = "";
   settings.saveToFile();
   RTJamNationApi api(urlBase);
   string bcastToken = "";
 
   bool bFirstTime = true;
+
+  if (!api.checkLinkStatus(networkInterface))
+  {
+    cout << networkInterface << " is not active" << endl;
+  }
 
   while (1)
   {

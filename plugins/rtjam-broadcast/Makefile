@@ -19,6 +19,7 @@ SRCS = \
 	../common/TimersAndStats.cpp \
 	../common/Settings.cpp \
 	../common/RTJamNationApi.cpp \
+	../common/ReplayStream.cpp \
 	
 
 OBJS := $(addsuffix .o,$(basename $(SRCS)))
