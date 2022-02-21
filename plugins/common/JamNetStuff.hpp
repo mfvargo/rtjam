@@ -300,10 +300,12 @@ namespace JamNetStuff
 
   private:
     JamNetStuff::JamPacket m_packet;
+    JamNetStuff::JamMixer m_mixer;
     ifstream m_infile;
     ofstream m_outfile;
     int64_t m_timeOffset;
     uint64_t m_timeStamp;
+    int m_framecount;
   };
 
   class JamSocket

@@ -40,31 +40,23 @@ static void signal_handler(int sig)
 
 int process(jack_nframes_t nframes, void *arg)
 {
-    JamNetStuff::JamMixer *pMixer = (JamNetStuff::JamMixer *)arg;
     float *inputs[2];
     float *outputs[2];
     inputs[0] = (float *)jack_port_get_buffer(input_ports[0], nframes);
     inputs[1] = (float *)jack_port_get_buffer(input_ports[1], nframes);
     outputs[0] = (float *)jack_port_get_buffer(output_ports[0], nframes);
     outputs[1] = (float *)jack_port_get_buffer(output_ports[1], nframes);
-
-    // debug
-    if (++framecount % 375 == 0)
-    {
-        pMixer->dumpOut();
-    }
     // read audio from replay stream
-    while (replay.packetReady())
+    JamNetStuff::JamPacket *pPlaybackPacket = replay.getPlayBackMix();
+    if (pPlaybackPacket)
     {
-        pMixer->addData(replay.getJamPacket());
-        replay.readPacket();
+        // we do stuff here to decode the mix and feed it.
     }
-
-    // Read output of mixer
-    pMixer->getMix(m_outputs, nframes);
-    // Do stuff here
-    memcpy(outputs[0], m_outputs[0], sizeof(float) * nframes);
-    memcpy(outputs[1], m_outputs[1], sizeof(float) * nframes);
+    else
+    {
+        memcpy(outputs[0], inputs[0], sizeof(float) * nframes);
+        memcpy(outputs[1], inputs[1], sizeof(float) * nframes);
+    }
     return 0;
 }
 

@@ -4,6 +4,8 @@ namespace JamNetStuff
 {
   string ReplayStream::readOpen(const char *filename)
   {
+    // for debug
+    m_framecount = 0;
     m_timeOffset = 0;
     // Open the file
     if (m_infile.is_open())
@@ -119,6 +121,30 @@ namespace JamNetStuff
 
   JamNetStuff::JamPacket *ReplayStream::getPlayBackMix()
   {
+    if (!m_infile.is_open())
+    {
+      return NULL;
+    }
+    // read audio from replay stream
+    while (packetReady())
+    {
+      // feed the mixer with packets up till now...
+      m_mixer.addData(&m_packet);
+      readPacket();
+    }
+
+    // debug
+    if (++m_framecount % 375 == 0)
+    {
+      m_mixer.dumpOut();
+    }
+
+    // Need to check if it's time to chunk out another mix chunk...
+    // TODO: figure this out.  Something to do with the time since we last chunked out
+    // and if a frames worth of time has gone by.  And if so, we need to get the mix out of the mixer
+    // and encode it into a packet so that will get sent to the people in the room.
+    // maybe use a timer objects?
+
     return NULL;
   }
 }
