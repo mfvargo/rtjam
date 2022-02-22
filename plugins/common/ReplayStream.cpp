@@ -136,6 +136,12 @@ namespace JamNetStuff
     // Write the data to the file
     if (m_outfile.is_open())
     {
+      if (m_outfile.tellp() > 1500000000)
+      {
+        // Shut the file when it gets full...
+        close();
+        return false;
+      }
       // we write the packet to the file
       uint64_t tStamp = htobe64(JamNetStuff::getMicroTime()); // Timestamp
       m_outfile.write((const char *)&tStamp, sizeof(tStamp));
