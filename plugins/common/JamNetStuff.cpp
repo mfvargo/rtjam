@@ -416,6 +416,11 @@ namespace JamNetStuff
         return m_capture.readOpen(filename.c_str());
     }
 
+    string JamSocket::captureStatus()
+    {
+        return m_capture.status();
+    }
+
     int JamSocket::sendPacket(const float **buffer, int frames)
     {
         if (!isActivated)
