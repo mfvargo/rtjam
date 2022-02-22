@@ -61,7 +61,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["recordRoom"] = m_pJamSocket->recordRoom();
+      resp["captureStatus"] = m_pJamSocket->recordRoom();
       sendMessage("say", resp.dump());
       return;
     }
@@ -69,7 +69,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["stopAudio"] = m_pJamSocket->stopAudio();
+      resp["captureStatus"] = m_pJamSocket->stopAudio();
       sendMessage("say", resp.dump());
       return;
     }
@@ -77,7 +77,15 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["playAudio"] = m_pJamSocket->playAudio();
+      resp["captureStatus"] = m_pJamSocket->playAudio();
+      sendMessage("say", resp.dump());
+      return;
+    }
+    if (command.find("!captureStatus") != string::npos)
+    {
+      // Command to start recording the room
+      json resp = {{"speaker", "RoomChatRobot"}};
+      resp["captureStatus"] = m_pJamSocket->captureStatus();
       sendMessage("say", resp.dump());
       return;
     }
@@ -88,6 +96,7 @@ public:
     {
       json resp = {{"speaker", "RoomChatRobot"}};
       resp["latency"] = m_pJamSocket->getLatency();
+      resp["captureStatus"] = m_pJamSocket->captureStatus();
       sendMessage("say", resp.dump());
       m_lastLatencyUpdate = JamNetStuff::getMicroTime();
     }

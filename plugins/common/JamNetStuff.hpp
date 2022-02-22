@@ -294,6 +294,7 @@ namespace JamNetStuff
     string readOpen(const char *filename);
     string writeOpen(const char *filename);
     string close();
+    string status();
     bool writePacket(JamNetStuff::JamPacket *packet);
     bool readPacket();
     bool packetReady();
@@ -338,6 +339,7 @@ namespace JamNetStuff
     string recordRoom();
     string stopAudio();
     string playAudio();
+    string captureStatus();
 
   private:
     PlayerList m_playerList;

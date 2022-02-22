@@ -26,6 +26,7 @@ namespace JamNetStuff
     m_timeOffset = 0;
     m_delta = 0;
     m_timer.reset();
+    m_mixer.masterVol = 0.707;
     // Open the file
     if (m_infile.is_open())
     {
@@ -74,6 +75,19 @@ namespace JamNetStuff
     if (m_outfile.is_open())
     {
       m_outfile.close();
+    }
+    return "idle";
+  }
+
+  string ReplayStream::status()
+  {
+    if (m_infile.is_open())
+    {
+      return "playing";
+    }
+    if (m_outfile.is_open())
+    {
+      return "recording";
     }
     return "idle";
   }
