@@ -58,8 +58,7 @@ namespace JamNetStuff
     {
       return "recording";
     }
-    m_outfile.open(filename, ios::out | ios::binary);
-    if (!m_outfile.good())
+    if (!m_outfile.open(filename))
     {
       return "error opening file";
     }
@@ -136,18 +135,12 @@ namespace JamNetStuff
     // Write the data to the file
     if (m_outfile.is_open())
     {
-      if (m_outfile.tellp() > 1500000000)
-      {
-        // Shut the file when it gets full...
-        close();
-        return false;
-      }
       // we write the packet to the file
       uint64_t tStamp = htobe64(JamNetStuff::getMicroTime()); // Timestamp
-      m_outfile.write((const char *)&tStamp, sizeof(tStamp));
+      m_outfile.write((char *)&tStamp, sizeof(tStamp));
       uint16_t cnt = htons(packet->getSize()); // Sizeof the packet
-      m_outfile.write((const char *)&cnt, sizeof(cnt));
-      m_outfile.write((const char *)packet->getPacket(), packet->getSize()); // The packet itself (encoded)
+      m_outfile.write((char *)&cnt, sizeof(cnt));
+      m_outfile.write((char *)packet->getPacket(), packet->getSize()); // The packet itself (encoded)
       return m_outfile.good();
     }
     return false;
