@@ -31,6 +31,7 @@
 #include <map>
 #include "MetroNome.hpp"
 #include "PeakDetector.hpp"
+#include "PacketStreamWriter.hpp"
 
 #define EMPTY_SLOT 40000
 
@@ -307,7 +308,8 @@ namespace JamNetStuff
     JamNetStuff::JamMixer m_mixer;
     JamNetStuff::MicroTimer m_timer;
     ifstream m_infile;
-    ofstream m_outfile;
+    PacketStreamWriter m_outfile;
+    // ofstream m_outfile;
     int64_t m_timeOffset;
     uint64_t m_timeStamp;
     uint64_t m_delta;
