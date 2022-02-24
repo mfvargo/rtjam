@@ -141,7 +141,7 @@ namespace JamNetStuff
       uint16_t cnt = htons(packet->getSize()); // Sizeof the packet
       m_outfile.write((char *)&cnt, sizeof(cnt));
       m_outfile.write((char *)packet->getPacket(), packet->getSize()); // The packet itself (encoded)
-      return m_outfile.good();
+      return true;
     }
     return false;
   }
