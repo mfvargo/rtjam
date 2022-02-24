@@ -4,6 +4,8 @@
 #include "easywsclient.hpp"
 #include "JamNetStuff.hpp"
 
+#include "RecordingCatalog.hpp"
+
 using namespace std;
 using easywsclient::WebSocket;
 using json = nlohmann::json;
@@ -87,6 +89,16 @@ public:
       json resp = {{"speaker", "RoomChatRobot"}};
       resp["captureStatus"] = m_pJamSocket->captureStatus();
       sendMessage("say", resp.dump());
+      return;
+    }
+    if (command.find("!listRecording") != string::npos)
+    {
+      RecordingCatalog cat(std::to_string(m_pJamSocket->getPort()));
+      // Command to start recording the room
+      json resp = {{"speaker", "RoomChatRobot"}};
+      resp["listRecording"] = cat.list();
+      sendMessage("say", resp.dump());
+      cout << resp.dump() << endl;
       return;
     }
   }
