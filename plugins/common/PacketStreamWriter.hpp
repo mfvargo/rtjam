@@ -13,6 +13,7 @@ using namespace std;
 class PacketStreamWriter
 {
   ofstream m_outfile;
+  int m_sizeCount;
   int m_writeCounter;
   bool m_writing;
   bool m_done;
@@ -80,6 +81,7 @@ public:
       return false;
     }
     m_writing = true;
+    m_sizeCount = 0;
     return m_writing;
   }
   bool close()
@@ -104,7 +106,13 @@ public:
     vector<char> buff(buffer, buffer + size);
     unique_lock<mutex> lk(m_mutex);
     m_queue.push(buff);
-    m_cv.notify_one();
+    m_sizeCount += size;
+    if (m_sizeCount > 1500000000)
+    {
+      return close();
+    }
+    // Don't signal the queue so the queue stays in memory
+    // m_cv.notify_one();
     return true;
   }
 };
