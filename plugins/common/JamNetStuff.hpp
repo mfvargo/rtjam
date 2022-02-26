@@ -339,9 +339,9 @@ namespace JamNetStuff
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
     short getPort() { return m_port; };
 
-    string recordRoom();
+    string recordRoom(string filename);
     string stopAudio();
-    string playAudio();
+    string playAudio(string filename);
     string captureStatus();
 
   private:

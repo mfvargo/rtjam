@@ -64,7 +64,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["captureStatus"] = m_pJamSocket->recordRoom();
+      resp["captureStatus"] = m_pJamSocket->recordRoom(m_catalog.getNewFilename());
       sendMessage("say", resp.dump());
       return;
     }
@@ -80,7 +80,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["captureStatus"] = m_pJamSocket->playAudio();
+      resp["captureStatus"] = m_pJamSocket->playAudio(m_catalog.getNewFilename());
       sendMessage("say", resp.dump());
       return;
     }
@@ -92,7 +92,7 @@ public:
       sendMessage("say", resp.dump());
       return;
     }
-    if (command.find("!listRecording") != string::npos)
+    if (command.find("!listRecordings") != string::npos)
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};

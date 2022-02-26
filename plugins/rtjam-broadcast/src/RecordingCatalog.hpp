@@ -38,7 +38,8 @@ public:
 
 class RecordingCatalog
 {
-
+  // List of files in the catalogs directory
+  vector<SessionRecording> m_list;
   string m_directory;
 
 public:
@@ -50,32 +51,53 @@ public:
   void init(string directory)
   {
     m_directory = directory;
+    cout << "init Catalog" << endl;
+    buildList();
   }
 
   json list()
   {
-    // load directory
+    buildList();
     json rval = json::array();
-    DIR *dirp = opendir(m_directory.c_str());
-    if (dirp != NULL)
+    for (auto &value : m_list)
     {
-      struct dirent *dp;
-      while ((dp = readdir(dirp)) != NULL)
-      {
-        string entry = dp->d_name;
-        if (entry.find(".raw") != string::npos)
-        {
-          SessionRecording rec(m_directory, entry);
-          rval.push_back(rec.toJson());
-        }
-      }
+      rval.push_back(value.toJson());
     }
-    closedir(dirp);
     return rval;
+  }
+
+  string getNewFilename()
+  {
+    m_list.clear();
+    return m_directory + "/take_1.raw";
   }
 
   void del(string filename)
   {
     // delete the file
+    unlink((m_directory + filename).c_str());
+  }
+
+protected:
+  void buildList()
+  {
+    if (m_list.empty())
+    {
+      cout << "building list" << endl;
+      DIR *dirp = opendir(m_directory.c_str());
+      if (dirp != NULL)
+      {
+        struct dirent *dp;
+        while ((dp = readdir(dirp)) != NULL)
+        {
+          string entry = dp->d_name;
+          if (entry.find(".raw") != string::npos)
+          {
+            m_list.push_back(SessionRecording(m_directory, entry));
+          }
+        }
+      }
+      closedir(dirp);
+    }
   }
 };
