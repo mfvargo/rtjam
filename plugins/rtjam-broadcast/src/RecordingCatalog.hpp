@@ -18,12 +18,15 @@ class SessionRecording
   string m_date;
 
 public:
-  SessionRecording(string filename)
+  SessionRecording(string directory, string filename)
   {
     m_name = filename;
     struct stat t_stat;
-    stat(filename.c_str(), &t_stat);
-    struct tm *timeinfo = localtime(&t_stat.st_ctime); // or gmtime() depending on what you want
+    if (stat((directory + "/" + filename).c_str(), &t_stat) != 0)
+    {
+      perror("failed to stat file");
+    }
+    struct tm *timeinfo = gmtime(&t_stat.st_ctime); // or gmtime() depending on what you want
     m_date = asctime(timeinfo);
   }
 
@@ -39,9 +42,14 @@ class RecordingCatalog
   string m_directory;
 
 public:
-  RecordingCatalog(string dir)
+  RecordingCatalog()
   {
-    m_directory = dir;
+    m_directory = "";
+  }
+
+  void init(string directory)
+  {
+    m_directory = directory;
   }
 
   json list()
@@ -57,7 +65,7 @@ public:
         string entry = dp->d_name;
         if (entry.find(".raw") != string::npos)
         {
-          SessionRecording rec(entry);
+          SessionRecording rec(m_directory, entry);
           rval.push_back(rec.toJson());
         }
       }

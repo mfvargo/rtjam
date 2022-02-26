@@ -19,6 +19,7 @@ public:
     m_pJamSocket = pJamSocket;
     ChatRobotBase::init(url, token);
     m_lastLatencyUpdate = JamNetStuff::getMicroTime();
+    m_catalog.init(std::to_string(m_pJamSocket->getPort()));
   };
 
   // This loop will drive the chat bot.
@@ -93,12 +94,11 @@ public:
     }
     if (command.find("!listRecording") != string::npos)
     {
-      RecordingCatalog cat(std::to_string(m_pJamSocket->getPort()));
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["listRecording"] = cat.list();
+      resp["listRecording"] = m_catalog.list();
       sendMessage("say", resp.dump());
-      cout << resp.dump() << endl;
+      cout << resp.dump(2) << endl;
       return;
     }
   }
@@ -118,4 +118,5 @@ private:
   // member variables
   JamNetStuff::JamSocket *m_pJamSocket;
   uint64_t m_lastLatencyUpdate;
+  RecordingCatalog m_catalog;
 };
