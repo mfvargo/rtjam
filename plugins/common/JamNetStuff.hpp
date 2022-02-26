@@ -298,9 +298,10 @@ namespace JamNetStuff
     string status();
     bool writePacket(JamNetStuff::JamPacket *packet);
     bool readPacket();
-    bool packetReady();
+    bool packetReady(uint64_t asOf);
     JamNetStuff::JamPacket *getJamPacket();
     JamPacket *getPlayBackMix();
+    float **getMix(uint64_t asOf);
 
   private:
     JamNetStuff::JamPacket m_packet;

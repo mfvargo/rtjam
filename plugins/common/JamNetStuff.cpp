@@ -33,7 +33,6 @@ namespace JamNetStuff
         {
             clientId = rand() % 32768;
         }
-        fprintf(stderr, "Client %d\n", clientId);
         channelMap.setMyId(clientId);
         bufferSize = 0;
         sequenceNo = 0;

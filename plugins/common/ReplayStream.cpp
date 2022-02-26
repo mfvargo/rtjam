@@ -91,7 +91,7 @@ namespace JamNetStuff
     return "idle";
   }
 
-  bool ReplayStream::packetReady()
+  bool ReplayStream::packetReady(uint64_t asOf)
   {
     if (!m_infile.is_open())
     {
@@ -102,7 +102,7 @@ namespace JamNetStuff
       m_infile.close();
       return false;
     }
-    return (getMicroTime() > m_timeStamp + m_timeOffset);
+    return (asOf > m_timeStamp + m_timeOffset);
   }
 
   bool ReplayStream::readPacket()
@@ -158,7 +158,8 @@ namespace JamNetStuff
       return NULL;
     }
     // read audio from replay stream
-    while (packetReady())
+    uint64_t asOf = getMicroTime();
+    while (packetReady(asOf))
     {
       // feed the mixer with packets up till now...
       m_mixer.addData(&m_packet);
@@ -184,5 +185,17 @@ namespace JamNetStuff
     }
 
     return NULL;
+  }
+
+  float **ReplayStream::getMix(uint64_t asOf)
+  {
+    while (packetReady(asOf))
+    {
+      // feed the mixer with packets up till now...
+      m_mixer.addData(&m_packet);
+      readPacket();
+    }
+    m_mixer.getMix(m_outputs, 128);
+    return m_outputs;
   }
 }
