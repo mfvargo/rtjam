@@ -14,25 +14,40 @@ using namespace std;
 
 class SessionRecording
 {
+  string m_directory;
   string m_name;
-  string m_date;
 
 public:
+  struct stat m_stat;
+
+  bool operator<(const SessionRecording &b)
+  {
+    return (m_stat.st_ctime < b.m_stat.st_ctime);
+  }
+  bool operator>(const SessionRecording &b)
+  {
+    return (m_stat.st_ctime > b.m_stat.st_ctime);
+  }
   SessionRecording(string directory, string filename)
   {
+    m_directory = directory;
     m_name = filename;
-    struct stat t_stat;
-    if (stat((directory + "/" + filename).c_str(), &t_stat) != 0)
+    if (stat((directory + "/" + filename).c_str(), &m_stat) != 0)
     {
       perror("failed to stat file");
     }
-    struct tm *timeinfo = gmtime(&t_stat.st_ctime); // or gmtime() depending on what you want
-    m_date = asctime(timeinfo);
+  }
+
+  string name()
+  {
+    return m_name;
   }
 
   json toJson()
   {
-    return {{"name", m_name}, {"date", m_date}};
+    struct tm *timeinfo = gmtime(&m_stat.st_ctime); // or gmtime() depending on what you want
+    string date = asctime(gmtime(&m_stat.st_ctime));
+    return {{"name", m_directory + "/" + m_name}, {"date", date}, {"size", m_stat.st_size}};
   }
 };
 
@@ -69,7 +84,18 @@ public:
   string getNewFilename()
   {
     m_list.clear();
-    return m_directory + "/take_1.raw";
+    buildList();
+    return m_directory + "/take-" + to_string(m_list.size()) + ".raw";
+  }
+
+  string getLastFilename()
+  {
+    buildList();
+    if (m_list.empty())
+    {
+      return "";
+    }
+    return m_directory + "/" + m_list.back().name();
   }
 
   void del(string filename)
@@ -81,6 +107,8 @@ public:
 protected:
   void buildList()
   {
+    // force cache clear for now
+    m_list.clear();
     if (m_list.empty())
     {
       cout << "building list" << endl;
@@ -96,6 +124,8 @@ protected:
             m_list.push_back(SessionRecording(m_directory, entry));
           }
         }
+        // Sort list
+        sort(m_list.begin(), m_list.end());
       }
       closedir(dirp);
     }

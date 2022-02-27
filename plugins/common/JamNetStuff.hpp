@@ -293,7 +293,7 @@ namespace JamNetStuff
     ReplayStream();
     ~ReplayStream();
     string readOpen(const char *filename);
-    string writeOpen(const char *filename);
+    string writeOpen(const char *filename, string metadata);
     string close();
     string status();
     bool writePacket(JamNetStuff::JamPacket *packet);
@@ -316,6 +316,7 @@ namespace JamNetStuff
     uint64_t m_delta;
     int m_framecount;
     float *m_outputs[MIX_CHANNELS + 2]; // each channel plus 2 for the overall mix
+    string m_metadata;
   };
 
   class JamSocket

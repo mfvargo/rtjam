@@ -79,8 +79,18 @@ public:
     if (command.find("!playAudio") != string::npos)
     {
       // Command to start recording the room
+      string playFile;
+      if (command.size() > strlen("!playAudio"))
+      {
+        playFile = command.substr(strlen("!playAudio") + 1);
+      }
+      else
+      {
+        playFile = m_catalog.getLastFilename();
+      }
+      cout << "playFile: " << playFile << endl;
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["captureStatus"] = m_pJamSocket->playAudio(m_catalog.getNewFilename());
+      resp["captureStatus"] = m_pJamSocket->playAudio(playFile);
       sendMessage("say", resp.dump());
       return;
     }

@@ -400,7 +400,7 @@ namespace JamNetStuff
 
     string JamSocket::recordRoom(string filename)
     {
-        return m_capture.writeOpen(filename.c_str());
+        return m_capture.writeOpen(filename.c_str(), json(getLatency()).dump());
     }
 
     string JamSocket::stopAudio()
