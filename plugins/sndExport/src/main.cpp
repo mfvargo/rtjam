@@ -33,7 +33,6 @@ int main(int argc, char *argv[])
   }
   JamNetStuff::ReplayStream *replay = new JamNetStuff::ReplayStream();
   SndfileHandle file;
-  int channels = 16;
   int srate = 48000;
   uint64_t asOf = JamNetStuff::getMicroTime();
   uint64_t microFrameTime = 128 * 1000 / 48;
@@ -45,6 +44,11 @@ int main(int argc, char *argv[])
     cerr << "failed to open raw packet file: " << argv[1] << endl;
     return EXIT_FAILURE;
   }
+
+  json metadata = json::parse(replay->getMetdata());
+  cout << metadata.dump(2) << endl;
+  cout << metadata.size() << endl;
+  int channels = metadata.size() * 2;
 
   if (!(file = SndfileHandle(argv[2], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
   {

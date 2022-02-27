@@ -106,7 +106,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["listRecording"] = m_catalog.list();
+      resp["listRecordings"] = m_catalog.list();
       sendMessage("say", resp.dump());
       cout << resp.dump(2) << endl;
       return;
