@@ -4,6 +4,8 @@
 #include "easywsclient.hpp"
 #include "JamNetStuff.hpp"
 
+#include "RecordingCatalog.hpp"
+
 using namespace std;
 using easywsclient::WebSocket;
 using json = nlohmann::json;
@@ -17,6 +19,7 @@ public:
     m_pJamSocket = pJamSocket;
     ChatRobotBase::init(url, token);
     m_lastLatencyUpdate = JamNetStuff::getMicroTime();
+    m_catalog.init(std::to_string(m_pJamSocket->getPort()));
   };
 
   // This loop will drive the chat bot.
@@ -61,7 +64,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["captureStatus"] = m_pJamSocket->recordRoom();
+      resp["captureStatus"] = m_pJamSocket->recordRoom(m_catalog.getNewFilename());
       sendMessage("say", resp.dump());
       return;
     }
@@ -77,7 +80,7 @@ public:
     {
       // Command to start recording the room
       json resp = {{"speaker", "RoomChatRobot"}};
-      resp["captureStatus"] = m_pJamSocket->playAudio();
+      resp["captureStatus"] = m_pJamSocket->playAudio(m_catalog.getNewFilename());
       sendMessage("say", resp.dump());
       return;
     }
@@ -87,6 +90,15 @@ public:
       json resp = {{"speaker", "RoomChatRobot"}};
       resp["captureStatus"] = m_pJamSocket->captureStatus();
       sendMessage("say", resp.dump());
+      return;
+    }
+    if (command.find("!listRecordings") != string::npos)
+    {
+      // Command to start recording the room
+      json resp = {{"speaker", "RoomChatRobot"}};
+      resp["listRecording"] = m_catalog.list();
+      sendMessage("say", resp.dump());
+      cout << resp.dump(2) << endl;
       return;
     }
   }
@@ -106,4 +118,5 @@ private:
   // member variables
   JamNetStuff::JamSocket *m_pJamSocket;
   uint64_t m_lastLatencyUpdate;
+  RecordingCatalog m_catalog;
 };

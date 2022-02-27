@@ -338,10 +338,11 @@ namespace JamNetStuff
     int getTempo() { return m_tempo; };
     std::map<unsigned, float> getLatency() { return m_playerList.getLatency(); };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
+    short getPort() { return m_port; };
 
-    string recordRoom();
+    string recordRoom(string filename);
     string stopAudio();
-    string playAudio();
+    string playAudio(string filename);
     string captureStatus();
 
   private:

@@ -398,9 +398,8 @@ namespace JamNetStuff
         // Open the save file
     }
 
-    string JamSocket::recordRoom()
+    string JamSocket::recordRoom(string filename)
     {
-        string filename = std::to_string(m_port) + ".raw";
         return m_capture.writeOpen(filename.c_str());
     }
 
@@ -409,9 +408,8 @@ namespace JamNetStuff
         return m_capture.close();
     }
 
-    string JamSocket::playAudio()
+    string JamSocket::playAudio(string filename)
     {
-        string filename = std::to_string(m_port) + ".raw";
         return m_capture.readOpen(filename.c_str());
     }
 
