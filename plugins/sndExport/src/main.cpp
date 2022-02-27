@@ -23,11 +23,15 @@
 
 using namespace std;
 
-int main(void)
+int main(int argc, char *argv[])
 {
+  if (argc < 3)
+  {
+    cerr << "sndExport: missing paramaters" << endl;
+    cerr << "usage:  sndExport infile.raw outfile.wav" << endl;
+    return EXIT_FAILURE;
+  }
   JamNetStuff::ReplayStream *replay = new JamNetStuff::ReplayStream();
-  string infile = "7891.raw";
-  string fname = "test.wav";
   SndfileHandle file;
   int channels = 16;
   int srate = 48000;
@@ -36,16 +40,15 @@ int main(void)
   float **mix;
   float buffer[128 * 16]; // up to 16 channels
 
-  cout << "Creating file named " << fname << endl;
-
-  if (!(file = SndfileHandle(fname.c_str(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
+  if (replay->readOpen(argv[1]) != "playing")
   {
-    cout << "Cannot create file " << fname << endl;
+    cerr << "failed to open raw packet file: " << argv[1] << endl;
+    return EXIT_FAILURE;
   }
 
-  if (replay->readOpen("7891.raw") != "playing")
+  if (!(file = SndfileHandle(argv[2], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
   {
-    cout << "failed to open raw packet file" << endl;
+    cerr << "Cannot create file " << argv[2] << endl;
   }
 
   while (replay->status() == "playing")
