@@ -85,7 +85,14 @@ public:
   {
     m_list.clear();
     buildList();
-    return m_directory + "/take-" + to_string(m_list.size()) + ".raw";
+    char buffer[256];
+    time_t rawtime;
+    struct tm *timeinfo;
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer, 256, "/rec_%m-%d_%H:%M:%S.raw", timeinfo);
+    return m_directory + string(buffer);
   }
 
   string getLastFilename()
