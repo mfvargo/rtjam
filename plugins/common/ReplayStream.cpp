@@ -31,12 +31,9 @@ namespace JamNetStuff
     if (m_infile.is_open())
     {
       // If file is open, rewind to the beginning
-      m_infile.seekg(0);
+      m_infile.close();
     }
-    else
-    {
-      m_infile.open(filename, ios::in | ios::binary);
-    }
+    m_infile.open(filename, ios::in | ios::binary);
     if (!m_infile.good())
     {
       return "error opening file";
