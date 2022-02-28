@@ -32,13 +32,29 @@ namespace JamNetStuff
     {
       // If file is open, rewind to the beginning
       m_infile.seekg(0);
-      return "playing";
     }
-    m_infile.open(filename, ios::in | ios::binary);
+    else
+    {
+      m_infile.open(filename, ios::in | ios::binary);
+    }
     if (!m_infile.good())
     {
       return "error opening file";
     }
+    // read the metadata off the top.
+    uint16_t cnt;
+    m_infile.read((char *)&cnt, sizeof(cnt));
+    if (cnt > 2048)
+    {
+      // corrumpt file?
+      close();
+      return "file seems corrupt";
+    }
+    char buffer[2048];
+    m_infile.read(buffer, cnt);
+    m_metadata = string(buffer);
+    cout << "metadata: " << m_metadata << endl;
+
     // now that we are here, let's load the first packet
     if (!readPacket())
     {
@@ -51,8 +67,9 @@ namespace JamNetStuff
     return "playing";
   }
 
-  string ReplayStream::writeOpen(const char *filename)
+  string ReplayStream::writeOpen(const char *filename, string metadata)
   {
+    m_metadata = metadata;
     // Open the file
     if (m_outfile.is_open())
     {
@@ -62,11 +79,15 @@ namespace JamNetStuff
     {
       return "error opening file";
     }
+    uint16_t count = metadata.size() + 1; // null terminator
+    m_outfile.write((char *)&count, sizeof(count));
+    m_outfile.write(metadata.c_str(), count);
     return "recording";
   }
 
   string ReplayStream::close()
   {
+    m_metadata.clear();
     if (m_infile.is_open())
     {
       m_infile.close();
@@ -91,7 +112,7 @@ namespace JamNetStuff
     return "idle";
   }
 
-  bool ReplayStream::packetReady()
+  bool ReplayStream::packetReady(uint64_t asOf)
   {
     if (!m_infile.is_open())
     {
@@ -102,7 +123,7 @@ namespace JamNetStuff
       m_infile.close();
       return false;
     }
-    return (getMicroTime() > m_timeStamp + m_timeOffset);
+    return (asOf > m_timeStamp + m_timeOffset);
   }
 
   bool ReplayStream::readPacket()
@@ -158,7 +179,8 @@ namespace JamNetStuff
       return NULL;
     }
     // read audio from replay stream
-    while (packetReady())
+    uint64_t asOf = getMicroTime();
+    while (packetReady(asOf))
     {
       // feed the mixer with packets up till now...
       m_mixer.addData(&m_packet);
@@ -184,5 +206,17 @@ namespace JamNetStuff
     }
 
     return NULL;
+  }
+
+  float **ReplayStream::getMix(uint64_t asOf)
+  {
+    while (packetReady(asOf))
+    {
+      // feed the mixer with packets up till now...
+      m_mixer.addData(&m_packet);
+      readPacket();
+    }
+    m_mixer.getMix(m_outputs, 128);
+    return m_outputs;
   }
 }

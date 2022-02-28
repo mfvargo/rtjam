@@ -293,14 +293,16 @@ namespace JamNetStuff
     ReplayStream();
     ~ReplayStream();
     string readOpen(const char *filename);
-    string writeOpen(const char *filename);
+    string writeOpen(const char *filename, string metadata);
     string close();
     string status();
     bool writePacket(JamNetStuff::JamPacket *packet);
     bool readPacket();
-    bool packetReady();
+    bool packetReady(uint64_t asOf);
     JamNetStuff::JamPacket *getJamPacket();
     JamPacket *getPlayBackMix();
+    float **getMix(uint64_t asOf);
+    string getMetdata() { return m_metadata; };
 
   private:
     JamNetStuff::JamPacket m_packet;
@@ -315,6 +317,7 @@ namespace JamNetStuff
     uint64_t m_delta;
     int m_framecount;
     float *m_outputs[MIX_CHANNELS + 2]; // each channel plus 2 for the overall mix
+    string m_metadata;
   };
 
   class JamSocket
@@ -337,10 +340,11 @@ namespace JamNetStuff
     int getTempo() { return m_tempo; };
     std::map<unsigned, float> getLatency() { return m_playerList.getLatency(); };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); };
+    short getPort() { return m_port; };
 
-    string recordRoom();
+    string recordRoom(string filename);
     string stopAudio();
-    string playAudio();
+    string playAudio(string filename);
     string captureStatus();
 
   private:

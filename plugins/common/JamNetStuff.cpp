@@ -33,7 +33,6 @@ namespace JamNetStuff
         {
             clientId = rand() % 32768;
         }
-        fprintf(stderr, "Client %d\n", clientId);
         channelMap.setMyId(clientId);
         bufferSize = 0;
         sequenceNo = 0;
@@ -399,10 +398,9 @@ namespace JamNetStuff
         // Open the save file
     }
 
-    string JamSocket::recordRoom()
+    string JamSocket::recordRoom(string filename)
     {
-        string filename = std::to_string(m_port) + ".raw";
-        return m_capture.writeOpen(filename.c_str());
+        return m_capture.writeOpen(filename.c_str(), json(getLatency()).dump());
     }
 
     string JamSocket::stopAudio()
@@ -410,9 +408,8 @@ namespace JamNetStuff
         return m_capture.close();
     }
 
-    string JamSocket::playAudio()
+    string JamSocket::playAudio(string filename)
     {
-        string filename = std::to_string(m_port) + ".raw";
         return m_capture.readOpen(filename.c_str());
     }
 

@@ -28,6 +28,7 @@ pi-embed:
 	$(MAKE) all -C plugins/rtjam-midi
 	$(MAKE) all -C plugins/testHarness
 	$(MAKE) all -C plugins/testLights
+	$(MAKE) all -C plugins/sndExport
 
 gitversion:
 	git rev-parse HEAD > bin/version.txt
@@ -63,6 +64,8 @@ clean:
 	$(MAKE) clean -C plugins/rtjam-status
 	$(MAKE) clean -C plugins/testHarness
 	$(MAKE) clean -C plugins/testLights
+	$(MAKE) clean -C plugins/sndExport
+	
 	rm -rf bin build
 
 # this will install code on the local raspberry pi this build is on
