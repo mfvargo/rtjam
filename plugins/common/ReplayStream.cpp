@@ -50,7 +50,6 @@ namespace JamNetStuff
     char buffer[2048];
     m_infile.read(buffer, cnt);
     m_metadata = string(buffer);
-    cout << "metadata: " << m_metadata << endl;
 
     // now that we are here, let's load the first packet
     if (!readPacket())

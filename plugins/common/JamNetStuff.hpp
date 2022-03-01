@@ -303,6 +303,7 @@ namespace JamNetStuff
     JamPacket *getPlayBackMix();
     float **getMix(uint64_t asOf);
     string getMetdata() { return m_metadata; };
+    void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); }
 
   private:
     JamNetStuff::JamPacket m_packet;
