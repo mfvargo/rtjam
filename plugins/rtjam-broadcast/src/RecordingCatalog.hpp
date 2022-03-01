@@ -91,7 +91,7 @@ public:
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    strftime(buffer, 256, "/rec_%m-%d_%H:%M:%S.raw", timeinfo);
+    strftime(buffer, 256, "/rec_%m-%d_%H_%M_%S.raw", timeinfo);
     return m_directory + string(buffer);
   }
 
