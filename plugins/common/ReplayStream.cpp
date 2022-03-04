@@ -42,6 +42,7 @@ namespace JamNetStuff
     // read the metadata off the top.
     uint16_t cnt;
     m_infile.read((char *)&cnt, sizeof(cnt));
+    cnt = ntohs(cnt);
     if (cnt > 2048)
     {
       // corrumpt file?
@@ -81,8 +82,9 @@ namespace JamNetStuff
       return "error opening file";
     }
     uint16_t count = metadata.size() + 1; // null terminator
+    count = htons(count);
     m_outfile.write((char *)&count, sizeof(count));
-    m_outfile.write(metadata.c_str(), count);
+    m_outfile.write(metadata.c_str(), metadata.size() + 1);
     return "recording";
   }
 

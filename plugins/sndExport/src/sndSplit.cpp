@@ -62,6 +62,7 @@ int main(int argc, char *argv[])
     header.push_back({i->first, 0}); // latency metadata header
     string metadata(header.dump());
     uint16_t count = metadata.size() + 1; // null terminator
+    count = htons(count);
     i->second.write((char *)&count, sizeof(count));
     i->second.write(metadata.c_str(), metadata.size() + 1);
   }
