@@ -72,6 +72,7 @@ int main(int argc, char *argv[])
 
   int frameCount = 0;
 
+  replay->m_debug = true;
   // This is where I would adjust queue depths based on latency
   while (replay->status() == "playing")
   {
@@ -127,6 +128,20 @@ int main(int argc, char *argv[])
 
       file.write(buffer, 128 * channels);
     }
+  }
+  // reopen the file
+  if (replay->readOpen(argv[1]) != "playing")
+  {
+    cerr << "failed to open raw packet file: " << argv[1] << endl;
+    return EXIT_FAILURE;
+  }
+  ofstream csvFile("stats.csv");
+  csvFile << "clientId,timestamp,seq" << endl;
+  while (replay->readPacket())
+  {
+    uint64_t timeStamp = replay->getTimeStamp();
+    JamMessage *pMsg = (JamMessage *)replay->getJamPacket()->getPacket();
+    csvFile << pMsg->ClientId << "," << timeStamp << "," << pMsg->SequenceNumber << endl;
   }
   return 0;
 }

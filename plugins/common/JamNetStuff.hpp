@@ -158,6 +158,7 @@ namespace JamNetStuff
     float getAvgDepth();
 
   protected:
+    void appendBuffer(const float *buffer, int frames);
     PeakDetector m_depthFilter;
     float myBuffer[JITTER_SAMPLES];
     float lastFrame[MAX_FRAME_SIZE];
@@ -304,6 +305,9 @@ namespace JamNetStuff
     float **getMix(uint64_t asOf);
     string getMetdata() { return m_metadata; };
     void getClientIds(uint32_t *ids) { m_packet.getClientIds(ids); }
+    uint64_t getTimeStamp() { return m_timeStamp; }
+    bool m_debug;
+    void dump();
 
   private:
     JamNetStuff::JamPacket m_packet;

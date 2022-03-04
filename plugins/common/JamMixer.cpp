@@ -64,7 +64,7 @@ namespace JamNetStuff
         {
             if (jitterBuffers[i].depth() > 0)
             {
-                printf("Chan: %d g: %f f: %f\t", i, gains[i], fades[i]);
+                printf("Chan: %2d g: %f f: %f\t", i, gains[i], fades[i]);
                 jitterBuffers[i].dumpOut();
             }
         }

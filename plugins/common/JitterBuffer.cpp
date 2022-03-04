@@ -15,7 +15,7 @@
 #include <string.h>
 
 #define MIN_DEPTH 512
-#define MAX_DEPTH 4096
+#define MAX_DEPTH 8192
 #define MIN_SIGMA 7.0
 
 namespace JamNetStuff
@@ -77,6 +77,7 @@ namespace JamNetStuff
 
     void JitterBuffer::putIn(const float *buffer, int frames, uint32_t seqNo)
     {
+
         int dropped = lastSequence - seqNo;
         lastSequence = seqNo;
         numPuts++;
@@ -97,6 +98,15 @@ namespace JamNetStuff
             // This is just to prevent overflowing the buffer.
             return;
         }
+        appendBuffer(buffer, frames);
+        // Save the lastFrame to use to fill if there is a dropped packet.
+        memcpy(lastFrame, buffer, frames * sizeof(float));
+        return;
+    }
+
+    // function to write the buffer to the circular buffer (handleing array wraparound)
+    void JitterBuffer::appendBuffer(const float *buffer, int frames)
+    {
         if (JITTER_SAMPLES - writeIdx >= frames)
         {
             // there is room on the end
@@ -140,13 +150,8 @@ namespace JamNetStuff
                 numUnderruns++;
                 m_filling = true;
             }
-            // Play back the last frame
-            memcpy(buffer, lastFrame, frames * sizeof(float));
-            // fade the last frame
-            for (int i = 0; i < frames; i++)
-            {
-                lastFrame[i] *= 0.85;
-            }
+            // Play back zeros
+            memset(buffer, 0x00, frames * sizeof(float));
             return;
         }
         int framesLeft = JITTER_SAMPLES - readIdx;
@@ -180,11 +185,6 @@ namespace JamNetStuff
             copySamples(&buffer[framesLeft], &myBuffer[0], frames - framesLeft);
             readIdx = frames - framesLeft;
         }
-        // Save the lastFrame in case we starve
-        memcpy(lastFrame, buffer, frames * sizeof(float));
-        // if (numGets%375 == 0) {
-        //     dumpOut();
-        // }
     }
 
     void JitterBuffer::copySamples(float *dst, const float *src, int count)
@@ -197,13 +197,15 @@ namespace JamNetStuff
 
     void JitterBuffer::dumpOut()
     {
+        float dropRate = (100.0 * numDropped) / numPuts;
         printf(
-            "avgDepth: %08.1f\t target: %06d\t under: %05d\t over: %05d\t dropped: %05d\t dups: %05d\t delta_u:%03.2f\t seq: %d\n",
+            "avgDepth: %08.1f\t min: %d \t target: %06d\t under: %05d\t over: %05d\t dropped: %02.1f\t dups: %05d\t delta_u:%03.2f\t seq: %d\n",
             bufferStats.mean,
+            m_fillDepth,
             targetDepth,
             numUnderruns,
             numOverruns,
-            numDropped,
+            dropRate,
             numDups,
             bufferStats.sigma,
             lastSequence);

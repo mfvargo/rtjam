@@ -4,6 +4,7 @@ namespace JamNetStuff
 {
   ReplayStream::ReplayStream()
   {
+    m_debug = false;
     m_sendPacket.setClientId(40001); // TODO: fix this later
     m_sendPacket.setIsClient(true);
 
@@ -60,6 +61,10 @@ namespace JamNetStuff
     }
     uint64_t now = getMicroTime();
     m_timeOffset = now - m_timeStamp;
+    // for (int i = 0; i < MAX_JAMMERS; i++)
+    // {
+    //   m_mixer.setBufferSmoothness(i, 0.5);
+    // }
     return "playing";
   }
 
@@ -140,7 +145,7 @@ namespace JamNetStuff
       if (m_infile.good())
       {
         m_packet.decodeHeader(cnt);
-        // m_packet.dumpPacket("replay: ");
+        //  m_packet.dumpPacket("replay: ");
         return true;
       }
     }
@@ -174,6 +179,7 @@ namespace JamNetStuff
     {
       return NULL;
     }
+    dump();
     // read audio from replay stream
     uint64_t asOf = getMicroTime();
     while (packetReady(asOf))
@@ -182,12 +188,6 @@ namespace JamNetStuff
       m_mixer.addData(&m_packet);
       readPacket();
     }
-
-    // debug
-    // if (++m_framecount % 375 == 0)
-    // {
-    //   m_mixer.dumpOut();
-    // }
 
     uint64_t outFrameTime = 128 * 1000 / 48;
     m_delta += m_timer.getExpiredTime(); // add time since we did this last
@@ -206,6 +206,7 @@ namespace JamNetStuff
 
   float **ReplayStream::getMix(uint64_t asOf)
   {
+    dump();
     while (packetReady(asOf))
     {
       // feed the mixer with packets up till now...
@@ -214,5 +215,13 @@ namespace JamNetStuff
     }
     m_mixer.getMix(m_outputs, 128);
     return m_outputs;
+  }
+
+  void ReplayStream::dump()
+  {
+    if (m_debug && ++m_framecount % 375 == 0)
+    {
+      m_mixer.dumpOut();
+    }
   }
 }

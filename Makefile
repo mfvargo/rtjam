@@ -26,7 +26,6 @@ pi-embed:
 	$(MAKE) all -C plugins/rtjam-sound
 	$(MAKE) all -C plugins/rtjam-box
 	$(MAKE) all -C plugins/rtjam-midi
-	$(MAKE) all -C plugins/testHarness
 	$(MAKE) all -C plugins/testLights
 	$(MAKE) all -C plugins/sndExport
 
@@ -62,7 +61,6 @@ clean:
 	$(MAKE) clean -C plugins/rtjam-box
 	$(MAKE) clean -C plugins/rtjam-midi
 	$(MAKE) clean -C plugins/rtjam-status
-	$(MAKE) clean -C plugins/testHarness
 	$(MAKE) clean -C plugins/testLights
 	$(MAKE) clean -C plugins/sndExport
 	
