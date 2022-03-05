@@ -43,6 +43,7 @@ enum RTJamParameters
   paramSetFader,
   paramMuteToRoom,
   paramConnectionKeepAlive,
+  paramSetBufferSize,
   paramCount,
   paramSetAudioInput = 1000,
   paramSetAudioOutput,

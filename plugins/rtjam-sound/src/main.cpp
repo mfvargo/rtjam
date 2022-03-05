@@ -121,6 +121,7 @@ int main(int argc, char *argv[])
         fprintf(stderr, "unique name `%s' assigned\n", client_name);
     }
 
+    pJamEngine->setJackClient(client);
     jack_set_process_callback(client, process, pJamEngine);
 
     jack_on_shutdown(client, jack_shutdown, 0);

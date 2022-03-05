@@ -8,6 +8,7 @@
 #include <thread>
 #include <vector>
 #include "PedalBoard.hpp"
+#include <jack/jack.h>
 
 #define NUM_OUTPUTS MAX_JAMMERS * 2 + 2
 
@@ -24,6 +25,7 @@ public:
   void getParams();
   void connect(const char *host, int port, uint32_t id);
   void disconnect();
+  void setJackClient(jack_client_t *client) { m_jackClient = client; }
 
 private:
   PedalBoard m_pedalBoards[2];
@@ -46,6 +48,7 @@ private:
   BiQuadFilter m_inputDCremoval[2];
   bool m_LeftRoomMute;
   bool m_RightRoomMute;
+  jack_client_t *m_jackClient;
 };
 
 #endif

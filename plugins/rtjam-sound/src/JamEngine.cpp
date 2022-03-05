@@ -213,6 +213,19 @@ void JamEngine::getParams()
   case paramConnectionKeepAlive:
     m_conTimer.reset();
     break;
+  case paramSetBufferSize:
+  {
+    int framesize = 128;
+    if (m_param.iValue == 1)
+      framesize = 64;
+    if (m_param.iValue == 2)
+      framesize = 128;
+    if (m_param.iValue == 3)
+      framesize = 256;
+    if (jack_set_buffer_size(m_jackClient, framesize))
+      cerr << "cannot set buffer size to: " << framesize << endl;
+  }
+  break;
   }
 }
 
@@ -252,7 +265,8 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   if (m_framecount % 375 == 0)
   {
     // every second
-    // cout << "Disconnect timeout: " << m_conTimer.getTimeFromStart() << endl;
+    cout << "Disconnect timeout: " << m_conTimer.getTimeFromStart() << endl;
+    cout << "framesize: " << frames << endl;
     // m_jamMixer.dumpOut();
   }
 
