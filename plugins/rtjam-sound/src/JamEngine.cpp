@@ -265,8 +265,8 @@ void JamEngine::run(const float **inputs, float **outputs, uint32_t frames)
   if (m_framecount % 375 == 0)
   {
     // every second
-    cout << "Disconnect timeout: " << m_conTimer.getTimeFromStart() << endl;
-    cout << "framesize: " << frames << endl;
+    // cout << "Disconnect timeout: " << m_conTimer.getTimeFromStart() << endl;
+    // cout << "framesize: " << frames << endl;
     // m_jamMixer.dumpOut();
   }
 
