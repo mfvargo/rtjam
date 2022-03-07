@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  string filename(argv[1]);
+  fs::path filename = argv[1];
 
   // The replay object will reconstruct the mix
   JamNetStuff::ReplayStream *replay = new JamNetStuff::ReplayStream();
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
   if (replay->readOpen(filename.c_str()) != "playing")
   {
-    cerr << "failed to open raw packet file: " << argv[1] << endl;
+    cerr << "failed to open raw packet file: " << filename << endl;
     return EXIT_FAILURE;
   }
 
@@ -66,8 +66,9 @@ int main(int argc, char *argv[])
   }
 
   // Open the output file
-  string wavfile = fs::path(filename).stem();
-  wavfile += ".wav";
+  fs::path wavfile = filename;
+  wavfile.replace_extension(".wav");
+  cout << "Wave file: " << wavfile << endl;
   if (!(file = SndfileHandle(wavfile.c_str(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
   {
     cerr << "Cannot create file " << wavfile << endl;
@@ -143,9 +144,8 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  string statfile = fs::path(filename).stem();
-  statfile += ".csv";
-
+  fs::path statfile = filename;
+  statfile.replace_extension(".csv");
   ofstream csvFile(statfile);
   csvFile << "clientId,timestamp,seq" << endl;
   while (replay->readPacket())
