@@ -27,7 +27,7 @@ INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 LDLIBS := -lm -lstdc++ -lpthread -ljack -lrt -lcurl -lfastcgipp
 
-CPPFLAGS ?= $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP -g -Wno-psabi
+CPPFLAGS ?= -std=c++17 $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP -g -Wno-psabi
 
 all:	$(TARGET)
 

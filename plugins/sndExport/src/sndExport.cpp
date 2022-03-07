@@ -20,17 +20,22 @@
 #include <string>
 #include <sndfile.hh>
 #include "JamNetStuff.hpp"
+#include <filesystem>
 
 using namespace std;
+namespace fs = filesystem;
 
 int main(int argc, char *argv[])
 {
-  if (argc < 3)
+  if (argc < 2)
   {
-    cerr << "sndExport: missing paramaters" << endl;
-    cerr << "usage:  sndExport infile.raw outfile.wav" << endl;
+    cerr << "sndExport: missing paramater" << endl;
+    cerr << "usage:  sndExport infile.raw" << endl;
     return EXIT_FAILURE;
   }
+
+  string filename(argv[1]);
+
   // The replay object will reconstruct the mix
   JamNetStuff::ReplayStream *replay = new JamNetStuff::ReplayStream();
   // File handle for the output
@@ -41,7 +46,7 @@ int main(int argc, char *argv[])
   float **mix;
   float buffer[128 * 16]; // up to 16 channels
 
-  if (replay->readOpen(argv[1]) != "playing")
+  if (replay->readOpen(filename.c_str()) != "playing")
   {
     cerr << "failed to open raw packet file: " << argv[1] << endl;
     return EXIT_FAILURE;
@@ -61,9 +66,11 @@ int main(int argc, char *argv[])
   }
 
   // Open the output file
-  if (!(file = SndfileHandle(argv[2], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
+  string wavfile = fs::path(filename).stem();
+  wavfile += ".wav";
+  if (!(file = SndfileHandle(wavfile.c_str(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
   {
-    cerr << "Cannot create file " << argv[2] << endl;
+    cerr << "Cannot create file " << wavfile << endl;
   }
 
   // The delayAdjust are just queues of floats.  They all start out even, but after the channelmap
@@ -135,7 +142,11 @@ int main(int argc, char *argv[])
     cerr << "failed to open raw packet file: " << argv[1] << endl;
     return EXIT_FAILURE;
   }
-  ofstream csvFile("stats.csv");
+
+  string statfile = fs::path(filename).stem();
+  statfile += ".csv";
+
+  ofstream csvFile(statfile);
   csvFile << "clientId,timestamp,seq" << endl;
   while (replay->readPacket())
   {

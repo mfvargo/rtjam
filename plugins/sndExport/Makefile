@@ -36,7 +36,7 @@ DEPS := $(SNDPLAYOBJS:.o=.d) $(SNDEXPORTOBJS:.o=.d) $(SNDSPLITOBJS:.o=.d) $(COMM
 LDLIBS1 := -Bdynamic -lm -lstdc++ -lpthread -lsndfile
 LDLIBS2 := -Bdynamic -lm -lstdc++ -lpthread -ljack -lrt 
 
-CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -Wno-psabi
+CPPFLAGS ?= -std=c++17 $(INC_FLAGS) -MMD -MP -g -Wno-psabi
 
 all:	$(TARGETS)
 
