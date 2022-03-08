@@ -34,7 +34,7 @@ LDLIBS := -Bdynamic -lm -lstdc++ -lpthread -ljack -lrt
 LOADLIBES := -Bstatic -lfftw3
 LDFLAGS := -L../lib
 
-CPPFLAGS ?= $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP -g -Wno-psabi
+CPPFLAGS ?= -std=c++17 $(INC_FLAGS) $(VERSION_FLAGS) -MMD -MP -g -Wno-psabi
 
 all:	$(TARGET)
 

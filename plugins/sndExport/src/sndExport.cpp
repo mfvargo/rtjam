@@ -20,30 +20,36 @@
 #include <string>
 #include <sndfile.hh>
 #include "JamNetStuff.hpp"
+#include <filesystem>
 
 using namespace std;
+namespace fs = filesystem;
 
 int main(int argc, char *argv[])
 {
-  if (argc < 3)
+  if (argc < 2)
   {
-    cerr << "sndExport: missing paramaters" << endl;
-    cerr << "usage:  sndExport infile.raw outfile.wav" << endl;
+    cerr << "sndExport: missing paramater" << endl;
+    cerr << "usage:  sndExport infile.raw" << endl;
     return EXIT_FAILURE;
   }
+
+  fs::path filename = argv[1];
+
   // The replay object will reconstruct the mix
   JamNetStuff::ReplayStream *replay = new JamNetStuff::ReplayStream();
   // File handle for the output
   SndfileHandle file;
+  SndfileHandle preview;
   int srate = 48000;
   uint64_t asOf = JamNetStuff::getMicroTime();
   uint64_t microFrameTime = 128 * 1000 / 48;
   float **mix;
   float buffer[128 * 16]; // up to 16 channels
 
-  if (replay->readOpen(argv[1]) != "playing")
+  if (replay->readOpen(filename.c_str()) != "playing")
   {
-    cerr << "failed to open raw packet file: " << argv[1] << endl;
+    cerr << "failed to open raw packet file: " << filename << endl;
     return EXIT_FAILURE;
   }
 
@@ -61,9 +67,20 @@ int main(int argc, char *argv[])
   }
 
   // Open the output file
-  if (!(file = SndfileHandle(argv[2], SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
+  fs::path wavfile = filename;
+  wavfile.replace_extension(".wav");
+  cout << "Wave file: " << wavfile << endl;
+  if (!(file = SndfileHandle(wavfile.c_str(), SFM_WRITE, SF_FORMAT_WAV | SF_FORMAT_PCM_16, channels, srate)))
   {
-    cerr << "Cannot create file " << argv[2] << endl;
+    cerr << "Cannot create file " << wavfile << endl;
+  }
+
+  fs::path mp3File = filename;
+  mp3File.replace_extension(".ogg");
+  cout << "Mp3 file: " << mp3File << endl;
+  if (!(preview = SndfileHandle(mp3File.c_str(), SFM_WRITE, SF_FORMAT_OGG | SF_FORMAT_VORBIS, 2, srate)))
+  {
+    cerr << "Cannot create file " << mp3File << endl;
   }
 
   // The delayAdjust are just queues of floats.  They all start out even, but after the channelmap
@@ -127,6 +144,17 @@ int main(int argc, char *argv[])
       }
 
       file.write(buffer, 128 * channels);
+
+      // write preview file (ogg)
+      bufptr = buffer;
+      for (int i = 0; i < 128; i++)
+      {
+        for (int chan = 0; chan < 2; chan++)
+        {
+          *bufptr++ = mix[chan][i];
+        }
+      }
+      preview.write(buffer, 128 * 2);
     }
   }
   // reopen the file
@@ -135,7 +163,10 @@ int main(int argc, char *argv[])
     cerr << "failed to open raw packet file: " << argv[1] << endl;
     return EXIT_FAILURE;
   }
-  ofstream csvFile("stats.csv");
+
+  fs::path statfile = filename;
+  statfile.replace_extension(".csv");
+  ofstream csvFile(statfile);
   csvFile << "clientId,timestamp,seq" << endl;
   while (replay->readPacket())
   {
