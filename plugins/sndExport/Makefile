@@ -33,7 +33,7 @@ SNDPLAYOBJS := $(addsuffix .o,$(basename $(SNDPLAYSRCS)))
 SNDSPLITOBJS := $(addsuffix .o,$(basename $(SNDSPLITSRCS))) 
 DEPS := $(SNDPLAYOBJS:.o=.d) $(SNDEXPORTOBJS:.o=.d) $(SNDSPLITOBJS:.o=.d) $(COMMONOBJS:.o=.d) 
 
-LDLIBS1 := -Bdynamic -lm -lstdc++ -lpthread -lsndfile
+LDLIBS1 := -Bdynamic -lm -lstdc++ -lpthread -lsndfile -lstdc++fs
 LDLIBS2 := -Bdynamic -lm -lstdc++ -lpthread -ljack -lrt 
 
 CPPFLAGS ?= -std=c++17 $(INC_FLAGS) -MMD -MP -g -Wno-psabi
