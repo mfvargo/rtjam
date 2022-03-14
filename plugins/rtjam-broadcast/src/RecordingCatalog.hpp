@@ -88,11 +88,16 @@ public:
     char buffer[256];
     time_t rawtime;
     struct tm *timeinfo;
-
+    string filename = m_directory;
+    filename += "/";
     time(&rawtime);
     timeinfo = localtime(&rawtime);
-    strftime(buffer, 256, "/rec_%m-%d_%H_%M_%S.raw", timeinfo);
-    return m_directory + string(buffer);
+    strftime(buffer, 256, "rec_%m-%d_%H_%M_%S_", timeinfo);
+    filename += buffer;
+    filename += to_string(rand() % 10000);
+    filename += ".raw";
+
+    return filename;
   }
 
   string getLastFilename()
