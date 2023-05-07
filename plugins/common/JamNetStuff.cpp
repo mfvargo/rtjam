@@ -49,7 +49,7 @@ namespace JamNetStuff
                jamMessage.ClientId,
                jamMessage.Channel,
                jamMessage.SampleRate,
-               jamMessage.NumSubChannels,
+               jamMessage.NumAudioChunks,
                jamMessage.SequenceNumber,
                jamMessage.Beat,
                bufferSize);
@@ -70,13 +70,12 @@ namespace JamNetStuff
         encodeJamBuffer(bufPtr, inputs[0], frames);
         bufPtr += frames * sizeof(uint16_t);
         encodeJamBuffer(bufPtr, inputs[1], frames);
-        bufferSize = frames * jamMessage.NumSubChannels * sizeof(uint16_t);
+        bufferSize = frames * 2 * sizeof(uint16_t);
     }
 
     void JamPacket::encodeHeader()
     {
         jamMessage.SampleRate = sampleRate;
-        jamMessage.NumSubChannels = 2;
         jamMessage.TimeStamp = htobe64(getMicroTime());
         jamMessage.ServerTime = htobe64(jamMessage.ServerTime);
         // Note that these next two fields are just pass through if you are not a client
@@ -118,7 +117,7 @@ namespace JamNetStuff
             return 0;
         }
         bufferSize = nBytes - (sizeof(struct JamMessage) - JAM_BUF_SIZE);
-        numSamples = bufferSize / (sizeof(uint16_t) * jamMessage.NumSubChannels);
+        numSamples = bufferSize / (sizeof(uint16_t) * 2);
         return numSamples;
     }
 
@@ -149,12 +148,6 @@ namespace JamNetStuff
         {
             // Sample Rate mismatch!
             printf("bad sample rate\n");
-            return false;
-        }
-        if (jamMessage.NumSubChannels != 2)
-        {
-            printf("bad sub channel\n");
-            // hard code to 2 sub channels always.
             return false;
         }
         if ((int)(sizeof(struct JamMessage) - JAM_BUF_SIZE) > nBytes)
